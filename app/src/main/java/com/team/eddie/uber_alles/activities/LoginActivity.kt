@@ -10,6 +10,8 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.isEmailValid
+import com.team.eddie.uber_alles.utils.isPasswordValid
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity() {
@@ -78,10 +80,6 @@ class LoginActivity : AppCompatActivity() {
         return true;
     }
 
-    private fun isEmailValid(email: String): Boolean {
-        return email.contains("@")
-    }
-
     private fun checkPassword(password: String): Boolean {
         if (TextUtils.isEmpty(password)) {
             password_text_input.error = getString(R.string.error_field_required)
@@ -92,10 +90,6 @@ class LoginActivity : AppCompatActivity() {
         }
 
         return true
-    }
-
-    private fun isPasswordValid(password: String): Boolean {
-        return password.length > 4
     }
 
     private fun showProgress(show: Boolean) {
