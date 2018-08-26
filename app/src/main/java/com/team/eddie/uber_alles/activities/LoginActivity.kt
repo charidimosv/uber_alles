@@ -5,9 +5,9 @@ import android.animation.AnimatorListenerAdapter
 import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import kotlinx.android.synthetic.main.activity_login.*
