@@ -39,7 +39,7 @@ object RetrofitClient {
 
             val gson = GsonBuilder()
                     .setLenient()
-                    .registerTypeAdapter(Date::class.java, JsonDeserializer { jsonElement, type, context -> Date(jsonElement.asJsonPrimitive.asLong) })
+                    .registerTypeAdapter(Date::class.java, JsonDeserializer { jsonElement, _, context -> Date(jsonElement.asJsonPrimitive.asLong) })
                     .create()
 
             retrofit = Retrofit.Builder()

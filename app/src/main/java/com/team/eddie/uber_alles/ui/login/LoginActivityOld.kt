@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.activities
+package com.team.eddie.uber_alles.ui.login
 
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -11,6 +11,7 @@ import android.widget.RelativeLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.welcome.WelcomeActivity
 import com.team.eddie.uber_alles.utils.LoginServices
 import com.team.eddie.uber_alles.utils.RetrofitClient
 import com.team.eddie.uber_alles.utils.SaveSharedPreference

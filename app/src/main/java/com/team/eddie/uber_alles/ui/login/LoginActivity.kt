@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.activities
+package com.team.eddie.uber_alles.ui.login
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
@@ -9,6 +9,7 @@ import android.text.TextUtils
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.MapsActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
@@ -31,9 +32,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun moveNextActivity() {
-        val intent = Intent(applicationContext, MapsActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
-        startActivity(intent)
+        startActivity(Intent(this, MapsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
     }
 
     private fun attemptLogin() {

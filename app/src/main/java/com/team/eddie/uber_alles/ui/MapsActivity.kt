@@ -1,5 +1,7 @@
-package com.team.eddie.uber_alles.activities
+package com.team.eddie.uber_alles.ui
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -13,6 +15,12 @@ import com.team.eddie.uber_alles.R
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+
+    companion object {
+        fun getLaunchIntent(from: Context) = Intent(from, MapsActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

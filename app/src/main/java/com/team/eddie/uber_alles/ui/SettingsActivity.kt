@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.activities
+package com.team.eddie.uber_alles.ui
 
 import android.annotation.TargetApi
 import android.content.Context
