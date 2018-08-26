@@ -2,7 +2,6 @@ package com.team.eddie.uber_alles.ui.login
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.content.Intent
 import android.os.AsyncTask
 import android.os.Bundle
 import android.text.TextUtils
@@ -15,8 +14,7 @@ import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
 import kotlinx.android.synthetic.main.activity_login.*
 
-class LoginActivity : AppCompatActivity() {
-
+class LoginActivity : AppCompatActivity(), LoginView {
     // Keep track of the login task to ensure we can cancel it if requested.
     private var mAuthTask: UserLoginTask? = null
 
@@ -24,19 +22,14 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        // Check if user is already LoggedIn
-        if (SaveSharedPreference.isLoggedIn(applicationContext)) moveNextActivity()
-        else login_form.visibility = View.VISIBLE
-
         log_in_button.setOnClickListener { attemptLogin() }
     }
 
-    private fun moveNextActivity() {
-        startActivity(Intent(this, MapsActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
-    }
 
     private fun attemptLogin() {
-        if (mAuthTask == null && localLogin()) {
+        if (mAuthTask != null) return
+
+        if (localLogin()) {
             showProgress(true)
 
             mAuthTask = UserLoginTask(email.text.toString(), password.text.toString())
@@ -91,6 +84,20 @@ class LoginActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onLoginSuccess() = startActivity(MapsActivity.getLaunchIntent(this))
+
+    override fun showPasswordError() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showEmailError() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun showLoginError() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private fun showProgress(show: Boolean) {
         val shortAnimTime = resources.getInteger(android.R.integer.config_shortAnimTime).toLong()
 
@@ -136,7 +143,7 @@ class LoginActivity : AppCompatActivity() {
 
             if (success!!) {
                 SaveSharedPreference.setLoggedIn(applicationContext, mEmail)
-                moveNextActivity()
+                onLoginSuccess()
                 // finish()
             } else {
                 password_text_input.error = getString(R.string.error_incorrect_password)
