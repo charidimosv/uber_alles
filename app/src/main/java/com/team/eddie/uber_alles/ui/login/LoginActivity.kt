@@ -25,7 +25,6 @@ class LoginActivity : AppCompatActivity(), LoginView {
         log_in_button.setOnClickListener { attemptLogin() }
     }
 
-
     private fun attemptLogin() {
         if (mAuthTask != null) return
 
@@ -69,7 +68,7 @@ class LoginActivity : AppCompatActivity(), LoginView {
             return false
         }
 
-        return true;
+        return true
     }
 
     private fun checkPassword(password: String): Boolean {
@@ -84,7 +83,11 @@ class LoginActivity : AppCompatActivity(), LoginView {
         return true
     }
 
-    override fun onLoginSuccess() = startActivity(MapsActivity.getLaunchIntent(this))
+    override fun onLoginSuccess() {
+        startActivity(MapsActivity.getLaunchIntent(this))
+        finish()
+        return
+    }
 
     override fun showPasswordError() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
