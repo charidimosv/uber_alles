@@ -55,7 +55,7 @@ class LoginActivityOld : AppCompatActivity() {
      */
     private fun userLogin(username: String, password: String) {
 
-        val retrofit = RetrofitClient.client
+        val retrofit = RetrofitClient.getClient(this@LoginActivityOld)
         val loginServices = retrofit!!.create(LoginServices::class.java)
         val call = loginServices.userLogin(username, password)
 

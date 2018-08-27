@@ -9,9 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.MapsActivity
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import com.team.eddie.uber_alles.utils.isEmailValid
-import com.team.eddie.uber_alles.utils.isPasswordValid
+import com.team.eddie.uber_alles.utils.*
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : AppCompatActivity(), LoginView {
@@ -129,6 +127,12 @@ class LoginActivity : AppCompatActivity(), LoginView {
 
         override fun doInBackground(vararg params: Void): Boolean? {
             // TODO: attempt authentication against a network service.
+
+
+            val user = User(null,mEmail,mPassword, null, null, false)
+            val retrofit = RetrofitClient.getClient(this@LoginActivity)
+            val loginServices = retrofit!!.create(LoginServices::class.java)
+            val userResp = loginServices.login(user).blockingGet()
 
             try {
                 // Simulate network access.
