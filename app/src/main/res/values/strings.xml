@@ -15,6 +15,7 @@
     <string name="error_password_match">Passwords do not match</string>
     <string name="error_field_required">This field is required</string>
 
+    <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
 
     <string name="back">Back</string>
@@ -22,7 +23,7 @@
 
     <string name="title_activity_maps">Map</string>
 
-    <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
+
 
     <!-- Strings related to Settings -->
 
