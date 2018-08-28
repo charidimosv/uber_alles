@@ -60,14 +60,16 @@ dependencies {
     // google play services
     def playServices_version = "15.0.1"
     implementation "com.google.android.gms:play-services-maps:$playServices_version"
-    implementation 'com.google.android.gms:play-services-location:15.0.1'
-    implementation 'com.google.android.gms:play-services-places:15.0.1'
-    implementation 'com.google.android.gms:play-services-nearby:15.0.1'
+    implementation "com.google.android.gms:play-services-location:$playServices_version"
+    implementation "com.google.android.gms:play-services-places:$playServices_version"
+    implementation "com.google.android.gms:play-services-nearby:$playServices_version"
+    implementation "com.google.android.gms:play-services-vision:15.0.2"
 
     // firebase
     implementation 'com.google.firebase:firebase-core:16.0.3'
     implementation 'com.google.firebase:firebase-database:16.0.1'
     implementation 'com.google.firebase:firebase-auth:16.0.3'
+    implementation 'com.firebase:geofire-android:2.1.1'
 
     // Testing dependencies
     testImplementation "junit:junit:4.12"

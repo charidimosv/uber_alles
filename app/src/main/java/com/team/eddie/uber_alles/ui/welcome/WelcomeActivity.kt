@@ -11,7 +11,7 @@ import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.onClick
 import kotlinx.android.synthetic.main.activity_welcome.*
 
-class WelcomeActivity : AppCompatActivity(), WelcomeView {
+class WelcomeActivity : AppCompatActivity() {
 
 //    private val presenter by lazy { welcomePresenter() }
 
@@ -21,13 +21,10 @@ class WelcomeActivity : AppCompatActivity(), WelcomeView {
 
         // Check if user is already LoggedIn
         if (SaveSharedPreference.isLoggedIn(applicationContext)) startMainScreen()
-//        presenter.setView(this)
-
-//        presenter.viewReady()
 
         registerButton.onClick { startActivity(Intent(this, RegisterActivity::class.java)) }
         loginButton.onClick { startActivity(Intent(this, LoginActivity::class.java)) }
     }
 
-    override fun startMainScreen() = startActivity(MapsActivity.getLaunchIntent(this))
+    fun startMainScreen() = startActivity(MapsActivity.getLaunchIntent(this))
 }
