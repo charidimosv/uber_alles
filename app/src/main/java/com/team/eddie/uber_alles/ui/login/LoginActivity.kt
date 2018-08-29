@@ -13,6 +13,7 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
 import com.team.eddie.uber_alles.ui.map.DriverMapActivity
+import com.team.eddie.uber_alles.ui.welcome.WelcomeActivity
 import com.team.eddie.uber_alles.utils.FirebaseUtility.ALL_USER
 import com.team.eddie.uber_alles.utils.FirebaseUtility.IS_DRIVER
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
@@ -37,6 +38,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         logInButton.setOnClickListener { attemptLogin() }
+        backButton.setOnClickListener { startActivity(WelcomeActivity.getLaunchIntent(this)) }
+
     }
 
     override fun onStart() {

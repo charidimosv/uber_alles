@@ -10,6 +10,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
 import com.team.eddie.uber_alles.ui.map.DriverMapActivity
+import com.team.eddie.uber_alles.ui.welcome.WelcomeActivity
 import com.team.eddie.uber_alles.utils.*
 import com.team.eddie.uber_alles.utils.FirebaseUtility.ALL_USER
 import com.team.eddie.uber_alles.utils.FirebaseUtility.CUSTOMER
@@ -38,6 +39,8 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         registerButton.setOnClickListener { attemptRegister() }
+        backButton.setOnClickListener { startActivity(WelcomeActivity.getLaunchIntent(this)) }
+
     }
 
     override fun onStart() {

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -15,6 +16,9 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.welcome.WelcomeActivity
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import kotlinx.android.synthetic.main.activity_map_driver.*
 
 class DriverMapActivity : GenericMapActivity() {
 
@@ -25,6 +29,8 @@ class DriverMapActivity : GenericMapActivity() {
     private var destinationLatLng: LatLng? = null
     private var pickupLatLng: LatLng? = null
     private var rideDistance: Float = 0.toFloat()
+
+    private var isLoggingOut: Boolean = false;
 
     companion object {
         fun getLaunchIntent(from: Context) = Intent(from, DriverMapActivity::class.java).apply {
@@ -40,6 +46,18 @@ class DriverMapActivity : GenericMapActivity() {
         val mapFragment = supportFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        logout.setOnClickListener {
+            if(customerId.isBlank()) {
+                isLoggingOut = true
+                disconnectDriver()
+                SaveSharedPreference.cleanAll(applicationContext)
+                FirebaseAuth.getInstance().signOut()
+                startActivity(WelcomeActivity.getLaunchIntent(this))
+            }
+            else
+                Toast.makeText(this, "Ride must be ended before you can logout", Toast.LENGTH_SHORT).show()
+        }
+
         getAssignedCustomer()
     }
 
@@ -52,6 +70,11 @@ class DriverMapActivity : GenericMapActivity() {
                     status = 1
                     customerId = dataSnapshot.value!!.toString()
                     getAssignedCustomerPickupLocation()
+                }
+                else{
+                    customerId = ""
+                    pickupMarker?.remove()
+                    assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
                 }
             }
 
@@ -107,9 +130,7 @@ class DriverMapActivity : GenericMapActivity() {
         }
     }
 
-    override fun onStop() {
-        super.onStop()
-
+    private fun disconnectDriver(){
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
         val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
         val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
@@ -117,5 +138,11 @@ class DriverMapActivity : GenericMapActivity() {
         val geoFireWorking = GeoFire(refWorking)
 
         geoFireAvailable.removeLocation(userId)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        if(!isLoggingOut)
+            disconnectDriver()
     }
 }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Bundle
+import android.widget.Toast
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
@@ -36,6 +37,9 @@ class CustomerMapActivity : GenericMapActivity() {
     private var mDriverMarker: Marker? = null
     private var driverLocationRef: DatabaseReference? = null
     private var driverLocationRefListener: ValueEventListener? = null
+    private var requestActive: Boolean = false
+
+    private var isLoggingOut: Boolean = false
 
     companion object {
         fun getLaunchIntent(from: Context) = Intent(from, CustomerMapActivity::class.java).apply {
@@ -52,23 +56,53 @@ class CustomerMapActivity : GenericMapActivity() {
         mapFragment.getMapAsync(this)
 
         logoutButton.setOnClickListener {
-            SaveSharedPreference.cleanAll(applicationContext)
-            FirebaseAuth.getInstance().signOut()
-            startActivity(WelcomeActivity.getLaunchIntent(this))
+            if(!requestActive) {
+                isLoggingOut = true
+                disconnectCustomer()
+                SaveSharedPreference.cleanAll(applicationContext)
+                FirebaseAuth.getInstance().signOut()
+                startActivity(WelcomeActivity.getLaunchIntent(this))
+            }
+            else
+                Toast.makeText(this, "Ride must be ended before you can logout", Toast.LENGTH_SHORT).show()
         }
 
         request.setOnClickListener {
-            val userId = FirebaseAuth.getInstance().currentUser!!.uid
-            val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
-            val geoFire = GeoFire(ref)
-            geoFire.setLocation(userId, GeoLocation(mLastLocation!!.latitude, mLastLocation!!.longitude))
 
-            pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
-            pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+            if (requestActive) {
+                requestActive = false
+                radius = 1
+                geoQuery!!.removeAllListeners()
+                driverLocationRef?.removeEventListener(driverLocationRefListener!!)
 
-            request.setText("Getting your Driver....")
+                if(driverFoundID != null){
+                    val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest")
+                    driverRef.setValue(true)
+                    driverFoundID = null
+                    driverFound = false
+                }
+                val userId = FirebaseAuth.getInstance().currentUser!!.uid
+                val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+                val geoFire = GeoFire(ref)
+                geoFire.removeLocation(userId)
+                pickupMarker?.remove()
 
-            getClosestDriver()
+                request.setText("Call Uber")
+            }
+            else {
+                requestActive = true
+                val userId = FirebaseAuth.getInstance().currentUser!!.uid
+                val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+                val geoFire = GeoFire(ref)
+                geoFire.setLocation(userId, GeoLocation(mLastLocation!!.latitude, mLastLocation!!.longitude))
+
+                pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
+                pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+                request.setText("Getting your Driver....")
+
+                getClosestDriver()
+            }
         }
     }
 
@@ -77,26 +111,33 @@ class CustomerMapActivity : GenericMapActivity() {
             mLastLocation = location
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), DEFAULT_ZOOM))
 
-            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+            /*val userId = FirebaseAuth.getInstance().currentUser!!.uid
             val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
             val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
             val geoFireAvailable = GeoFire(refAvailable)
             val geoFireWorking = GeoFire(refWorking)
 
-            geoFireAvailable.setLocation(userId, GeoLocation(location.latitude, location.longitude))
+            geoFireAvailable.setLocation(userId, GeoLocation(location.latitude, location.longitude))*/
         }
+    }
+
+    private fun disconnectCustomer(){
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val custRequest = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val geoFire = GeoFire(custRequest)
+        geoFire.removeLocation(userId)
+        //val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
+        //val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+        //val geoFireAvailable = GeoFire(refAvailable)
+        //val geoFireWorking = GeoFire(refWorking)
+
+        //geoFireAvailable.removeLocation(userId)
     }
 
     override fun onStop() {
         super.onStop()
-
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
-        val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
-        val geoFireAvailable = GeoFire(refAvailable)
-        val geoFireWorking = GeoFire(refWorking)
-
-        geoFireAvailable.removeLocation(userId)
+        if(!isLoggingOut)
+            disconnectCustomer()
     }
 
     private fun getClosestDriver() {
@@ -108,7 +149,7 @@ class CustomerMapActivity : GenericMapActivity() {
 
         geoQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
-                if (!driverFound) {
+                if (!driverFound && requestActive) {
                     driverFound = true
                     driverFoundID = key
 
@@ -150,7 +191,7 @@ class CustomerMapActivity : GenericMapActivity() {
         driverLocationRef = FirebaseDatabase.getInstance().reference.child("driversWorking").child(driverFoundID!!).child("l")
         driverLocationRefListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
+                if (dataSnapshot.exists() && requestActive) {
                     val map: List<*> = dataSnapshot.value as List<*>
 
                     val locationLat: Double = if (map[0] == null) 0.0 else map[0].toString().toDouble()
