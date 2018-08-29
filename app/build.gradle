@@ -65,7 +65,7 @@ dependencies {
     implementation "com.google.android.gms:play-services-nearby:$playServices_version"
     implementation "com.google.android.gms:play-services-vision:15.0.2"
 
-    // firebase
+    // firebase + geofire
     implementation 'com.google.firebase:firebase-core:16.0.3'
     implementation 'com.google.firebase:firebase-database:16.0.1'
     implementation 'com.google.firebase:firebase-auth:16.0.3'

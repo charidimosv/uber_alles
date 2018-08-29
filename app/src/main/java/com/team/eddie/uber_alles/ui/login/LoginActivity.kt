@@ -6,8 +6,13 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.ui.MapsActivity
+import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
+import com.team.eddie.uber_alles.ui.map.DriverMapActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
@@ -17,6 +22,13 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
+
+    private val USER: String = "Users";
+    private val ALL_USER: String = "All_Users";
+    private val DRIVER: String = "Drivers";
+    private val CUSTOMER: String = "Customers";
+
+    private val IS_DRIVER: String = "is_driver";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,8 +55,24 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun onLoginSuccess() {
-        SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
-        startActivity(MapsActivity.getLaunchIntent(this))
+
+        val userId = mAuth.currentUser!!.uid
+        FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER)
+                .addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
+
+                        SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
+                        SaveSharedPreference.setUserType(applicationContext, isDriver)
+
+                        if (isDriver)
+                            startActivity(DriverMapActivity.getLaunchIntent(this@LoginActivity))
+                        else
+                            startActivity(CustomerMapActivity.getLaunchIntent(this@LoginActivity))
+                    }
+
+                    override fun onCancelled(databaseError: DatabaseError) {}
+                })
     }
 
     private fun attemptLogin() {
@@ -54,9 +82,8 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordTextInputEdit.text.toString()
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
-                if (!task.isSuccessful) {
-                    Toast.makeText(this, "Log in error", Toast.LENGTH_SHORT).show()
-                }
+                if (!task.isSuccessful)
+                    Toast.makeText(this, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
             }
         }
     }

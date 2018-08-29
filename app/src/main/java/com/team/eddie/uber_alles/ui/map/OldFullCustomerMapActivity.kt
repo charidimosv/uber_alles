@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.ui
+package com.team.eddie.uber_alles.ui.map
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -10,6 +10,8 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.firebase.geofire.GeoFire
+import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -17,18 +19,20 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.team.eddie.uber_alles.R
 import java.lang.Exception
 
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
-class MapsActivity :
+class OldFullCustomerMapActivity :
         AppCompatActivity(),
         OnMapReadyCallback,
         LocationListener {
 
-    private val TAG = MapsActivity::class.java.simpleName
+    private val TAG = OldFullCustomerMapActivity::class.java.simpleName
 
     private lateinit var mMap: GoogleMap
 
@@ -48,14 +52,14 @@ class MapsActivity :
     private val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES"
 
     companion object {
-        fun getLaunchIntent(from: Context) = Intent(from, MapsActivity::class.java).apply {
+        fun getLaunchIntent(from: Context) = Intent(from, OldFullCustomerMapActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
+        setContentView(R.layout.activity_map_customer)
 
         updateValuesFromBundle(savedInstanceState)
 
@@ -69,7 +73,7 @@ class MapsActivity :
             }
         }
 
-        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.customer_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
@@ -165,7 +169,15 @@ class MapsActivity :
     override fun onLocationChanged(location: Location?) {
         if (applicationContext != null && location != null) {
             mLastLocation = location
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), DEFAULT_ZOOM))
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), DEFAULT_ZOOM))
+
+            val userId = FirebaseAuth.getInstance().currentUser!!.uid
+            val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
+            val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+            val geoFireAvailable = GeoFire(refAvailable)
+            val geoFireWorking = GeoFire(refWorking)
+
+            geoFireAvailable.setLocation(userId, GeoLocation(location.latitude, location.longitude))
         }
     }
 
@@ -177,6 +189,18 @@ class MapsActivity :
     override fun onPause() {
         super.onPause()
         stopLocationUpdates()
+    }
+
+    override fun onStop() {
+        super.onStop()
+
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
+        val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+        val geoFireAvailable = GeoFire(refAvailable)
+        val geoFireWorking = GeoFire(refWorking)
+
+        geoFireAvailable.removeLocation(userId)
     }
 
     @SuppressLint("MissingPermission")

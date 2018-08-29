@@ -8,7 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.ui.MapsActivity
+import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
+import com.team.eddie.uber_alles.ui.map.DriverMapActivity
 import com.team.eddie.uber_alles.utils.*
 import kotlinx.android.synthetic.main.activity_register.*
 
@@ -17,8 +18,13 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
 
-    private val DRIVER: String = "DRIVER";
-    private val CUSTOMER: String = "CUSTOMER";
+    private val USER: String = "Users";
+    private val ALL_USER: String = "All_Users";
+    private val DRIVER: String = "Drivers";
+    private val CUSTOMER: String = "Customers";
+
+    private val IS_DRIVER: String = "is_driver";
+    private val USERNAME: String = "username";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +52,12 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun onRegisterSuccess() {
         SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
-        startActivity(MapsActivity.getLaunchIntent(this))
+        SaveSharedPreference.setUserType(applicationContext, driverSwitch.isChecked)
+
+        if (driverSwitch.isChecked)
+            startActivity(DriverMapActivity.getLaunchIntent(this))
+        else
+            startActivity(CustomerMapActivity.getLaunchIntent(this))
     }
 
     private fun attemptRegister() {
@@ -56,14 +67,15 @@ class RegisterActivity : AppCompatActivity() {
             val password = passwordTextInputEdit.text.toString()
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
-                if (!task.isSuccessful) {
-                    Toast.makeText(this, "Sign Up Error", Toast.LENGTH_SHORT).show()
-                } else {
+                if (!task.isSuccessful)
+                    Toast.makeText(this, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
+                else {
+                    val userId = mAuth.currentUser!!.uid
                     val typeUser: String = if (driverSwitch.isChecked) DRIVER else CUSTOMER
 
-                    val userId = mAuth.currentUser!!.uid
-                    val currentUserDb = FirebaseDatabase.getInstance().reference.child("Users").child(typeUser).child(userId).child("name")
-                    currentUserDb.setValue(email)
+                    FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
+                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER).setValue(driverSwitch.isChecked)
+                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(USERNAME).setValue(usernameTextInputEdit.text.toString())
                 }
             }
 

@@ -1,11 +1,11 @@
 package com.team.eddie.uber_alles.utils
 
+import io.reactivex.Single
 import retrofit2.Call
+import retrofit2.http.Body
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.POST
-import io.reactivex.Single
-import retrofit2.http.Body
 
 
 interface LoginServices {
