@@ -11,20 +11,19 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
 import com.team.eddie.uber_alles.ui.map.DriverMapActivity
 import com.team.eddie.uber_alles.utils.*
+import com.team.eddie.uber_alles.utils.FirebaseUtility.ALL_USER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.CUSTOMER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.DRIVER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.EMAIL
+import com.team.eddie.uber_alles.utils.FirebaseUtility.IS_DRIVER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.USER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.USERNAME
 import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
-
-    private val USER: String = "Users";
-    private val ALL_USER: String = "All_Users";
-    private val DRIVER: String = "Drivers";
-    private val CUSTOMER: String = "Customers";
-
-    private val IS_DRIVER: String = "is_driver";
-    private val USERNAME: String = "username";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,9 +73,11 @@ class RegisterActivity : AppCompatActivity() {
                     val typeUser: String = if (driverSwitch.isChecked) DRIVER else CUSTOMER
 
                     FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
-                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER).setValue(driverSwitch.isChecked)
+
+                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(EMAIL).setValue(email)
                     FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(USERNAME).setValue(usernameTextInputEdit.text.toString())
-                }
+                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER).setValue(driverSwitch.isChecked)
+               }
             }
 
         }
@@ -146,13 +147,13 @@ class RegisterActivity : AppCompatActivity() {
 
     private fun checkRepeatPassword(password: String, repeatPassword: String): Boolean {
         if (TextUtils.isEmpty(repeatPassword)) {
-            passwordTextInput.error = getString(R.string.error_field_required)
+            repeatPasswordTextInput.error = getString(R.string.error_field_required)
             return false
         } else if (!isPasswordValid(repeatPassword)) {
-            passwordTextInput.error = getString(R.string.error_invalid_password)
+            repeatPasswordTextInput.error = getString(R.string.error_invalid_password)
             return false
         } else if (!arePasswordsSame(password, repeatPassword)) {
-            passwordTextInput.error = getString(R.string.error_password_match)
+            repeatPasswordTextInput.error = getString(R.string.error_password_match)
             return false
         }
 

@@ -13,6 +13,8 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.map.CustomerMapActivity
 import com.team.eddie.uber_alles.ui.map.DriverMapActivity
+import com.team.eddie.uber_alles.utils.FirebaseUtility.ALL_USER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.IS_DRIVER
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
@@ -22,13 +24,6 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
-
-    private val USER: String = "Users";
-    private val ALL_USER: String = "All_Users";
-    private val DRIVER: String = "Drivers";
-    private val CUSTOMER: String = "Customers";
-
-    private val IS_DRIVER: String = "is_driver";
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
