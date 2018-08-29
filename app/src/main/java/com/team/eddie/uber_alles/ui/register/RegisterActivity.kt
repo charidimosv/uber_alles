@@ -78,10 +78,11 @@ class RegisterActivity : AppCompatActivity() {
 
                     FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
 
-                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(EMAIL).setValue(email)
-                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(PASSWORD).setValue(password)
-                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(USERNAME).setValue(usernameTextInputEdit.text.toString())
-                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER).setValue(driverSwitch.isChecked)
+                    val userReference = FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId)
+                    userReference.child(EMAIL).setValue(email)
+                    userReference.child(PASSWORD).setValue(password)
+                    userReference.child(USERNAME).setValue(usernameTextInputEdit.text.toString())
+                    userReference.child(IS_DRIVER).setValue(driverSwitch.isChecked)
                 }
             }
 
