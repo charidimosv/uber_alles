@@ -16,6 +16,7 @@ import com.team.eddie.uber_alles.utils.FirebaseUtility.CUSTOMER
 import com.team.eddie.uber_alles.utils.FirebaseUtility.DRIVER
 import com.team.eddie.uber_alles.utils.FirebaseUtility.EMAIL
 import com.team.eddie.uber_alles.utils.FirebaseUtility.IS_DRIVER
+import com.team.eddie.uber_alles.utils.FirebaseUtility.PASSWORD
 import com.team.eddie.uber_alles.utils.FirebaseUtility.USER
 import com.team.eddie.uber_alles.utils.FirebaseUtility.USERNAME
 import kotlinx.android.synthetic.main.activity_register.*
@@ -75,9 +76,10 @@ class RegisterActivity : AppCompatActivity() {
                     FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
 
                     FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(EMAIL).setValue(email)
+                    FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(PASSWORD).setValue(password)
                     FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(USERNAME).setValue(usernameTextInputEdit.text.toString())
                     FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER).setValue(driverSwitch.isChecked)
-               }
+                }
             }
 
         }

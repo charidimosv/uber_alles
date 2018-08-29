@@ -9,6 +9,7 @@ object FirebaseUtility {
     val CUSTOMER: String = "Customers";
 
     val EMAIL: String = "email";
+    val PASSWORD: String = "password";
     val USERNAME: String = "username";
     val IS_DRIVER: String = "is_driver";
 
