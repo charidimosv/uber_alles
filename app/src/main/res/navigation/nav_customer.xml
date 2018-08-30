@@ -15,6 +15,6 @@
         android:id="@+id/customer_plant_list_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerPlantListFragment"
         android:label="@string/plant_list_title"
-        tools:layout="@layout/fragment_customer_plant_list"/>
+        tools:layout="@layout/fragment_customer_plant_list" />
 
 </navigation>

@@ -150,7 +150,7 @@
     <string name="option_get_place">Get place</string>
     <string name="pick_place">Choose a place</string>
 
-	<string name="navigation_drawer_header_title" translatable="false">Sunflower</string>
+    <string name="navigation_drawer_header_title" translatable="false">Sunflower</string>
 
     <!-- Translatable resources -->
     <string name="menu_filter_by_grow_zone" translation_description="The label for the menu item to filter the displayed plants by grow zone.">Filter by grow zone</string>
@@ -182,5 +182,5 @@
     <!-- Accessibility -->
     <string name="a11y_plant_item_image" translation_description="Accessibility text for each of the plant images shown in the 'My garden' and 'Plant list' screens.">Picture of plant</string>
 
-	
+
 </resources>
