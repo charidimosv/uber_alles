@@ -38,7 +38,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".ui.welcome.WelcomeActivity">
+        <activity android:name=".ui.session.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,19 +46,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.login.LoginActivity" />
+        <activity android:name=".ui.session.LoginActivity" />
 
-        <activity android:name=".ui.register.RegisterActivity" />
-
-        <activity
-            android:name=".ui.map.DriverMapActivity"
-            android:label="@string/title_activity_maps"></activity>
+        <activity android:name=".ui.session.RegisterActivity" />
 
         <activity
-            android:name=".ui.map.CustomerMapActivity"
-            android:label="@string/title_activity_maps"></activity>
-
-        <activity android:name=".ui.SettingsActivity" />
+            android:name=".ui.customer.CustomerActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ui.driver.DriverActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
     </application>
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@+id/driver_map_fragment">
+
+    <fragment
+        android:id="@+id/driver_map_fragment"
+        android:name="com.team.eddie.uber_alles.ui.driver.DriverMapFragment"
+        android:label="@string/my_garden_title"
+        tools:layout="@layout/fragment_driver_map" />
+
+    <fragment
+        android:id="@+id/driver_plant_list_fragment"
+        android:name="com.team.eddie.uber_alles.ui.driver.DriverPlantListFragment"
+        android:label="@string/plant_list_title"
+        tools:layout="@layout/fragment_driver_plant_list"/>
+
+</navigation>
