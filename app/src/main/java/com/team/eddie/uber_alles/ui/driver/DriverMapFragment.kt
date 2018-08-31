@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationCallback
@@ -22,8 +21,6 @@ import com.google.firebase.database.*
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.GenericMapFragment
-import com.team.eddie.uber_alles.ui.session.WelcomeActivity
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 
 class DriverMapFragment : GenericMapFragment() {
@@ -59,17 +56,6 @@ class DriverMapFragment : GenericMapFragment() {
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
-
-        binding.logout.setOnClickListener {
-            if (customerId.isBlank()) {
-                isLoggingOut = true
-                disconnectDriver()
-                SaveSharedPreference.cleanAll(activity!!.applicationContext)
-                FirebaseAuth.getInstance().signOut()
-                startActivity(WelcomeActivity.getLaunchIntent(activity!!))
-            } else
-                Toast.makeText(activity!!, "Ride must be ended before you can logout", Toast.LENGTH_SHORT).show()
-        }
 
         getAssignedCustomer()
 

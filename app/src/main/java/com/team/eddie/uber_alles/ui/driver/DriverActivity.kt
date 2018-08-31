@@ -2,7 +2,10 @@ package com.team.eddie.uber_alles.ui.driver
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
@@ -37,6 +40,18 @@ class DriverActivity : AppCompatActivity() {
 
         // Set up navigation menu
         binding.navigationView.setupWithNavController(navController)
+
+        // TODO remove it later
+        navController.addOnNavigatedListener { _, destination ->
+            val dest: String = try {
+                resources.getResourceName(destination.id)
+            } catch (e: Resources.NotFoundException) {
+                Integer.toString(destination.id)
+            }
+
+            Toast.makeText(this, "Navigated to $dest", Toast.LENGTH_SHORT).show()
+            Log.d("NavigationActivity", "Navigated to $dest")
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

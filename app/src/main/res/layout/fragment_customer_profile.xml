@@ -7,11 +7,11 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/empty_plants"
+            android:id="@+id/customer_profile"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:text="@string/list_empty"
+            android:text="Customer Profile"
             android:textSize="24sp" />
 
     </FrameLayout>

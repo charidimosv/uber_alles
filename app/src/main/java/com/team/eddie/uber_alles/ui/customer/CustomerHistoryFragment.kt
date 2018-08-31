@@ -1,19 +1,19 @@
-package com.team.eddie.uber_alles.ui.driver
+package com.team.eddie.uber_alles.ui.customer
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.team.eddie.uber_alles.databinding.FragmentDriverPlantListBinding
+import com.team.eddie.uber_alles.databinding.FragmentCustomerHistoryBinding
 
-class DriverPlantListFragment : androidx.fragment.app.Fragment() {
+class CustomerHistoryFragment : androidx.fragment.app.Fragment() {
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentDriverPlantListBinding.inflate(inflater, container, false)
+        val binding = FragmentCustomerHistoryBinding.inflate(inflater, container, false)
         context ?: return binding.root
 
         setHasOptionsMenu(true)

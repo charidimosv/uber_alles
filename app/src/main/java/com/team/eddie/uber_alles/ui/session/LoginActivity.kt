@@ -57,15 +57,19 @@ class LoginActivity : AppCompatActivity() {
         FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
+                        if (dataSnapshot.exists()) {
 
-                        SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
-                        SaveSharedPreference.setUserType(applicationContext, isDriver)
+                            var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
 
-                        if (isDriver)
-                            startActivity(DriverActivity.getLaunchIntent(this@LoginActivity))
-                        else
-                            startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
+                            SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
+                            SaveSharedPreference.setUserType(applicationContext, isDriver)
+
+                            if (isDriver)
+                                startActivity(DriverActivity.getLaunchIntent(this@LoginActivity))
+                            else
+                                startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
+                        } else
+                            Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT)
                     }
 
                     override fun onCancelled(databaseError: DatabaseError) {}

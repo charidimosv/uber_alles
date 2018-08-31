@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
@@ -24,7 +23,6 @@ import com.google.firebase.database.*
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.GenericMapFragment
-import com.team.eddie.uber_alles.ui.session.WelcomeActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import java.util.*
 
@@ -44,7 +42,6 @@ class CustomerMapFragment : GenericMapFragment() {
     private var mDriverMarker: Marker? = null
     private var driverLocationRef: DatabaseReference? = null
     private var driverLocationRefListener: ValueEventListener? = null
-    private var requestActive: Boolean = false
 
     private var isLoggingOut: Boolean = false
 
@@ -68,21 +65,10 @@ class CustomerMapFragment : GenericMapFragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.customer_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        binding.logoutButton.setOnClickListener {
-            if (!requestActive) {
-                isLoggingOut = true
-                disconnectCustomer()
-                SaveSharedPreference.cleanAll(activity!!.applicationContext)
-                FirebaseAuth.getInstance().signOut()
-                startActivity(WelcomeActivity.getLaunchIntent(activity!!))
-            } else
-                Toast.makeText(activity!!, "Ride must be ended before you can logout", Toast.LENGTH_SHORT).show()
-        }
-
         binding.request.setOnClickListener {
 
-            if (requestActive) {
-                requestActive = false
+            if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
+                SaveSharedPreference.setActiveRequest(activity!!.applicationContext, false)
                 radius = 1
                 geoQuery!!.removeAllListeners()
                 driverLocationRef?.removeEventListener(driverLocationRefListener!!)
@@ -101,7 +87,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
                 binding.request.setText("Call Uber")
             } else {
-                requestActive = true
+                SaveSharedPreference.setActiveRequest(activity!!.applicationContext, true)
                 val userId = FirebaseAuth.getInstance().currentUser!!.uid
                 val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
                 val geoFire = GeoFire(ref)
@@ -162,7 +148,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         geoQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
-                if (!driverFound && requestActive) {
+                if (!driverFound && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
                     driverFound = true
                     driverFoundID = key
 
@@ -204,7 +190,7 @@ class CustomerMapFragment : GenericMapFragment() {
         driverLocationRef = FirebaseDatabase.getInstance().reference.child("driversWorking").child(driverFoundID!!).child("l")
         driverLocationRefListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists() && requestActive) {
+                if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
                     val map: List<*> = dataSnapshot.value as List<*>
 
                     val locationLat: Double = if (map[0] == null) 0.0 else map[0].toString().toDouble()

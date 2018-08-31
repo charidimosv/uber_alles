@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.text.TextUtils
+import com.team.eddie.uber_alles.utils.PreferencesUtility.ACTIVE_REQUEST_PREF
 
 import com.team.eddie.uber_alles.utils.PreferencesUtility.LOGGED_IN_EMAIL_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_TYPE_PREF
@@ -15,9 +16,7 @@ object SaveSharedPreference {
     }
 
     fun cleanAll(context: Context) {
-        val editor = getPreferences(context).edit()
-        editor.clear()
-        editor.apply()
+        getPreferences(context).edit().clear().apply()
     }
 
     fun setLoggedIn(context: Context, loggedUser: String) {
@@ -40,5 +39,19 @@ object SaveSharedPreference {
         return getPreferences(context).getBoolean(USER_TYPE_PREF, false)
     }
 
+    fun setActiveRequest(context: Context, boolValue: Boolean) {
+        setBooleanTypeValue(context, ACTIVE_REQUEST_PREF, boolValue)
+    }
 
+    fun getActiveRequest(context: Context): Boolean {
+        return getBooleanTypeValue(context, ACTIVE_REQUEST_PREF, false)
+    }
+
+    fun setBooleanTypeValue(context: Context, name: String, boolValue: Boolean) {
+        getPreferences(context).edit().putBoolean(name, boolValue).apply()
+    }
+
+    fun getBooleanTypeValue(context: Context, name: String, defaultValue: Boolean): Boolean {
+        return getPreferences(context).getBoolean(name, defaultValue)
+    }
 }
