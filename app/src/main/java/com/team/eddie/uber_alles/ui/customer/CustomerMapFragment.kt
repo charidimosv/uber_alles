@@ -5,6 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RatingBar
+import android.widget.TextView
+import com.bumptech.glide.Glide
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
@@ -43,7 +48,16 @@ class CustomerMapFragment : GenericMapFragment() {
     private var driverLocationRef: DatabaseReference? = null
     private var driverLocationRefListener: ValueEventListener? = null
 
-    private var isLoggingOut: Boolean = false
+    //private var isLoggingOut: Boolean = false
+
+    private var mDriverInfo: LinearLayout? = null
+
+    private var mDriverProfileImage: ImageView? = null
+
+    private var mDriverName: TextView? = null
+    private var mDriverPhone: TextView? = null
+    private var mDriverCar: TextView? = null
+    private var mRatingBar: RatingBar? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -65,6 +79,16 @@ class CustomerMapFragment : GenericMapFragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.customer_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        mDriverInfo = binding.driverInfo
+
+        mDriverProfileImage = binding.driverProfileImage
+
+        mDriverName = binding.driverName
+        mDriverPhone = binding.driverPhone
+        mDriverCar = binding.driverCar
+        mRatingBar = binding.ratingBar
+
+
         binding.request.setOnClickListener {
 
             if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
@@ -84,6 +108,14 @@ class CustomerMapFragment : GenericMapFragment() {
                 val geoFire = GeoFire(ref)
                 geoFire.removeLocation(userId)
                 pickupMarker?.remove()
+
+                mDriverMarker?.remove()
+
+                mDriverInfo?.setVisibility(View.GONE);
+                mDriverName?.setText("");
+                mDriverPhone?.setText("");
+                mDriverCar?.setText("");
+                mDriverProfileImage?.setImageResource(R.mipmap.ic_default_user);
 
                 binding.request.setText("Call Uber")
             } else {
@@ -120,7 +152,7 @@ class CustomerMapFragment : GenericMapFragment() {
         }
     }
 
-    private fun disconnectCustomer() {
+   /* private fun disconnectCustomer() {
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
         val custRequest = FirebaseDatabase.getInstance().getReference("customerRequest")
         val geoFire = GeoFire(custRequest)
@@ -137,7 +169,7 @@ class CustomerMapFragment : GenericMapFragment() {
         super.onStop()
         if (!isLoggingOut)
             disconnectCustomer()
-    }
+    }*/
 
     private fun getClosestDriver() {
         val driverLocation: DatabaseReference = FirebaseDatabase.getInstance().reference.child("driversAvailable")
@@ -161,6 +193,7 @@ class CustomerMapFragment : GenericMapFragment() {
                     driverRef.updateChildren(map as Map<String, String>)
 
                     getDriverLocation()
+                    getDriverInfo()
                     binding.request.setText("Looking for Driver Location....")
                 }
             }
@@ -214,6 +247,35 @@ class CustomerMapFragment : GenericMapFragment() {
                     mDriverMarker = mMap.addMarker(MarkerOptions().position(driverLatLng).title("your driver").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
                 }
 
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
+
+    }
+
+    private fun getDriverInfo() {
+        mDriverInfo?.visibility = View.VISIBLE
+        val mDriverDatabase = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!)
+        mDriverDatabase?.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
+                    val map = dataSnapshot.value as Map<String, Any>?
+                    if (map!!["name"] != null)
+                        mDriverName?.text = map["name"].toString()
+
+                    if (map["phone"] != null)
+                        mDriverPhone?.text = map["phone"].toString()
+
+                    if (map["car"] != null)
+                        mDriverPhone?.text = map["car"].toString()
+
+                    if (map["profileImageUrl"] != null)
+                        Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mDriverProfileImage!!)
+
+
+                    //TODO add rating
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}

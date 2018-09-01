@@ -75,6 +75,7 @@ class RegisterActivity : AppCompatActivity() {
                     val userId = mAuth.currentUser!!.uid
                     val typeUser: String = if (driverSwitch.isChecked) DRIVER else CUSTOMER
 
+                    //todo save and other values
                     FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
 
                     val userReference = FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId)
