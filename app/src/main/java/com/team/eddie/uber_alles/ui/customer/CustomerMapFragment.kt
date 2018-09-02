@@ -5,10 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RatingBar
-import android.widget.TextView
+import android.widget.*
 import com.bumptech.glide.Glide
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
@@ -66,9 +63,14 @@ class CustomerMapFragment : GenericMapFragment() {
     private var mDriverPhone: TextView? = null
     private var mDriverCar: TextView? = null
     private var mRatingBar: RatingBar? = null
+    private var mRatingText: TextView? = null
+    private var mRatingButton: Button? = null
 
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
+    private var destinationMarker: Marker? = null
+
+    private var completedRide: Boolean = false
 
 
     override fun onCreateView(
@@ -99,6 +101,8 @@ class CustomerMapFragment : GenericMapFragment() {
         mDriverPhone = binding.driverPhone
         mDriverCar = binding.driverCar
         mRatingBar = binding.ratingBar
+        mRatingText = binding.ratingText
+        mRatingButton = binding.ratingButton
 
 
         binding.request.setOnClickListener {
@@ -107,6 +111,18 @@ class CustomerMapFragment : GenericMapFragment() {
                 endRide()
             else
                 beginRide()
+        }
+
+        mRatingButton!!.setOnClickListener {
+
+            val ratingRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("rating")
+            val ratingRefId = ratingRef.key
+
+            val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating,"comment" to mRatingText)
+
+            ratingRef.child(ratingRefId!!).updateChildren(map)
+
+            clearDriversInfo()
         }
 
        /*val autocompleteFragment = fragmentManager?.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
@@ -213,6 +229,7 @@ class CustomerMapFragment : GenericMapFragment() {
         })
     }
 
+
     private fun getDriverLocation() {
         driverLocationRef = FirebaseDatabase.getInstance().reference.child("driversWorking").child(driverFoundID!!).child("l")
         driverLocationRefListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
@@ -267,8 +284,19 @@ class CustomerMapFragment : GenericMapFragment() {
                     if (map["profileImageUrl"] != null)
                         Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mDriverProfileImage!!)
 
+                    //Load rating
+                    var ratingSum = 0
+                    var ratingsTotal = 0.toFloat()
+                    var ratingsAvg = 0.toFloat()
+                    for (rating in dataSnapshot.child("rating").children){
+                        ratingSum += Integer.valueOf(rating.child("value").value.toString())
+                        ratingsTotal++
+                    }
+                    if(ratingsTotal != 0.toFloat()){
+                        ratingsAvg = ratingSum/ratingsTotal
+                        mRatingBar?.rating = ratingsAvg
+                    }
 
-                    //TODO add rating
                 }
             }
 
@@ -283,8 +311,10 @@ class CustomerMapFragment : GenericMapFragment() {
         driveHasEndedRefListener = driveHasEndedRef!!.addValueEventListener(object : ValueEventListener{
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!dataSnapshot.exists())
+                if (!dataSnapshot.exists()) {
+                    completedRide = true
                     endRide()
+                }
             }
 
             override fun onCancelled(p0: DatabaseError) {}
@@ -299,25 +329,43 @@ class CustomerMapFragment : GenericMapFragment() {
         driverLocationRef?.removeEventListener(driverLocationRefListener!!)
         driveHasEndedRef?.removeEventListener(driveHasEndedRefListener!!)
 
+
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val geoFire = GeoFire(ref)
+        geoFire.removeLocation(userId)
+        pickupMarker?.remove()
+        destinationMarker?.remove()
+        mDriverMarker?.remove()
+
+
+        if(completedRide){
+            completedRide = false
+            mRatingBar?.rating = 0.toFloat()
+            mRatingButton?.visibility = View.VISIBLE
+            mRatingText?.visibility = View.VISIBLE
+        }
+        else
+            clearDriversInfo()
+    }
+
+    private fun clearDriversInfo(){
         if (driverFoundID != null) {
             val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest")
             driverRef.removeValue()
             driverFoundID = null
             driverFound = false
         }
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
-        val geoFire = GeoFire(ref)
-        geoFire.removeLocation(userId)
-        pickupMarker?.remove()
-
-        mDriverMarker?.remove()
 
         mDriverInfo?.visibility = View.GONE
         mDriverName?.text = ""
         mDriverPhone?.text = ""
         mDriverCar?.text = ""
         mDriverProfileImage?.setImageResource(R.mipmap.ic_default_user)
+
+        mRatingButton?.visibility = View.GONE
+        mRatingText?.visibility = View.GONE
+        mRatingBar?.rating = 0.toFloat()
 
         binding.request.text = "Call Uber"
     }
@@ -331,6 +379,8 @@ class CustomerMapFragment : GenericMapFragment() {
 
         pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        destinationMarker = mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title("Leave Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         binding.request.text = "Getting your Driver...."
 

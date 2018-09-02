@@ -27,6 +27,7 @@ import com.google.android.gms.maps.model.PolylineOptions
 import android.widget.TextView
 import android.widget.LinearLayout
 import com.bumptech.glide.Glide
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 
 class DriverMapFragment : GenericMapFragment(), RoutingListener {
@@ -36,8 +37,12 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private var status = 0
 
     private var customerId = ""
+
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
+    private var destinationMarker: Marker? = null
+
+    private var pickupTime: Long? = null
     private var pickupLatLng: LatLng? = null
     private var rideDistance: Float = 0.toFloat()
 
@@ -50,6 +55,7 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private var mCustomerName: TextView? = null
     private var mCustomerPhone: TextView? = null
     private var mCustomerDestination: TextView? = null
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -74,12 +80,14 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
                 status=2
                 erasePolylines()
                 if(destinationLatLng?.latitude != 0.0 && destinationLatLng?.longitude != 0.0){
+                    destinationMarker = mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
                     getRouteToMarker(destinationLatLng);
                 }
                 binding.rideStatus.text = "Drive completed"
+                pickupTime = getCurrentTimestamp()
             }
-            else{
-               // recordRide()
+            else if(status == 2){
+                recordRide()
                 endRide()
             }
         }
@@ -123,7 +131,6 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private var pickupMarker: Marker? = null
     private var assignedCustomerPickupLocationRef: DatabaseReference? = null
     private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
-
     private fun getAssignedCustomerPickupLocation() {
         assignedCustomerPickupLocationRef = FirebaseDatabase.getInstance().reference.child("customerRequest").child(customerId).child("l")
         assignedCustomerPickupLocationRefListener = assignedCustomerPickupLocationRef?.addValueEventListener(object : ValueEventListener {
@@ -201,6 +208,7 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private fun endRide(){
         binding.rideStatus.text = "Picked Customer"
 
+        status = 0
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("customerRequest")
         driverRef.removeValue();
@@ -210,12 +218,11 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         geoFire.removeLocation(customerId)
 
         pickupMarker?.remove()
+        destinationMarker?.remove()
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
 
         customerId = ""
         rideDistance = 0.toFloat()
-        pickupMarker?.remove()
-        assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
         mCustomerInfo?.visibility = View.GONE
         mCustomerName?.text = ""
         mCustomerPhone?.text = ""
@@ -223,6 +230,37 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         mCustomerProfileImage?.setImageResource(R.mipmap.ic_default_user)
         erasePolylines()
 
+    }
+
+     private fun recordRide(){
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("history")
+        val customerRef = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId).child("history")
+        val historyRef = FirebaseDatabase.getInstance().reference.child("history")
+
+        val requestId = historyRef.push().key
+        driverRef.child(requestId!!).setValue(true)
+        customerRef.child(requestId!!).setValue(true)
+
+        val map = hashMapOf<String, Any?>(
+                "driver" to userId,
+                "customer" to customerId,
+                "pickupTime" to pickupTime,
+                "arrivingTime" to getCurrentTimestamp(),
+                "destination" to destination,
+                "location/from/lat" to pickupLatLng?.latitude,
+                "location/from/lng" to pickupLatLng?.longitude,
+                "location/to/lat" to destinationLatLng?.latitude,
+                "location/to/lng" to destinationLatLng?.longitude,
+                "distance" to rideDistance
+        )
+
+        historyRef.child(requestId).updateChildren(map)
+
+    }
+
+    private fun getCurrentTimestamp(): Long? {
+        return System.currentTimeMillis() / 1000
     }
 
 
