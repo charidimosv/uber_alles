@@ -41,7 +41,7 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private var pickupLatLng: LatLng? = null
     private var rideDistance: Float = 0.toFloat()
 
-    private var isLoggingOut: Boolean = false;
+    private var isLoggingOut: Boolean = false
 
     private var mCustomerInfo: LinearLayout? = null
 
@@ -65,6 +65,22 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
                 locationResult ?: return
                 for (location in locationResult.locations)
                     onLocationChanged(location)
+            }
+        }
+
+        binding.rideStatus.setOnClickListener{
+
+            if(status == 1){
+                status=2
+                erasePolylines()
+                if(destinationLatLng?.latitude != 0.0 && destinationLatLng?.longitude != 0.0){
+                    getRouteToMarker(destinationLatLng);
+                }
+                binding.rideStatus.text = "Drive completed"
+            }
+            else{
+               // recordRide()
+                endRide()
             }
         }
 
@@ -93,19 +109,11 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
                     status = 1
                     customerId = dataSnapshot.value!!.toString()
                     getAssignedCustomerPickupLocation()
-                    //TODO Add customer destination
+                    getAssignedCustomerDestination()
                     getAssignedCustomerInfo()
-                } else {
-                    customerId = ""
-                    pickupMarker?.remove()
-                    assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
-                    mCustomerInfo?.visibility = View.GONE
-                    mCustomerName?.text = ""
-                    mCustomerPhone?.text = ""
-                    mCustomerDestination?.setText("Destination: --");
-                    mCustomerProfileImage?.setImageResource(R.mipmap.ic_default_user)
-                    erasePolylines()
-                }
+                } else
+                    endRide()
+
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -136,6 +144,38 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         })
     }
 
+    private fun getAssignedCustomerDestination(){
+        val driverId = FirebaseAuth.getInstance().currentUser?.uid
+        val assignedCustomerRequestRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverId!!).child("customerRequest")
+
+        assignedCustomerRequestRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    val map: Map<String, Object> = dataSnapshot.value as Map<String, Object>
+
+                    if(map["destination"] !=null){
+                        destination = map["destination"].toString()
+                        mCustomerDestination?.text = "Destination: $destination"
+                    }
+                    else
+                        mCustomerDestination?.text = "Destination: --"
+
+                    val destinationLat: Double = if (map["destinationLat"] == null) 0.0 else map["destinationLat"].toString().toDouble()
+                    val destinationLng: Double = if (map["destinationLng"] == null) 0.0 else map["destinationLng"].toString().toDouble()
+
+                    destinationLatLng = LatLng(destinationLat, destinationLng)
+
+                }
+
+            }
+
+
+            override fun onCancelled(p0: DatabaseError) {}
+        })
+
+    }
+
+
     private fun getAssignedCustomerInfo() {
         mCustomerInfo?.visibility = View.VISIBLE
         val mCustomerDatabase = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId)
@@ -150,12 +190,39 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
                         mCustomerPhone?.text = map["phone"].toString()
 
                     if (map["profileImageUrl"] != null)
-                        Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mCustomerProfileImage!!)
+                        Glide.with(mCustomerInfo!!).load(map["profileImageUrl"].toString()).into(mCustomerProfileImage!!)
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+    }
+
+    private fun endRide(){
+        binding.rideStatus.text = "Picked Customer"
+
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("customerRequest")
+        driverRef.removeValue();
+
+        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val geoFire = GeoFire(ref)
+        geoFire.removeLocation(customerId)
+
+        pickupMarker?.remove()
+        assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
+
+        customerId = ""
+        rideDistance = 0.toFloat()
+        pickupMarker?.remove()
+        assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
+        mCustomerInfo?.visibility = View.GONE
+        mCustomerName?.text = ""
+        mCustomerPhone?.text = ""
+        mCustomerDestination?.text = "Destination: --"
+        mCustomerProfileImage?.setImageResource(R.mipmap.ic_default_user)
+        erasePolylines()
+
     }
 
 

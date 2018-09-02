@@ -14,9 +14,13 @@ import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
 import com.firebase.geofire.GeoQueryEventListener
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.places.Place
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment
+import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -30,6 +34,7 @@ import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class CustomerMapFragment : GenericMapFragment() {
@@ -48,6 +53,9 @@ class CustomerMapFragment : GenericMapFragment() {
     private var driverLocationRef: DatabaseReference? = null
     private var driverLocationRefListener: ValueEventListener? = null
 
+    private var driveHasEndedRef: DatabaseReference? = null
+    private var driveHasEndedRefListener: ValueEventListener? = null
+
     //private var isLoggingOut: Boolean = false
 
     private var mDriverInfo: LinearLayout? = null
@@ -58,6 +66,10 @@ class CustomerMapFragment : GenericMapFragment() {
     private var mDriverPhone: TextView? = null
     private var mDriverCar: TextView? = null
     private var mRatingBar: RatingBar? = null
+
+    private var destination: String? = null
+    private var destinationLatLng: LatLng? = null
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -91,48 +103,26 @@ class CustomerMapFragment : GenericMapFragment() {
 
         binding.request.setOnClickListener {
 
-            if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
-                SaveSharedPreference.setActiveRequest(activity!!.applicationContext, false)
-                radius = 1
-                geoQuery!!.removeAllListeners()
-                driverLocationRef?.removeEventListener(driverLocationRefListener!!)
-
-                if (driverFoundID != null) {
-                    val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest")
-                    driverRef.setValue(true)
-                    driverFoundID = null
-                    driverFound = false
-                }
-                val userId = FirebaseAuth.getInstance().currentUser!!.uid
-                val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
-                val geoFire = GeoFire(ref)
-                geoFire.removeLocation(userId)
-                pickupMarker?.remove()
-
-                mDriverMarker?.remove()
-
-                mDriverInfo?.setVisibility(View.GONE);
-                mDriverName?.setText("");
-                mDriverPhone?.setText("");
-                mDriverCar?.setText("");
-                mDriverProfileImage?.setImageResource(R.mipmap.ic_default_user);
-
-                binding.request.setText("Call Uber")
-            } else {
-                SaveSharedPreference.setActiveRequest(activity!!.applicationContext, true)
-                val userId = FirebaseAuth.getInstance().currentUser!!.uid
-                val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
-                val geoFire = GeoFire(ref)
-                geoFire.setLocation(userId, GeoLocation(mLastLocation!!.latitude, mLastLocation!!.longitude))
-
-                pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
-                pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-
-                binding.request.setText("Getting your Driver....")
-
-                getClosestDriver()
-            }
+            if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext))
+                endRide()
+            else
+                beginRide()
         }
+
+       /*val autocompleteFragment = fragmentManager?.findFragmentById(R.id.place_autocomplete_fragment) as PlaceAutocompleteFragment
+
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                destination = place.name.toString()
+                destinationLatLng = place.latLng
+            }
+
+            override fun onError(status: Status) {}
+        }) */
+
+        destination = "Louisville"
+        destinationLatLng = LatLng(38.328732, -85.764771)
+
 
         return binding.root
     }
@@ -187,14 +177,18 @@ class CustomerMapFragment : GenericMapFragment() {
                     val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest")
                     val customerId = FirebaseAuth.getInstance().currentUser!!.uid
 
-                    val map: HashMap<String, String> = hashMapOf(
-                            "customerRideId" to customerId
+                    val map: HashMap<String, Any?> = hashMapOf(
+                            "customerRideId" to customerId,
+                            "destination" to destination,
+                            "destinationLat" to (destinationLatLng?.latitude),
+                            "destinationLng" to (destinationLatLng?.longitude)
                     )
                     driverRef.updateChildren(map as Map<String, String>)
 
                     getDriverLocation()
                     getDriverInfo()
-                    binding.request.setText("Looking for Driver Location....")
+                    getHasRideEnded()
+                    binding.request.text = "Looking for Driver Location...."
                 }
             }
 
@@ -281,5 +275,65 @@ class CustomerMapFragment : GenericMapFragment() {
             override fun onCancelled(databaseError: DatabaseError) {}
         })
 
+    }
+
+
+    private fun getHasRideEnded() {
+        driveHasEndedRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest").child("customerRideId");
+        driveHasEndedRefListener = driveHasEndedRef!!.addValueEventListener(object : ValueEventListener{
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (!dataSnapshot.exists())
+                    endRide()
+            }
+
+            override fun onCancelled(p0: DatabaseError) {}
+
+        })
+    }
+
+    private fun endRide(){
+        SaveSharedPreference.setActiveRequest(activity!!.applicationContext, false)
+        radius = 1
+        geoQuery!!.removeAllListeners()
+        driverLocationRef?.removeEventListener(driverLocationRefListener!!)
+        driveHasEndedRef?.removeEventListener(driveHasEndedRefListener!!)
+
+        if (driverFoundID != null) {
+            val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest")
+            driverRef.removeValue()
+            driverFoundID = null
+            driverFound = false
+        }
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val geoFire = GeoFire(ref)
+        geoFire.removeLocation(userId)
+        pickupMarker?.remove()
+
+        mDriverMarker?.remove()
+
+        mDriverInfo?.visibility = View.GONE
+        mDriverName?.text = ""
+        mDriverPhone?.text = ""
+        mDriverCar?.text = ""
+        mDriverProfileImage?.setImageResource(R.mipmap.ic_default_user)
+
+        binding.request.text = "Call Uber"
+    }
+
+    private fun beginRide() {
+        SaveSharedPreference.setActiveRequest(activity!!.applicationContext, true)
+        val userId = FirebaseAuth.getInstance().currentUser!!.uid
+        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val geoFire = GeoFire(ref)
+        geoFire.setLocation(userId, GeoLocation(mLastLocation!!.latitude, mLastLocation!!.longitude))
+
+        pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title("Pickup Here").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        binding.request.text = "Getting your Driver...."
+
+        getClosestDriver()
     }
 }
