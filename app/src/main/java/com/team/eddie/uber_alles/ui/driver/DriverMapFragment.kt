@@ -5,8 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationCallback
@@ -24,8 +23,6 @@ import com.google.android.gms.maps.model.*
 import java.util.ArrayList
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
-import android.widget.TextView
-import android.widget.LinearLayout
 import com.bumptech.glide.Glide
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
@@ -55,6 +52,9 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private var mCustomerName: TextView? = null
     private var mCustomerPhone: TextView? = null
     private var mCustomerDestination: TextView? = null
+    private var mRatingBar: RatingBar? = null
+    private var mRatingText: EditText? = null
+    private var mRatingButton: Button? = null
 
 
     override fun onCreateView(
@@ -92,6 +92,18 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
             }
         }
 
+        mRatingButton!!.setOnClickListener {
+
+            val ratingRef = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId).child("rating")
+            val ratingRefId = ratingRef.push().key
+
+            val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating/*,"comment" to mRatingText*/)
+
+            ratingRef.child(ratingRefId!!).updateChildren(map)
+
+            clearCustomersInfo()
+        }
+
         val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
@@ -102,6 +114,7 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         mCustomerName = binding.customerName
         mCustomerPhone = binding.customerPhone
         mCustomerDestination = binding.customerDestination
+
 
         getAssignedCustomer()
 
@@ -198,6 +211,19 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
 
                     if (map["profileImageUrl"] != null)
                         Glide.with(mCustomerInfo!!).load(map["profileImageUrl"].toString()).into(mCustomerProfileImage!!)
+
+                    //Load rating
+                    var ratingSum = 0.toFloat()
+                    var ratingsTotal = 0.toFloat()
+                    var ratingsAvg = 0.toFloat()
+                    for (rating in dataSnapshot.child("rating").children){
+                        ratingSum += rating.child("value").value.toString().toFloat()
+                        ratingsTotal++
+                    }
+                    if(ratingsTotal != 0.toFloat()){
+                        ratingsAvg = ratingSum/ratingsTotal
+                        mRatingBar?.rating = ratingsAvg
+                    }
                 }
             }
 
@@ -208,7 +234,6 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
     private fun endRide(){
         binding.rideStatus.text = "Picked Customer"
 
-        status = 0
         val userId = FirebaseAuth.getInstance().currentUser?.uid
         val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("customerRequest")
         driverRef.removeValue();
@@ -221,6 +246,25 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         destinationMarker?.remove()
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
 
+        erasePolylines()
+
+        if(status == 2){
+            status = 0
+            mRatingBar?.rating = 0.toFloat()
+            mRatingButton?.visibility = View.VISIBLE
+            mRatingText?.visibility = View.VISIBLE
+        }
+        else
+            clearCustomersInfo()
+
+    }
+
+    private fun clearCustomersInfo(){
+        mRatingBar?.rating = 0.toFloat()
+        mRatingText = null
+        mRatingButton?.visibility = View.GONE
+        mRatingText?.visibility = View.GONE
+
         customerId = ""
         rideDistance = 0.toFloat()
         mCustomerInfo?.visibility = View.GONE
@@ -228,7 +272,6 @@ class DriverMapFragment : GenericMapFragment(), RoutingListener {
         mCustomerPhone?.text = ""
         mCustomerDestination?.text = "Destination: --"
         mCustomerProfileImage?.setImageResource(R.mipmap.ic_default_user)
-        erasePolylines()
 
     }
 

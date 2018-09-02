@@ -63,7 +63,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private var mDriverPhone: TextView? = null
     private var mDriverCar: TextView? = null
     private var mRatingBar: RatingBar? = null
-    private var mRatingText: TextView? = null
+    private var mRatingText: EditText? = null
     private var mRatingButton: Button? = null
 
     private var destination: String? = null
@@ -116,9 +116,9 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingButton!!.setOnClickListener {
 
             val ratingRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverFoundID!!).child("rating")
-            val ratingRefId = ratingRef.key
+            val ratingRefId = ratingRef.push().key
 
-            val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating,"comment" to mRatingText)
+            val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating/*,"comment" to mRatingText*/)
 
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
@@ -279,17 +279,17 @@ class CustomerMapFragment : GenericMapFragment() {
                         mDriverPhone?.text = map["phone"].toString()
 
                     if (map["car"] != null)
-                        mDriverPhone?.text = map["car"].toString()
+                        mDriverCar?.text = map["car"].toString()
 
                     if (map["profileImageUrl"] != null)
                         Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mDriverProfileImage!!)
 
                     //Load rating
-                    var ratingSum = 0
+                    var ratingSum = 0.toFloat()
                     var ratingsTotal = 0.toFloat()
                     var ratingsAvg = 0.toFloat()
                     for (rating in dataSnapshot.child("rating").children){
-                        ratingSum += Integer.valueOf(rating.child("value").value.toString())
+                        ratingSum += rating.child("value").value.toString().toFloat()
                         ratingsTotal++
                     }
                     if(ratingsTotal != 0.toFloat()){
@@ -366,6 +366,7 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingButton?.visibility = View.GONE
         mRatingText?.visibility = View.GONE
         mRatingBar?.rating = 0.toFloat()
+        mRatingText = null
 
         binding.request.text = "Call Uber"
     }

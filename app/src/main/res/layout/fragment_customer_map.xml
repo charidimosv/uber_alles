@@ -91,8 +91,9 @@
                         android:numStars="5"
                         android:stepSize="0.1" />
 
-                    <TextView
+                    <EditText
                         android:id="@+id/ratingText"
+                        android:inputType="textMultiLine"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingTop="20sp"
