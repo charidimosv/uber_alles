@@ -53,6 +53,9 @@ class CustomerMapFragment : GenericMapFragment() {
     private var driveHasEndedRef: DatabaseReference? = null
     private var driveHasEndedRefListener: ValueEventListener? = null
 
+    var customerPickedUpRef: DatabaseReference? = null
+    var customerPickedUpRefListener: ValueEventListener? = null
+
     //private var isLoggingOut: Boolean = false
 
     private var mDriverInfo: LinearLayout? = null
@@ -201,7 +204,7 @@ class CustomerMapFragment : GenericMapFragment() {
                     )
                     driverRef.updateChildren(map as Map<String, String>)
 
-                    getDriverLocation()
+                    getHasCustomerPickedUp()
                     getDriverInfo()
                     getHasRideEnded()
                     binding.request.text = "Looking for Driver Location...."
@@ -305,6 +308,24 @@ class CustomerMapFragment : GenericMapFragment() {
 
     }
 
+    private fun getHasCustomerPickedUp() {
+        customerPickedUpRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest").child("pickup");
+        customerPickedUpRefListener = customerPickedUpRef!!.addValueEventListener(object : ValueEventListener{
+
+            override fun onDataChange(dataSnapshot: DataSnapshot){
+                if (!dataSnapshot.exists())
+                    getDriverLocation()
+                else {
+                    binding.request.text = "Your ride has start"
+                    binding.request.isClickable = false
+                    getRouteToMarker(destinationLatLng)
+                }
+            }
+
+            override fun onCancelled(p0: DatabaseError) {}
+
+        })
+    }
 
     private fun getHasRideEnded() {
         driveHasEndedRef = FirebaseDatabase.getInstance().getReference().child("Users").child("Drivers").child(driverFoundID!!).child("customerRequest").child("customerRideId");
@@ -328,6 +349,7 @@ class CustomerMapFragment : GenericMapFragment() {
         geoQuery!!.removeAllListeners()
         driverLocationRef?.removeEventListener(driverLocationRefListener!!)
         driveHasEndedRef?.removeEventListener(driveHasEndedRefListener!!)
+        customerPickedUpRef?.removeEventListener(customerPickedUpRefListener!!)
 
 
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
@@ -337,7 +359,6 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         destinationMarker?.remove()
         mDriverMarker?.remove()
-
 
         if(completedRide){
             completedRide = false
@@ -368,6 +389,7 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingBar?.rating = 0.toFloat()
         mRatingText = null
 
+        binding.request.isClickable = true
         binding.request.text = "Call Uber"
     }
 
