@@ -11,14 +11,13 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.*
-import com.team.eddie.uber_alles.utils.FirebaseConstants.ALL_USER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.CUSTOMER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.DRIVER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.EMAIL
-import com.team.eddie.uber_alles.utils.FirebaseConstants.IS_DRIVER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.PASSWORD
-import com.team.eddie.uber_alles.utils.FirebaseConstants.USER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.USERNAME
+import com.team.eddie.uber_alles.utils.FirebaseHelper.CUSTOMERS
+import com.team.eddie.uber_alles.utils.FirebaseHelper.DRIVERS
+import com.team.eddie.uber_alles.utils.FirebaseHelper.EMAIL
+import com.team.eddie.uber_alles.utils.FirebaseHelper.IS_DRIVER
+import com.team.eddie.uber_alles.utils.FirebaseHelper.PASSWORD
+import com.team.eddie.uber_alles.utils.FirebaseHelper.USERNAME
+import com.team.eddie.uber_alles.utils.FirebaseHelper.USERS
 import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {
@@ -73,12 +72,12 @@ class RegisterActivity : AppCompatActivity() {
                     Toast.makeText(this, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
                 else {
                     val userId = mAuth.currentUser!!.uid
-                    val typeUser: String = if (driverSwitch.isChecked) DRIVER else CUSTOMER
+                    val typeUser: String = if (driverSwitch.isChecked) DRIVERS else CUSTOMERS
 
                     //todo save and other values
-                    FirebaseDatabase.getInstance().reference.child(USER).child(typeUser).child(userId).child("name").setValue(email)
+                    FirebaseDatabase.getInstance().reference.child(USERS).child(typeUser).child(userId).child("name").setValue(email)
 
-                    val userReference = FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId)
+                    val userReference = FirebaseHelper.getUser(userId)
                     userReference.child(EMAIL).setValue(email)
                     userReference.child(PASSWORD).setValue(password)
                     userReference.child(USERNAME).setValue(usernameTextInputEdit.text.toString())
@@ -164,10 +163,6 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         return true
-    }
-
-
-    fun showSignUpError() {
     }
 
 }

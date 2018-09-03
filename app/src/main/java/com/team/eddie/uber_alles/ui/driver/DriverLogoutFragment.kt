@@ -9,10 +9,10 @@ import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.databinding.FragmentDriverLogoutBinding
 import com.team.eddie.uber_alles.ui.session.WelcomeActivity
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 class DriverLogoutFragment : androidx.fragment.app.Fragment() {
@@ -27,7 +27,7 @@ class DriverLogoutFragment : androidx.fragment.app.Fragment() {
         val binding = FragmentDriverLogoutBinding.inflate(inflater, container, false)
 
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId).child("customerRequest").child("customerRideId")
+        FirebaseHelper.getDriverCustomerRide(userId)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                         var customerId: String? = if (dataSnapshot.exists()) dataSnapshot.value!!.toString() else ""
@@ -52,8 +52,8 @@ class DriverLogoutFragment : androidx.fragment.app.Fragment() {
 
     private fun disconnectDriver() {
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
-        val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+        val refAvailable = FirebaseHelper.getDriversAvailable()
+        val refWorking = FirebaseHelper.getDriversWorking()
         val geoFireAvailable = GeoFire(refAvailable)
         val geoFireWorking = GeoFire(refWorking)
 

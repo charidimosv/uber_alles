@@ -7,8 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import com.bumptech.glide.Glide
-import com.directions.route.AbstractRouting
-import com.directions.route.Routing
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationCallback
@@ -21,10 +19,14 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.GenericMapFragment
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 
 
 class DriverMapFragment : GenericMapFragment() {
@@ -74,23 +76,22 @@ class DriverMapFragment : GenericMapFragment() {
             }
         }
 
-        binding.rideStatus.setOnClickListener{
+        binding.rideStatus.setOnClickListener {
 
-            if(status == 1){
-                status=2
+            if (status == 1) {
+                status = 2
                 erasePolylines()
-                if(destinationLatLng?.latitude != 0.0 && destinationLatLng?.longitude != 0.0){
+                if (destinationLatLng?.latitude != 0.0 && destinationLatLng?.longitude != 0.0) {
                     destinationMarker = mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
                     getRouteToMarker(destinationLatLng);
                 }
                 binding.rideStatus.text = "Drive completed"
                 pickupTime = getCurrentTimestamp()
                 val driverId = FirebaseAuth.getInstance().currentUser?.uid
-                val pickUpRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverId!!).child("customerRequest").child("pickup")
+                val pickUpRef = FirebaseHelper.getDriverCustomerReqPickup(driverId!!)
                 pickUpRef.setValue(true)
 
-            }
-            else if(status == 2){
+            } else if (status == 2) {
                 recordRide()
                 endRide()
             }
@@ -102,7 +103,7 @@ class DriverMapFragment : GenericMapFragment() {
 
         mRatingButton!!.setOnClickListener {
 
-            val ratingRef = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId).child("rating")
+            val ratingRef = FirebaseHelper.getCustomerRating(customerId)
             val ratingRefId = ratingRef.push().key
 
             val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating/*,"comment" to mRatingText*/)
@@ -131,7 +132,7 @@ class DriverMapFragment : GenericMapFragment() {
 
     private fun getAssignedCustomer() {
         val driverId = FirebaseAuth.getInstance().currentUser!!.uid
-        val assignedCustomerRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverId).child("customerRequest").child("customerRideId")
+        val assignedCustomerRef = FirebaseHelper.getDriverCustomerRide(driverId)
         assignedCustomerRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -153,7 +154,7 @@ class DriverMapFragment : GenericMapFragment() {
     private var assignedCustomerPickupLocationRef: DatabaseReference? = null
     private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
     private fun getAssignedCustomerPickupLocation() {
-        assignedCustomerPickupLocationRef = FirebaseDatabase.getInstance().reference.child("customerRequest").child(customerId).child("l")
+        assignedCustomerPickupLocationRef = FirebaseHelper.getCustomerRequestLocation(customerId)
         assignedCustomerPickupLocationRefListener = assignedCustomerPickupLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && customerId != "") {
@@ -172,20 +173,19 @@ class DriverMapFragment : GenericMapFragment() {
         })
     }
 
-    private fun getAssignedCustomerDestination(){
+    private fun getAssignedCustomerDestination() {
         val driverId = FirebaseAuth.getInstance().currentUser?.uid
-        val assignedCustomerRequestRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(driverId!!).child("customerRequest")
+        val assignedCustomerRequestRef = FirebaseHelper.getDriverCustomerReq(driverId!!)
 
-        assignedCustomerRequestRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        assignedCustomerRequestRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.exists()) {
+                if (dataSnapshot.exists()) {
                     val map: Map<String, Object> = dataSnapshot.value as Map<String, Object>
 
-                    if(map["destination"] !=null){
+                    if (map["destination"] != null) {
                         destination = map["destination"].toString()
                         mCustomerDestination?.text = "Destination: $destination"
-                    }
-                    else
+                    } else
                         mCustomerDestination?.text = "Destination: --"
 
                     val destinationLat: Double = if (map["destinationLat"] == null) 0.0 else map["destinationLat"].toString().toDouble()
@@ -206,7 +206,7 @@ class DriverMapFragment : GenericMapFragment() {
 
     private fun getAssignedCustomerInfo() {
         mCustomerInfo?.visibility = View.VISIBLE
-        val mCustomerDatabase = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId)
+        val mCustomerDatabase = FirebaseHelper.getCustomer(customerId)
         mCustomerDatabase?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
@@ -224,12 +224,12 @@ class DriverMapFragment : GenericMapFragment() {
                     var ratingSum = 0.toFloat()
                     var ratingsTotal = 0.toFloat()
                     var ratingsAvg = 0.toFloat()
-                    for (rating in dataSnapshot.child("rating").children){
+                    for (rating in dataSnapshot.child("rating").children) {
                         ratingSum += rating.child("value").value.toString().toFloat()
                         ratingsTotal++
                     }
-                    if(ratingsTotal != 0.toFloat()){
-                        ratingsAvg = ratingSum/ratingsTotal
+                    if (ratingsTotal != 0.toFloat()) {
+                        ratingsAvg = ratingSum / ratingsTotal
                         mRatingBar?.rating = ratingsAvg
                     }
                 }
@@ -239,14 +239,14 @@ class DriverMapFragment : GenericMapFragment() {
         })
     }
 
-    private fun endRide(){
+    private fun endRide() {
         binding.rideStatus.text = "Picked Customer"
 
         val userId = FirebaseAuth.getInstance().currentUser?.uid
-        val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("customerRequest")
+        val driverRef = FirebaseHelper.getDriverCustomerReq(userId!!)
         driverRef.removeValue();
 
-        val ref = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val ref = FirebaseHelper.getCustomerRequest()
         val geoFire = GeoFire(ref)
         geoFire.removeLocation(customerId)
 
@@ -256,17 +256,16 @@ class DriverMapFragment : GenericMapFragment() {
 
         erasePolylines()
 
-        if(status == 2){
+        if (status == 2) {
             mRatingBar?.rating = 0.toFloat()
             mRatingButton?.visibility = View.VISIBLE
             mRatingText?.visibility = View.VISIBLE
-        }
-        else
+        } else
             clearCustomersInfo()
 
     }
 
-    private fun clearCustomersInfo(){
+    private fun clearCustomersInfo() {
         status = 0
         mRatingBar?.rating = 0.toFloat()
         //mRatingText = null
@@ -283,11 +282,12 @@ class DriverMapFragment : GenericMapFragment() {
 
     }
 
-     private fun recordRide(){
+    private fun recordRide() {
         val userId = FirebaseAuth.getInstance().currentUser?.uid
-        val driverRef = FirebaseDatabase.getInstance().reference.child("Users").child("Drivers").child(userId!!).child("history")
-        val customerRef = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(customerId).child("history")
-        val historyRef = FirebaseDatabase.getInstance().reference.child("history")
+
+        val driverRef = FirebaseHelper.getDriverHistory(userId!!)
+        val customerRef = FirebaseHelper.getCustomerHistory(customerId)
+        val historyRef = FirebaseHelper.getHistory()
 
         val requestId = historyRef.push().key
         driverRef.child(requestId!!).setValue(true)
@@ -323,8 +323,8 @@ class DriverMapFragment : GenericMapFragment() {
 
             val userId = FirebaseAuth.getInstance().currentUser!!.uid
 
-            val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
-            val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+            val refAvailable = FirebaseHelper.getDriversAvailable()
+            val refWorking = FirebaseHelper.getDriversWorking()
 
             val geoFireAvailable = GeoFire(refAvailable)
             val geoFireWorking = GeoFire(refWorking)
@@ -341,8 +341,8 @@ class DriverMapFragment : GenericMapFragment() {
 
     private fun disconnectDriver() {
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
-        val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+        val refAvailable = FirebaseHelper.getDriversAvailable()
+        val refWorking = FirebaseHelper.getDriversWorking()
         val geoFireAvailable = GeoFire(refAvailable)
         val geoFireWorking = GeoFire(refWorking)
 
@@ -354,7 +354,6 @@ class DriverMapFragment : GenericMapFragment() {
         if (!isLoggingOut)
             disconnectDriver()
     }
-
 
 
 }

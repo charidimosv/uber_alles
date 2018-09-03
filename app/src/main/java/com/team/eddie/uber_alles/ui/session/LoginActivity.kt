@@ -8,13 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
-import com.team.eddie.uber_alles.utils.FirebaseConstants.ALL_USER
-import com.team.eddie.uber_alles.utils.FirebaseConstants.IS_DRIVER
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
@@ -54,26 +52,25 @@ class LoginActivity : AppCompatActivity() {
     private fun onLoginSuccess() {
 
         val userId = mAuth.currentUser!!.uid
-        FirebaseDatabase.getInstance().reference.child(ALL_USER).child(userId).child(IS_DRIVER)
-                .addListenerForSingleValueEvent(object : ValueEventListener {
-                    override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        if (dataSnapshot.exists()) {
+        FirebaseHelper.getUserIsDriver(userId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
 
-                            var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
+                    var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
 
-                            SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
-                            SaveSharedPreference.setUserType(applicationContext, isDriver)
+                    SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
+                    SaveSharedPreference.setUserType(applicationContext, isDriver)
 
-                            if (isDriver)
-                                startActivity(DriverActivity.getLaunchIntent(this@LoginActivity))
-                            else
-                                startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
-                        } else
-                            Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT)
-                    }
+                    if (isDriver)
+                        startActivity(DriverActivity.getLaunchIntent(this@LoginActivity))
+                    else
+                        startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
+                } else
+                    Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT)
+            }
 
-                    override fun onCancelled(databaseError: DatabaseError) {}
-                })
+            override fun onCancelled(databaseError: DatabaseError) {}
+        })
     }
 
     private fun attemptLogin() {

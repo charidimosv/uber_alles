@@ -9,17 +9,17 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
-import com.google.firebase.auth.FirebaseAuth
-import com.team.eddie.uber_alles.databinding.FragmentDriverProfileBinding
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
 import com.bumptech.glide.Glide
-import com.google.firebase.database.*
-import com.google.firebase.storage.FirebaseStorage
-import com.team.eddie.uber_alles.R.id.*
-import java.io.ByteArrayOutputStream
-import android.widget.RadioButton
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
+import com.google.firebase.storage.FirebaseStorage
+import com.team.eddie.uber_alles.databinding.FragmentDriverProfileBinding
+import java.io.ByteArrayOutputStream
 
 
 class DriverProfileFragment : androidx.fragment.app.Fragment() {
@@ -65,12 +65,12 @@ class DriverProfileFragment : androidx.fragment.app.Fragment() {
             startActivityForResult(intent, 1)
         }
 
-        mConfirm!!.setOnClickListener{saveUserInformation()}
+        mConfirm!!.setOnClickListener { saveUserInformation() }
 
         return binding.root
     }
 
-    private fun getUserInfo(){
+    private fun getUserInfo() {
         mDriverDatabase?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
@@ -94,7 +94,7 @@ class DriverProfileFragment : androidx.fragment.app.Fragment() {
         })
     }
 
-    private fun saveUserInformation(){
+    private fun saveUserInformation() {
         val mName = mNameField?.text.toString()
         val mPhone = mPhoneField?.text.toString()
         val mCar = mCarField?.text.toString()
@@ -118,12 +118,13 @@ class DriverProfileFragment : androidx.fragment.app.Fragment() {
             })
             uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
                 val downloadUrlTask = taskSnapshot.storage.downloadUrl
-                downloadUrlTask.addOnFailureListener {OnFailureListener {
-                    //activity?.finish()
-                    return@OnFailureListener
+                downloadUrlTask.addOnFailureListener {
+                    OnFailureListener {
+                        //activity?.finish()
+                        return@OnFailureListener
+                    }
                 }
-                }
-                downloadUrlTask.addOnSuccessListener(OnSuccessListener {downloadUrl ->
+                downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
                     val newImage: HashMap<String, String> = hashMapOf("profileImageUrl" to downloadUrl.toString())
                     mDriverDatabase!!.updateChildren(newImage as Map<String, Any>)
 

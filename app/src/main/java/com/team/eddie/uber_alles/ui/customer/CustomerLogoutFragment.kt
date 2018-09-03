@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.team.eddie.uber_alles.databinding.FragmentCustomerLogoutBinding
 import com.team.eddie.uber_alles.ui.session.WelcomeActivity
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 class CustomerLogoutFragment : androidx.fragment.app.Fragment() {
@@ -36,11 +36,11 @@ class CustomerLogoutFragment : androidx.fragment.app.Fragment() {
 
     private fun disconnectCustomer() {
         val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val custRequest = FirebaseDatabase.getInstance().getReference("customerRequest")
+        val custRequest = FirebaseHelper.getCustomerRequest()
         val geoFire = GeoFire(custRequest)
         geoFire.removeLocation(userId)
-        //val refAvailable = FirebaseDatabase.getInstance().getReference("driversAvailable")
-        //val refWorking = FirebaseDatabase.getInstance().getReference("driversWorking")
+//        val refAvailable = FirebaseHelper.getDriversAvailable()
+//        val refWorking = FirebaseHelper.getDriversWorking()
         //val geoFireAvailable = GeoFire(refAvailable)
         //val geoFireWorking = GeoFire(refWorking)
 

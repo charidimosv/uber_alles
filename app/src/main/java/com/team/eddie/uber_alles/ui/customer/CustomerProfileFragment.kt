@@ -16,9 +16,13 @@ import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.team.eddie.uber_alles.databinding.FragmentCustomerProfileBinding
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 import java.io.ByteArrayOutputStream
 
 class CustomerProfileFragment : androidx.fragment.app.Fragment() {
@@ -54,7 +58,7 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
         mConfirm = binding.confirm
 
         userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mCustomerDatabase = FirebaseDatabase.getInstance().reference.child("Users").child("Customers").child(userID!!)
+        mCustomerDatabase = FirebaseHelper.getCustomer(userID!!)
 
         getUserInfo()
 
@@ -64,13 +68,13 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
             startActivityForResult(intent, 1)
         }
 
-        mConfirm!!.setOnClickListener{saveUserInformation()}
+        mConfirm!!.setOnClickListener { saveUserInformation() }
 
 
         return binding.root
     }
 
-    private fun getUserInfo(){
+    private fun getUserInfo() {
         mCustomerDatabase?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
@@ -90,7 +94,7 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
         })
     }
 
-    private fun saveUserInformation(){
+    private fun saveUserInformation() {
         val mName = mNameField?.text.toString()
         val mPhone = mPhoneField?.text.toString()
 
@@ -114,12 +118,13 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
             })
             uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
                 val downloadUrlTask = taskSnapshot.storage.downloadUrl
-                downloadUrlTask.addOnFailureListener {OnFailureListener {
-                    //activity?.finish()
-                    return@OnFailureListener
+                downloadUrlTask.addOnFailureListener {
+                    OnFailureListener {
+                        //activity?.finish()
+                        return@OnFailureListener
+                    }
                 }
-                }
-                downloadUrlTask.addOnSuccessListener(OnSuccessListener {downloadUrl ->
+                downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
                     val newImage: HashMap<String, String> = hashMapOf("profileImageUrl" to downloadUrl.toString())
                     mCustomerDatabase!!.updateChildren(newImage as Map<String, Any>)
 

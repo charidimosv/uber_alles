@@ -17,7 +17,7 @@ import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.team.eddie.uber_alles.R
 import java.lang.Exception
-import java.util.ArrayList
+import java.util.*
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
@@ -150,7 +150,7 @@ abstract class GenericMapFragment :
     }
 
     override fun onRoutingFailure(p0: RouteException?) {
-        if(p0 != null)
+        if (p0 != null)
             Toast.makeText(activity!!, "Error: " + p0.message, Toast.LENGTH_LONG).show()
         else
             Toast.makeText(activity!!, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
