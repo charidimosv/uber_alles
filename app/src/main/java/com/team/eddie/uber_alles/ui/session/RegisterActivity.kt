@@ -6,18 +6,14 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.*
-import com.team.eddie.uber_alles.utils.FirebaseHelper.CUSTOMERS
-import com.team.eddie.uber_alles.utils.FirebaseHelper.DRIVERS
 import com.team.eddie.uber_alles.utils.FirebaseHelper.EMAIL
 import com.team.eddie.uber_alles.utils.FirebaseHelper.IS_DRIVER
 import com.team.eddie.uber_alles.utils.FirebaseHelper.PASSWORD
 import com.team.eddie.uber_alles.utils.FirebaseHelper.USERNAME
-import com.team.eddie.uber_alles.utils.FirebaseHelper.USERS
 import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {
@@ -66,22 +62,21 @@ class RegisterActivity : AppCompatActivity() {
         if (localRegister()) {
             val email = emailTextInputEdit.text.toString()
             val password = passwordTextInputEdit.text.toString()
+            val username = usernameTextInputEdit.text.toString()
 
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
                 if (!task.isSuccessful)
                     Toast.makeText(this, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
                 else {
                     val userId = mAuth.currentUser!!.uid
-                    val typeUser: String = if (driverSwitch.isChecked) DRIVERS else CUSTOMERS
-
-                    //todo save and other values
-                    FirebaseDatabase.getInstance().reference.child(USERS).child(typeUser).child(userId).child("name").setValue(email)
-
                     val userReference = FirebaseHelper.getUser(userId)
-                    userReference.child(EMAIL).setValue(email)
-                    userReference.child(PASSWORD).setValue(password)
-                    userReference.child(USERNAME).setValue(usernameTextInputEdit.text.toString())
-                    userReference.child(IS_DRIVER).setValue(driverSwitch.isChecked)
+
+                    val userInfo: HashMap<String, *> = hashMapOf(
+                            EMAIL to email,
+                            USERNAME to username,
+                            PASSWORD to password,
+                            IS_DRIVER to driverSwitch.isChecked)
+                    userReference.updateChildren(userInfo)
                 }
             }
 

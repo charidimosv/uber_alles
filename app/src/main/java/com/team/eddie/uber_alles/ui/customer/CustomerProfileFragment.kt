@@ -20,25 +20,26 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.google.firebase.storage.FirebaseStorage
 import com.team.eddie.uber_alles.databinding.FragmentCustomerProfileBinding
 import com.team.eddie.uber_alles.utils.FirebaseHelper
+import com.team.eddie.uber_alles.utils.FirebaseHelper.NAME
+import com.team.eddie.uber_alles.utils.FirebaseHelper.PHONE
+import com.team.eddie.uber_alles.utils.FirebaseHelper.PROFILE_IMG_URL
 import java.io.ByteArrayOutputStream
 
 class CustomerProfileFragment : androidx.fragment.app.Fragment() {
 
-    private var mNameField: EditText? = null
-    private var mPhoneField: EditText? = null
-
-    private var mConfirm: Button? = null
-
-    private var mProfileImage: ImageView? = null
-
-    private var mCustomerDatabase: DatabaseReference? = null
+    private lateinit var mCustomerDatabase: DatabaseReference
 
     private var userID: String? = null
 
+    private lateinit var mProfileImage: ImageView
     private var resultUri: Uri? = null
+
+    private lateinit var mNameField: EditText
+    private lateinit var mPhoneField: EditText
+
+    private lateinit var mConfirm: Button
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -46,7 +47,6 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentCustomerProfileBinding.inflate(inflater, container, false)
-        //context ?: return binding.root
 
         setHasOptionsMenu(true)
 
@@ -58,35 +58,35 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
         mConfirm = binding.confirm
 
         userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mCustomerDatabase = FirebaseHelper.getCustomer(userID!!)
+        mCustomerDatabase = FirebaseHelper.getCustomerInfo(userID!!)
 
         getUserInfo()
 
-        mProfileImage!!.setOnClickListener {
+        mProfileImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
             startActivityForResult(intent, 1)
         }
 
-        mConfirm!!.setOnClickListener { saveUserInformation() }
-
+        mConfirm.setOnClickListener { saveUserInformation() }
 
         return binding.root
     }
 
     private fun getUserInfo() {
-        mCustomerDatabase?.addValueEventListener(object : ValueEventListener {
+        mCustomerDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>?
-                    if (map!!["name"] != null)
-                        mNameField?.setText(map["name"].toString())
+                    val map = dataSnapshot.value as Map<String, Any>
 
-                    if (map["phone"] != null)
-                        mPhoneField?.setText(map["phone"].toString())
+                    if (map[NAME] != null)
+                        mNameField.setText(map[NAME].toString())
 
-                    if (map["profileImageUrl"] != null)
-                        Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mProfileImage!!)
+                    if (map[PHONE] != null)
+                        mPhoneField.setText(map[PHONE].toString())
+
+                    if (map[PROFILE_IMG_URL] != null)
+                        Glide.with(activity?.application!!).load(map[PROFILE_IMG_URL].toString()).into(mProfileImage)
                 }
             }
 
@@ -95,16 +95,15 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
     }
 
     private fun saveUserInformation() {
-        val mName = mNameField?.text.toString()
-        val mPhone = mPhoneField?.text.toString()
+        val mName = mNameField.text.toString()
+        val mPhone = mPhoneField.text.toString()
 
-
-        val userInfo: HashMap<String, String?> = hashMapOf("name" to mName, "phone" to mPhone)
-        mCustomerDatabase!!.updateChildren(userInfo as Map<String, Any>)
+        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone)
+        mCustomerDatabase.updateChildren(userInfo)
 
         if (resultUri != null) {
 
-            val filePath = FirebaseStorage.getInstance().reference.child("profile_images").child(userID!!)
+            val filePath = FirebaseHelper.getProfileImages(userID!!)
             val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
 
             val baos = ByteArrayOutputStream()
@@ -125,8 +124,8 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
                     }
                 }
                 downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, String> = hashMapOf("profileImageUrl" to downloadUrl.toString())
-                    mCustomerDatabase!!.updateChildren(newImage as Map<String, Any>)
+                    val newImage: HashMap<String, *> = hashMapOf(PROFILE_IMG_URL to downloadUrl.toString())
+                    mCustomerDatabase.updateChildren(newImage)
 
                     //activity?.finish()
                     return@OnSuccessListener
@@ -134,20 +133,14 @@ class CustomerProfileFragment : androidx.fragment.app.Fragment() {
                 //activity?.finish()
                 return@OnSuccessListener
             })
-        } //else {
-        //  activity?.finish()
-        //}
-
-        //todo navigate back
-
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
-            val imageUri = data!!.data
-            resultUri = imageUri
-            mProfileImage?.setImageURI(resultUri)
+            resultUri = data!!.data
+            mProfileImage.setImageURI(resultUri)
         }
     }
 }
