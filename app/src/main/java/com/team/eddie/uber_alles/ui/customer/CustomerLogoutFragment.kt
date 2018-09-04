@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
 import com.team.eddie.uber_alles.R
@@ -12,7 +13,7 @@ import com.team.eddie.uber_alles.ui.session.WelcomeActivity
 import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
-class CustomerLogoutFragment : androidx.fragment.app.Fragment() {
+class CustomerLogoutFragment : Fragment() {
 
     private var isLoggingOut: Boolean = false;
 

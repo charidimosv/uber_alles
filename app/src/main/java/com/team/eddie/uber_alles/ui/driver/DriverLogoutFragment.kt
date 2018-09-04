@@ -5,6 +5,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -15,7 +16,7 @@ import com.team.eddie.uber_alles.ui.session.WelcomeActivity
 import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
-class DriverLogoutFragment : androidx.fragment.app.Fragment() {
+class DriverLogoutFragment : Fragment() {
 
     private var isLoggingOut: Boolean = false;
 

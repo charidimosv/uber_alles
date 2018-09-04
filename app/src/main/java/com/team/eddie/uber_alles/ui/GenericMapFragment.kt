@@ -7,9 +7,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import com.directions.route.*
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
@@ -23,9 +25,10 @@ import java.util.*
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
 
 abstract class GenericMapFragment :
-        androidx.fragment.app.Fragment(),
+        Fragment(),
         OnMapReadyCallback,
-        LocationListener, RoutingListener {
+        LocationListener,
+        RoutingListener {
 
     protected lateinit var mMap: GoogleMap
 
@@ -119,6 +122,14 @@ abstract class GenericMapFragment :
     }
 
     abstract override fun onLocationChanged(location: Location?)
+
+    fun moveCamera(location: Location) {
+        moveCamera(LatLng(location.latitude, location.longitude))
+    }
+
+    fun moveCamera(latlng: LatLng) {
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latlng, DEFAULT_ZOOM))
+    }
 
     override fun onResume() {
         super.onResume()

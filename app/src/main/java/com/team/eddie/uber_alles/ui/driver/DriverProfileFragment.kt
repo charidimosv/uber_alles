@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -29,7 +30,7 @@ import com.team.eddie.uber_alles.utils.FirebaseHelper.PROFILE_IMG_URL
 import java.io.ByteArrayOutputStream
 
 
-class DriverProfileFragment : androidx.fragment.app.Fragment() {
+class DriverProfileFragment : Fragment() {
 
     private lateinit var mDriverDatabase: DatabaseReference
 

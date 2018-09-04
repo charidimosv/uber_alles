@@ -18,7 +18,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceSelectionListener
 import com.google.android.gms.location.places.ui.SupportPlaceAutocompleteFragment
-import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -81,6 +81,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private var destinationMarker: Marker? = null
 
     private var completedRide: Boolean = false
+    private var followMeFlag: Boolean = true
 
 
     override fun onCreateView(
@@ -122,6 +123,12 @@ class CustomerMapFragment : GenericMapFragment() {
                 destination = place.name.toString()
                 destinationLatLng = place.latLng
 
+                destinationMarker?.remove()
+                destinationMarker = mMap.addMarker(MarkerOptions().position(place.latLng).title(getString(R.string.destination_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+                moveCamera(place.latLng)
+                followMeFlag = false
+
                 mRequest.visibility = View.VISIBLE
             }
 
@@ -150,10 +157,20 @@ class CustomerMapFragment : GenericMapFragment() {
         return binding.root
     }
 
+    override fun onMapReady(googleMap: GoogleMap) {
+        super.onMapReady(googleMap)
+
+        mMap.setOnMyLocationButtonClickListener {
+            followMeFlag = true
+            if (mLastLocation != null) moveCamera(mLastLocation!!)
+            true;
+        };
+    }
+
     override fun onLocationChanged(location: Location?) {
         if (activity!!.applicationContext != null && location != null) {
             mLastLocation = location
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), DEFAULT_ZOOM))
+            if (followMeFlag) moveCamera(location)
         }
     }
 
@@ -331,8 +348,6 @@ class CustomerMapFragment : GenericMapFragment() {
 
         pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-
-        destinationMarker = mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title(getString(R.string.destination_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         autocompleteFragment.view?.visibility = View.GONE
         mRequest.text = getString(R.string.getting_driver)
