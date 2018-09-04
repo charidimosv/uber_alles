@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.utils.FirebaseHelper
 import java.lang.Exception
 import java.util.*
 
@@ -31,17 +32,15 @@ abstract class GenericMapFragment :
     protected var mLastLocation: Location? = null
     protected var mLocationRequest: LocationRequest? = null
 
+    protected val currentUserId: String = FirebaseHelper.getUserId()
+
     protected lateinit var fusedLocationClient: FusedLocationProviderClient
     protected lateinit var locationCallback: LocationCallback
 
     protected var requestingLocationUpdates: Boolean = false
     protected var mLocationPermissionGranted: Boolean = false
 
-    // sydney
-    protected val mDefaultLocation = LatLng(-33.8523341, 151.2106085)
     protected val DEFAULT_ZOOM: Float = 15F
-
-    protected val REQUESTING_LOCATION_UPDATES_KEY = "REQUESTING_LOCATION_UPDATES"
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
+import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerLogoutBinding
 import com.team.eddie.uber_alles.ui.session.WelcomeActivity
 import com.team.eddie.uber_alles.utils.FirebaseHelper
@@ -25,11 +26,12 @@ class CustomerLogoutFragment : androidx.fragment.app.Fragment() {
         if (!SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
             isLoggingOut = true
             disconnectCustomer()
+
             SaveSharedPreference.cleanAll(activity!!.applicationContext)
             FirebaseAuth.getInstance().signOut()
             startActivity(WelcomeActivity.getLaunchIntent(activity!!))
         } else
-            binding.customerLogout.setText("Ride must be ended before you can logout")
+            binding.customerLogout.text = getString(R.string.end_ride_before_logout)
 
         return binding.root
     }
@@ -39,17 +41,10 @@ class CustomerLogoutFragment : androidx.fragment.app.Fragment() {
         val custRequest = FirebaseHelper.getCustomerRequest()
         val geoFire = GeoFire(custRequest)
         geoFire.removeLocation(userId)
-//        val refAvailable = FirebaseHelper.getDriversAvailable()
-//        val refWorking = FirebaseHelper.getDriversWorking()
-        //val geoFireAvailable = GeoFire(refAvailable)
-        //val geoFireWorking = GeoFire(refWorking)
-
-        //geoFireAvailable.removeLocation(userId)
     }
 
     override fun onStop() {
         super.onStop()
-        if (!isLoggingOut)
-            disconnectCustomer()
+        if (!isLoggingOut) disconnectCustomer()
     }
 }

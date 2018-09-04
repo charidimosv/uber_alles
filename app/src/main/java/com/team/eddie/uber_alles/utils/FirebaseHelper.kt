@@ -1,5 +1,6 @@
 package com.team.eddie.uber_alles.utils
 
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -23,6 +24,11 @@ object FirebaseHelper {
     const val PROFILE_IMG_URL: String = "profileImageUrl"
     const val CAR: String = "car"
 
+    const val DESTINATION: String = "destination"
+    const val DESTINATION_LAT: String = "destinationLat"
+    const val DESTINATION_LOT: String = "destinationLng"
+    const val CUSTOMER_RIDE_ID: String = "customerRideId";
+
     private const val INFO: String = "info"
     private const val RATING: String = "rating"
     private const val HISTORY: String = "history"
@@ -31,7 +37,6 @@ object FirebaseHelper {
     private const val CUSTOMER_REQ: String = "customerRequest";
     private const val DRIVERS_WORKING: String = "driversWorking";
     private const val DRIVERS_AVAILABLE: String = "driversAvailable";
-    private const val CUSTOMER_RIDE_ID: String = "customerRideId";
 
     private const val PROFILE_IMGS: String = "profile_images";
 
@@ -125,5 +130,10 @@ object FirebaseHelper {
     // storage
     fun getProfileImages(userId: String): StorageReference {
         return FirebaseStorage.getInstance().reference.child(PROFILE_IMGS).child(userId)
+    }
+
+    // auth
+    fun getUserId(): String {
+        return FirebaseAuth.getInstance().currentUser!!.uid
     }
 }
