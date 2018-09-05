@@ -9,6 +9,10 @@ import com.team.eddie.uber_alles.utils.PreferencesUtility.ACTIVE_REQUEST_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.LOGGED_IN_EMAIL_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_TYPE_PREF
 
+import com.team.eddie.uber_alles.utils.PreferencesUtility.SENDER_NAME
+import com.team.eddie.uber_alles.utils.PreferencesUtility.RECEIVER_NAME
+
+
 object SaveSharedPreference {
 
     internal fun getPreferences(context: Context): SharedPreferences {
@@ -53,5 +57,21 @@ object SaveSharedPreference {
 
     fun getBooleanTypeValue(context: Context, name: String, defaultValue: Boolean): Boolean {
         return getPreferences(context).getBoolean(name, defaultValue)
+    }
+
+    fun setChatSender(context: Context, name: String) {
+        getPreferences(context).edit().putString(SENDER_NAME, name).apply()
+    }
+
+    fun getChatSender(context: Context): String {
+        return getPreferences(context).getString(SENDER_NAME, "")
+    }
+
+    fun setChatReceiver(context: Context, name: String) {
+        getPreferences(context).edit().putString(RECEIVER_NAME, name).apply()
+    }
+
+    fun getChatReceiver(context: Context): String {
+        return getPreferences(context).getString(RECEIVER_NAME, "")
     }
 }

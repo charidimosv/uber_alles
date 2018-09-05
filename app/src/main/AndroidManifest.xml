@@ -52,13 +52,14 @@
 
         <activity android:name=".ui.generic.GenericHistorySingleActivity" />
 
+        <activity android:name=".ui.generic.GenericChatFragment"/>
+
         <activity
             android:name=".ui.customer.CustomerActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".ui.driver.DriverActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
-
     </application>
 
 </manifest>

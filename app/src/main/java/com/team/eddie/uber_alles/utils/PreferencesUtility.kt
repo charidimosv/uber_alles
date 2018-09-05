@@ -8,4 +8,7 @@ object PreferencesUtility {
     val LOGGED_IN_EMAIL_PREF = "logged_in_email"
     val USER_TYPE_PREF = "user_type"
 
+    val SENDER_NAME = "sender_name"
+    val RECEIVER_NAME = "recveiver_name"
+
 }

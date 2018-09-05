@@ -18,9 +18,15 @@
         tools:layout="@layout/fragment_generic_history" />
 
     <fragment
+        android:id="@+id/chat_fragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericChatFragment"
+        android:label="Chat"
+        tools:layout="@layout/fragment_chat" />
+
+    <fragment
         android:id="@+id/customer_profile_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerProfileFragment"
-        android:label="History"
+        android:label="Profile"
         tools:layout="@layout/fragment_customer_profile" />
 
     <fragment

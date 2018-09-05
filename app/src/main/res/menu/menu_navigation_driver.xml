@@ -11,6 +11,10 @@
         android:title="History" />
 
     <item
+        android:id="@+id/chat_fragment"
+        android:title="Chat" />
+
+    <item
         android:id="@+id/driver_profile_fragment"
         android:title="Profile" />
 

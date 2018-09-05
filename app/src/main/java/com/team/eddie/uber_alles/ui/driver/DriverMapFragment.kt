@@ -1,7 +1,9 @@
 package com.team.eddie.uber_alles.ui.driver
 
+import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,6 +28,8 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.FirebaseHelper
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import kotlinx.android.synthetic.main.fragment_customer_map.*
 import com.team.eddie.uber_alles.utils.FirebaseHelper.addHistoryForDriverCustomer
 
 
@@ -56,6 +60,8 @@ class DriverMapFragment : GenericMapFragment() {
     private var mRatingText: EditText? = null
     private var mRatingButton: Button? = null
 
+    private var newIncomeMessageRef: DatabaseReference? = null
+    private var newIncomeMessageListener: ValueEventListener? = null
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -89,6 +95,10 @@ class DriverMapFragment : GenericMapFragment() {
                 val pickUpRef = FirebaseHelper.getDriverCustomerReqPickup(currentUserId)
                 pickUpRef.setValue(true)
 
+
+                binding.callCustomer.visibility =  View.GONE
+                binding.chatCustomer.visibility =  View.GONE
+
             } else if (status == 2) {
                 recordRide()
                 endRide()
@@ -110,6 +120,14 @@ class DriverMapFragment : GenericMapFragment() {
 
             clearCustomersInfo()
         }
+
+        /*binding.chatCustomer.setOnClickListener{
+            val chatFragment = GenericChatFragment()
+            val fragmentTransaction = childFragmentManager!!.beginTransaction()
+            fragmentTransaction.replace(R.id.generic_driver_fragment, chatFragment)
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }*/
 
         val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -231,6 +249,25 @@ class DriverMapFragment : GenericMapFragment() {
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+
+        SaveSharedPreference.setChatSender(activity!!.applicationContext,currentUserId)
+        SaveSharedPreference.setChatReceiver(activity!!.applicationContext,customerId)
+        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId+"_to_"+customerId).child("newMessagePushed")
+
+        binding.callCustomer.visibility =  View.VISIBLE
+        binding.chatCustomer.visibility =  View.VISIBLE
+
+        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object :ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.exists()){
+                    binding.chatCustomer.text =  "Message Customer (!)"
+                }
+            }
+
+        })
+
     }
 
     private fun endRide() {
