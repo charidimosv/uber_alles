@@ -58,6 +58,9 @@ class CustomerMapFragment : GenericMapFragment() {
     var customerPickedUpRef: DatabaseReference? = null
     var customerPickedUpRefListener: ValueEventListener? = null
 
+    private var newIncomeMessageRef: DatabaseReference? = null
+    private var newIncomeMessageListener: ValueEventListener? = null
+
     private lateinit var autocompleteFragment: SupportPlaceAutocompleteFragment
 
     private lateinit var mDriverInfo: LinearLayout
@@ -72,6 +75,8 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mRatingBar: RatingBar
     private lateinit var mRatingText: EditText
     private lateinit var mRatingButton: Button
+    private var mRatingAvg: TextView? = null
+
 
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
@@ -79,6 +84,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private var completedRide: Boolean = false
     private var followMeFlag: Boolean = true
+    private var isPickedUp: Boolean = false
 
 
     override fun onCreateView(
@@ -100,6 +106,7 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingBar = binding.ratingBar
         mRatingText = binding.ratingText
         mRatingButton = binding.ratingButton
+        mRatingAvg =  binding.ratingAvg
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
 
@@ -279,26 +286,34 @@ class CustomerMapFragment : GenericMapFragment() {
                     if (map["profileImageUrl"] != null)
                         Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mDriverProfileImage)
 
-                    //Load rating
-                    var ratingSum = 0.toFloat()
-                    var ratingsTotal = 0.toFloat()
-                    var ratingsAvg = 0.toFloat()
-
-                    for (rating in dataSnapshot.child("rating").children) {
-                        ratingSum += rating.child("value").value.toString().toFloat()
-                        ratingsTotal++
-                    }
-
-                    if (ratingsTotal > 0.toFloat()) {
-                        ratingsAvg = ratingSum / ratingsTotal
-                        mRatingBar.rating = ratingsAvg
-                    }
-
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
+
+        val mCustomerRating = FirebaseHelper.getUserRating(driverFoundID!!)
+        mCustomerRating.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                //Load rating
+                var ratingSum = 0.toFloat()
+                var ratingsTotal = 0.toFloat()
+                var ratingsAvg = 0.toFloat()
+                for (rating in dataSnapshot.children) {
+                    ratingSum += rating.child("value").value.toString().toFloat()
+                    ratingsTotal++
+                }
+                if (ratingsTotal != 0.toFloat()) {
+                    ratingsAvg = ratingSum / ratingsTotal
+                    mRatingBar?.rating = ratingsAvg
+                }
+                mRatingAvg?.text = "Average Rating: "+ratingsAvg.toString()+"/5"
+            }
+
+        })
+
 
     }
 
@@ -307,12 +322,38 @@ class CustomerMapFragment : GenericMapFragment() {
         customerPickedUpRefListener = customerPickedUpRef!!.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!dataSnapshot.exists())
+                if (!dataSnapshot.exists() && !isPickedUp) {
                     getDriverLocation()
+
+                    SaveSharedPreference.setChatSender(activity!!.applicationContext,currentUserId)
+                    SaveSharedPreference.setChatReceiver(activity!!.applicationContext,driverFoundID!!)
+                    newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId+"_to_"+driverFoundID).child("newMessagePushed")
+
+                    binding.callDriver.visibility =  View.VISIBLE
+                    binding.chatDriver.visibility =  View.VISIBLE
+
+                    newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object :ValueEventListener{
+                        override fun onCancelled(p0: DatabaseError) {}
+
+                        override fun onDataChange(dataSnapshot: DataSnapshot) {
+                            if(dataSnapshot.exists()){
+                                binding.chatDriver.text =  "Message (!)"
+                            }
+                        }
+
+                    })
+                }
                 else {
+
+                    isPickedUp=true
+                    binding.callDriver.visibility =  View.GONE
+                    binding.chatDriver.visibility =  View.GONE
+
                     mRequest.text = getString(R.string.ride_started)
                     mRequest.isClickable = false
                     getRouteToMarker(destinationLatLng)
+
+                    driverLocationRef?.removeEventListener(driverLocationRefListener!!)
                 }
             }
 
@@ -359,6 +400,7 @@ class CustomerMapFragment : GenericMapFragment() {
         geoQuery!!.removeAllListeners()
         driverLocationRef?.removeEventListener(driverLocationRefListener!!)
         driveHasEndedRef?.removeEventListener(driveHasEndedRefListener!!)
+        newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
         customerPickedUpRef?.removeEventListener(customerPickedUpRefListener!!)
 
         val ref = FirebaseHelper.getCustomerRequest()
@@ -370,13 +412,20 @@ class CustomerMapFragment : GenericMapFragment() {
         destinationMarker?.remove()
         mDriverMarker?.remove()
 
+        erasePolylines()
+
         autocompleteFragment.view?.visibility = View.VISIBLE
 
         if (completedRide) {
             completedRide = false
+            isPickedUp = false
             mRatingBar.rating = 0.toFloat()
+            mRatingBar?.setIsIndicator(false)
+            mRatingBar?.numStars = 5
+            mRatingAvg?.visibility = View.GONE
             mRatingButton.visibility = View.VISIBLE
             mRatingText.visibility = View.VISIBLE
+            mRequest.text = getString(R.string.ride_ended)
         } else
             clearDriversInfo()
     }
@@ -398,6 +447,10 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingButton.visibility = View.GONE
         mRatingText.visibility = View.GONE
         mRatingBar.rating = 0.toFloat()
+        mRatingBar?.setIsIndicator(false)
+        mRatingBar?.numStars = 1
+        mRatingAvg?.text = ""
+        mRatingAvg?.visibility = View.VISIBLE
         mRatingText.setText("", TextView.BufferType.EDITABLE)
 
         mRequest.isClickable = true

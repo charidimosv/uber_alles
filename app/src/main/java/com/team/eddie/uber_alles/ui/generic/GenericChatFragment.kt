@@ -117,7 +117,7 @@ class GenericChatFragment : androidx.fragment.app.Fragment(){
         layout?.addView(textView)
         scrollView?.fullScroll(View.FOCUS_DOWN)
 
-        //TODO clean form
+        messageArea?.text?.clear()
     }
 
     override fun onStop() {

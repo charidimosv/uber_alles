@@ -183,6 +183,7 @@
     <!-- Accessibility -->
     <string name="a11y_plant_item_image" translation_description="Accessibility text for each of the plant images shown in the 'My garden' and 'Plant list' screens.">Picture of plant</string>
     <string name="ride_started">Your ride has start</string>
+    <string name="ride_ended">Your ride has end</string>
     <string name="getting_driver">Getting your Driver....</string>
     <string name="call_uber">Call Uber</string>
     <string name="driver_here">Driver\'s Here</string>

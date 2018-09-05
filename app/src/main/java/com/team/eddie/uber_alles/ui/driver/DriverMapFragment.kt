@@ -59,6 +59,7 @@ class DriverMapFragment : GenericMapFragment() {
     private var mRatingBar: RatingBar? = null
     private var mRatingText: EditText? = null
     private var mRatingButton: Button? = null
+    private var mRatingAvg: TextView? = null
 
     private var newIncomeMessageRef: DatabaseReference? = null
     private var newIncomeMessageListener: ValueEventListener? = null
@@ -108,6 +109,7 @@ class DriverMapFragment : GenericMapFragment() {
         mRatingBar = binding.ratingBar
         mRatingText = binding.ratingText
         mRatingButton = binding.ratingButton
+        mRatingAvg =  binding.ratingAvg
 
         mRatingButton!!.setOnClickListener {
 
@@ -231,23 +233,33 @@ class DriverMapFragment : GenericMapFragment() {
 
                     if (map["profileImageUrl"] != null)
                         Glide.with(mCustomerInfo!!).load(map["profileImageUrl"].toString()).into(mCustomerProfileImage!!)
-
-                    //Load rating
-                    var ratingSum = 0.toFloat()
-                    var ratingsTotal = 0.toFloat()
-                    var ratingsAvg = 0.toFloat()
-                    for (rating in dataSnapshot.child("rating").children) {
-                        ratingSum += rating.child("value").value.toString().toFloat()
-                        ratingsTotal++
-                    }
-                    if (ratingsTotal != 0.toFloat()) {
-                        ratingsAvg = ratingSum / ratingsTotal
-                        mRatingBar?.rating = ratingsAvg
-                    }
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
+        })
+
+        val mCustomerRating = FirebaseHelper.getUserRating(customerId)
+        mCustomerRating.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                //Load rating
+                var ratingSum = 0.toFloat()
+                var ratingsTotal = 0.toFloat()
+                var ratingsAvg = 0.toFloat()
+                for (rating in dataSnapshot.children) {
+                    ratingSum += rating.child("value").value.toString().toFloat()
+                    ratingsTotal++
+                }
+                if (ratingsTotal != 0.toFloat()) {
+                    ratingsAvg = ratingSum / ratingsTotal
+                    mRatingBar?.rating = ratingsAvg
+                }
+                mRatingAvg?.text = "Average Rating: "+ratingsAvg.toString()+"/5"
+
+            }
+
         })
 
         SaveSharedPreference.setChatSender(activity!!.applicationContext,currentUserId)
@@ -262,7 +274,7 @@ class DriverMapFragment : GenericMapFragment() {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if(dataSnapshot.exists()){
-                    binding.chatCustomer.text =  "Message Customer (!)"
+                    binding.chatCustomer.text =  "Message (!)"
                 }
             }
 
@@ -283,11 +295,15 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         destinationMarker?.remove()
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
+        newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
 
         erasePolylines()
 
         if (status == 2) {
             mRatingBar?.rating = 0.toFloat()
+            mRatingBar?.setIsIndicator(false)
+            mRatingBar?.numStars = 5
+            mRatingAvg?.visibility = View.GONE
             mRatingButton?.visibility = View.VISIBLE
             mRatingText?.visibility = View.VISIBLE
         } else
@@ -298,12 +314,17 @@ class DriverMapFragment : GenericMapFragment() {
     private fun clearCustomersInfo() {
         status = 0
         mRatingBar?.rating = 0.toFloat()
+        mRatingAvg?.text = ""
         //mRatingText = null
         mRatingButton?.visibility = View.GONE
         mRatingText?.visibility = View.GONE
 
         customerId = ""
-        rideDistance = 0.toFloat()
+        mRatingBar?.rating = 0.toFloat()
+        mRatingBar?.setIsIndicator(false)
+        mRatingBar?.numStars = 1
+        mRatingAvg?.text = ""
+        mRatingAvg?.visibility = View.VISIBLE
         mCustomerInfo?.visibility = View.GONE
         mCustomerName?.text = ""
         mCustomerPhone?.text = ""
