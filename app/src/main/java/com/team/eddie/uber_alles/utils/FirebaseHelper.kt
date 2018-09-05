@@ -9,11 +9,7 @@ import com.google.firebase.storage.StorageReference
 
 object FirebaseHelper {
 
-    private const val ALL_USERS: String = "Users";
-
-    private const val USERS: String = "Users"
-    private const val DRIVERS: String = "Drivers"
-    private const val CUSTOMERS: String = "Customers"
+    private const val USERS: String = "Users";
 
     const val NAME: String = "name"
     const val PHONE: String = "phone"
@@ -30,18 +26,20 @@ object FirebaseHelper {
     const val PICKUP_TIME: String = "pickupTime"
     const val ARRIVING_TIME: String = "arrivingTime"
     const val DESTINATION: String = "destination"
+    const val LOCATION: String = "location"
     const val LOC_FROM_LAT: String = "location/from/lat"
     const val LOC_FROM_LNG: String = "location/from/lng"
     const val LOC_TO_LAT: String = "location/to/lat"
     const val LOC_TO_LNG: String = "location/to/lng"
     const val DISTANCE: String = "distance"
+    const val COST: String = "cost"
 
     const val DESTINATION_LAT: String = "destinationLat"
     const val DESTINATION_LOT: String = "destinationLng"
     const val CUSTOMER_RIDE_ID: String = "customerRideId";
 
     private const val INFO: String = "info"
-    private const val RATING: String = "rating"
+    const val RATING: String = "rating"
     private const val HISTORY: String = "history"
     private const val PICKUP: String = "pickup"
 
@@ -59,7 +57,7 @@ object FirebaseHelper {
 
     // generic user
     fun getUser(userId: String): DatabaseReference {
-        return getReference().child(ALL_USERS).child(userId)
+        return getReference().child(USERS).child(userId)
     }
 
     fun getUserInfo(userId: String): DatabaseReference {
@@ -70,44 +68,17 @@ object FirebaseHelper {
         return getUserInfo(userId).child(IS_DRIVER)
     }
 
-    // customer
-    fun getCustomer(customerId: String): DatabaseReference {
-//        return getReference().child(USERS).child(CUSTOMERS).child(customerId)
-        return getUser(customerId)
+    fun getUserRating(userId: String): DatabaseReference {
+        return getUser(userId).child(RATING)
     }
 
-    fun getCustomerRating(customerId: String): DatabaseReference {
-        return getCustomer(customerId).child(RATING)
-    }
-
-    fun getCustomerInfo(customerId: String): DatabaseReference {
-        return getCustomer(customerId).child(INFO)
-    }
-
-    fun getCustomerHistory(customerId: String): DatabaseReference {
-        return getCustomer(customerId).child(HISTORY)
+    fun getUserHistory(userId: String): DatabaseReference {
+        return getUser(userId).child(HISTORY)
     }
 
     // driver
-    fun getDriver(driverID: String): DatabaseReference {
-//        return getReference().child(USERS).child(DRIVERS).child(driverID)
-        return getUser(driverID)
-    }
-
-    fun getDriverRating(driverID: String): DatabaseReference {
-        return getDriver(driverID).child(RATING)
-    }
-
-    fun getDriverInfo(driverID: String): DatabaseReference {
-        return getDriver(driverID).child(INFO)
-    }
-
-    fun getDriverHistory(driverID: String): DatabaseReference {
-        return getDriver(driverID).child(HISTORY)
-    }
-
     fun getDriverCustomerReq(driverID: String): DatabaseReference {
-        return getDriver(driverID).child(CUSTOMER_REQ)
+        return getUser(driverID).child(CUSTOMER_REQ)
     }
 
     fun getDriverCustomerRide(driverID: String): DatabaseReference {
@@ -144,6 +115,10 @@ object FirebaseHelper {
         return getReference().child(HISTORY)
     }
 
+    fun getHistoryKey(key: String): DatabaseReference {
+        return getHistory().child(key)
+    }
+
     // storage
     fun getProfileImages(userId: String): StorageReference {
         return FirebaseStorage.getInstance().reference.child(PROFILE_IMGS).child(userId)
@@ -167,8 +142,8 @@ object FirebaseHelper {
             locToLat: Double?,
             locToLng: Double?
     ) {
-        val driverHistoryRef = FirebaseHelper.getDriverHistory(driverID)
-        val customerHistoryRef = FirebaseHelper.getCustomerHistory(customerID)
+        val driverHistoryRef = FirebaseHelper.getUserHistory(driverID)
+        val customerHistoryRef = FirebaseHelper.getUserHistory(customerID)
         val historyRef = FirebaseHelper.getHistory()
 
         val requestId = historyRef.push().key

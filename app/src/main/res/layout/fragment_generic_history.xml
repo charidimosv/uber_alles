@@ -2,16 +2,32 @@
 
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <RelativeLayout
+    <LinearLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/historyRecyclerView"
+        <TextView
+            android:id="@+id/balance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
+            android:padding="20sp"
+            android:text="Balance: 0€" />
 
-    </RelativeLayout>
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/historyRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical" />
+
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
 
 </layout>

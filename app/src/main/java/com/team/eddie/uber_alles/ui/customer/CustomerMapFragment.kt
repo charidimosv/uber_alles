@@ -144,7 +144,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         mRatingButton.setOnClickListener {
 
-            val ratingRef = FirebaseHelper.getDriverRating(driverFoundID!!)
+            val ratingRef = FirebaseHelper.getUserRating(driverFoundID!!)
             val ratingRefId = ratingRef.push().key
 
             val map = hashMapOf<String, Any?>("value" to mRatingBar.rating/*,"comment" to mRatingText*/)
@@ -198,7 +198,7 @@ class CustomerMapFragment : GenericMapFragment() {
                     driverCustReqRef.updateChildren(map)
 
                     getHasCustomerPickedUp()
-                    getDriverInfo()
+                    getUserInfo()
                     getHasRideEnded()
 
                     mRequest.text = getString(R.string.looking_driver_loc)
@@ -261,16 +261,16 @@ class CustomerMapFragment : GenericMapFragment() {
 
     }
 
-    private fun getDriverInfo() {
+    private fun getUserInfo() {
         mDriverInfo.visibility = View.VISIBLE
 
-        val mDriverDatabase = FirebaseHelper.getDriver(driverFoundID!!)
+        val mDriverDatabase = FirebaseHelper.getUserInfo(driverFoundID!!)
         mDriverDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>?
+                    val map = dataSnapshot.value as Map<String, Any>
 
-                    if (map!!["name"] != null)
+                    if (map["name"] != null)
                         mDriverName.text = map["name"].toString()
 
                     if (map["phone"] != null)

@@ -50,6 +50,8 @@
 
         <activity android:name=".ui.session.RegisterActivity" />
 
+        <activity android:name=".ui.generic.GenericHistorySingleActivity" />
+
         <activity
             android:name=".ui.customer.CustomerActivity"
             android:theme="@style/AppTheme.NoActionBar"/>

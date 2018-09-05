@@ -64,7 +64,7 @@ class DriverProfileFragment : Fragment() {
         mConfirm = binding.confirm
 
         userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mDriverDatabase = FirebaseHelper.getDriverInfo(userID!!)
+        mDriverDatabase = FirebaseHelper.getUserInfo(userID!!)
 
         getUserInfo()
 

@@ -1,6 +1,8 @@
 package com.team.eddie.uber_alles.adapters
 
 import android.content.Context
+import android.content.Intent
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.ItemHistoryBinding
+import com.team.eddie.uber_alles.ui.generic.GenericHistorySingleActivity
 import com.team.eddie.uber_alles.view.HistoryObject
 
 
@@ -51,13 +54,12 @@ class HistoryAdapter(
             time = itemView.findViewById<View>(R.id.time) as TextView
         }
 
-
         override fun onClick(v: View) {
-            //        Intent intent = new Intent(v.getContext(), HistorySingleActivity.class);
-            //        Bundle b = new Bundle();
-            //        b.putString("rideId", rideId.getText().toString());
-            //        intent.putExtras(b);
-            //        v.getContext().startActivity(intent);
+            val intent = Intent(v.context, GenericHistorySingleActivity::class.java)
+            val b = Bundle()
+            b.putString("rideId", rideId.text.toString())
+            intent.putExtras(b)
+            v.context.startActivity(intent)
         }
     }
 }

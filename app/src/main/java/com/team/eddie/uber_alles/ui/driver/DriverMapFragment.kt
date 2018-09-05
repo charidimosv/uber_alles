@@ -45,8 +45,6 @@ class DriverMapFragment : GenericMapFragment() {
     private var pickupLatLng: LatLng? = null
     private var rideDistance: Float = 0.toFloat()
 
-    private var isLoggingOut: Boolean = false
-
     private var mCustomerInfo: LinearLayout? = null
 
     private var mCustomerProfileImage: ImageView? = null
@@ -103,7 +101,7 @@ class DriverMapFragment : GenericMapFragment() {
 
         mRatingButton!!.setOnClickListener {
 
-            val ratingRef = FirebaseHelper.getCustomerRating(customerId)
+            val ratingRef = FirebaseHelper.getUserRating(customerId)
             val ratingRefId = ratingRef.push().key
 
             val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating/*,"comment" to mRatingText*/)
@@ -123,7 +121,6 @@ class DriverMapFragment : GenericMapFragment() {
         mCustomerName = binding.customerName
         mCustomerPhone = binding.customerPhone
         mCustomerDestination = binding.customerDestination
-
 
         getAssignedCustomer()
 
@@ -200,10 +197,9 @@ class DriverMapFragment : GenericMapFragment() {
 
     }
 
-
     private fun getAssignedCustomerInfo() {
         mCustomerInfo?.visibility = View.VISIBLE
-        val mCustomerDatabase = FirebaseHelper.getCustomer(customerId)
+        val mCustomerDatabase = FirebaseHelper.getUserInfo(customerId)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
@@ -310,21 +306,5 @@ class DriverMapFragment : GenericMapFragment() {
             }
         }
     }
-
-    private fun disconnectDriver() {
-        val refAvailable = FirebaseHelper.getDriversAvailable()
-        val refWorking = FirebaseHelper.getDriversWorking()
-        val geoFireAvailable = GeoFire(refAvailable)
-        val geoFireWorking = GeoFire(refWorking)
-
-        geoFireAvailable.removeLocation(currentUserId)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (!isLoggingOut)
-            disconnectDriver()
-    }
-
 
 }

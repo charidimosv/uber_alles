@@ -61,7 +61,7 @@ class CustomerProfileFragment : Fragment() {
         mConfirm = binding.confirm
 
         userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mCustomerDatabase = FirebaseHelper.getCustomerInfo(userID!!)
+        mCustomerDatabase = FirebaseHelper.getUserInfo(userID!!)
 
         getUserInfo()
 
