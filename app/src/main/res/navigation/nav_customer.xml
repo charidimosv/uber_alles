@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_customer_map" />
 
     <fragment
-        android:id="@+id/customer_history_fragment"
-        android:name="com.team.eddie.uber_alles.ui.customer.CustomerHistoryFragment"
+        android:id="@+id/generic_history_fragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistoryFragment"
         android:label="History"
-        tools:layout="@layout/fragment_customer_history" />
+        tools:layout="@layout/fragment_generic_history" />
 
     <fragment
         android:id="@+id/customer_profile_fragment"

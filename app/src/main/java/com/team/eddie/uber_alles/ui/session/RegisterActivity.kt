@@ -69,7 +69,7 @@ class RegisterActivity : AppCompatActivity() {
                     Toast.makeText(this, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
                 else {
                     val userId = mAuth.currentUser!!.uid
-                    val userReference = FirebaseHelper.getUser(userId)
+                    val userReference = FirebaseHelper.getUserInfo(userId)
 
                     val userInfo: HashMap<String, *> = hashMapOf(
                             EMAIL to email,

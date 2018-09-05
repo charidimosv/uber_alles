@@ -56,7 +56,7 @@ class LoginActivity : AppCompatActivity() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
 
-                    var isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
+                    val isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
 
                     SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
                     SaveSharedPreference.setUserType(applicationContext, isDriver)
@@ -66,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
                     else
                         startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
                 } else
-                    Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT)
+                    Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT).show()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -80,8 +80,7 @@ class LoginActivity : AppCompatActivity() {
             val password = passwordTextInputEdit.text.toString()
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
-                if (!task.isSuccessful)
-                    Toast.makeText(this, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
+                if (!task.isSuccessful) Toast.makeText(this, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
             }
         }
     }

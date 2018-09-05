@@ -24,8 +24,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
-import com.team.eddie.uber_alles.ui.GenericMapFragment
+import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.FirebaseHelper
+import com.team.eddie.uber_alles.utils.FirebaseHelper.addHistoryForDriverCustomer
 
 
 class DriverMapFragment : GenericMapFragment() {
@@ -279,33 +280,11 @@ class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun recordRide() {
-
-        val driverRef = FirebaseHelper.getDriverHistory(currentUserId)
-        val customerRef = FirebaseHelper.getCustomerHistory(customerId)
-        val historyRef = FirebaseHelper.getHistory()
-
-        val requestId = historyRef.push().key
-        driverRef.child(requestId!!).setValue(true)
-        customerRef.child(requestId).setValue(true)
-
-        val map = hashMapOf<String, Any?>(
-                "driver" to currentUserId,
-                "customer" to customerId,
-                "pickupTime" to pickupTime,
-                "arrivingTime" to getCurrentTimestamp(),
-                "destination" to destination,
-                "location/from/lat" to pickupLatLng?.latitude,
-                "location/from/lng" to pickupLatLng?.longitude,
-                "location/to/lat" to destinationLatLng?.latitude,
-                "location/to/lng" to destinationLatLng?.longitude,
-                "distance" to rideDistance
-        )
-
-        historyRef.child(requestId).updateChildren(map)
-
+        addHistoryForDriverCustomer(currentUserId, customerId, pickupTime, getCurrentTimestamp(), destination, rideDistance,
+                pickupLatLng?.latitude, pickupLatLng?.longitude, destinationLatLng?.latitude, destinationLatLng?.longitude)
     }
 
-    private fun getCurrentTimestamp(): Long? {
+    private fun getCurrentTimestamp(): Long {
         return System.currentTimeMillis() / 1000
     }
 

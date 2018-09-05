@@ -12,10 +12,10 @@
         tools:layout="@layout/fragment_driver_map" />
 
     <fragment
-        android:id="@+id/driver_history_fragment"
-        android:name="com.team.eddie.uber_alles.ui.driver.DriverHistoryFragment"
+        android:id="@+id/generic_history_fragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistoryFragment"
         android:label="History"
-        tools:layout="@layout/fragment_driver_history" />
+        tools:layout="@layout/fragment_generic_history" />
 
     <fragment
         android:id="@+id/driver_profile_fragment"

@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
@@ -21,6 +22,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerProfileBinding
 import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.FirebaseHelper.NAME
@@ -113,28 +115,28 @@ class CustomerProfileFragment : Fragment() {
             val uploadTask = filePath.putBytes(data)
 
             uploadTask.addOnFailureListener(OnFailureListener {
-                //activity?.finish()
+                Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
                 return@OnFailureListener
             })
+
             uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
                 val downloadUrlTask = taskSnapshot.storage.downloadUrl
                 downloadUrlTask.addOnFailureListener {
                     OnFailureListener {
-                        //activity?.finish()
+                        Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
                         return@OnFailureListener
                     }
                 }
                 downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
                     val newImage: HashMap<String, *> = hashMapOf(PROFILE_IMG_URL to downloadUrl.toString())
                     mCustomerDatabase.updateChildren(newImage)
-
-                    //activity?.finish()
+                    Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
                     return@OnSuccessListener
                 })
-                //activity?.finish()
                 return@OnSuccessListener
             })
-        }
+
+        } else Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -9,7 +9,7 @@ import com.google.firebase.storage.StorageReference
 
 object FirebaseHelper {
 
-    private const val ALL_USERS: String = "All_Users";
+    private const val ALL_USERS: String = "Users";
 
     private const val USERS: String = "Users"
     private const val DRIVERS: String = "Drivers"
@@ -24,7 +24,18 @@ object FirebaseHelper {
     const val PROFILE_IMG_URL: String = "profileImageUrl"
     const val CAR: String = "car"
 
+    // history related
+    const val DRIVER: String = "driver"
+    const val CUSTOMER: String = "customer"
+    const val PICKUP_TIME: String = "pickupTime"
+    const val ARRIVING_TIME: String = "arrivingTime"
     const val DESTINATION: String = "destination"
+    const val LOC_FROM_LAT: String = "location/from/lat"
+    const val LOC_FROM_LNG: String = "location/from/lng"
+    const val LOC_TO_LAT: String = "location/to/lat"
+    const val LOC_TO_LNG: String = "location/to/lng"
+    const val DISTANCE: String = "distance"
+
     const val DESTINATION_LAT: String = "destinationLat"
     const val DESTINATION_LOT: String = "destinationLng"
     const val CUSTOMER_RIDE_ID: String = "customerRideId";
@@ -34,11 +45,11 @@ object FirebaseHelper {
     private const val HISTORY: String = "history"
     private const val PICKUP: String = "pickup"
 
-    private const val CUSTOMER_REQ: String = "customerRequest";
-    private const val DRIVERS_WORKING: String = "driversWorking";
-    private const val DRIVERS_AVAILABLE: String = "driversAvailable";
+    private const val CUSTOMER_REQ: String = "customerRequest"
+    private const val DRIVERS_WORKING: String = "driversWorking"
+    private const val DRIVERS_AVAILABLE: String = "driversAvailable"
 
-    private const val PROFILE_IMGS: String = "profile_images";
+    private const val PROFILE_IMGS: String = "profile_images"
 
 
     // general
@@ -51,13 +62,18 @@ object FirebaseHelper {
         return getReference().child(ALL_USERS).child(userId)
     }
 
+    fun getUserInfo(userId: String): DatabaseReference {
+        return getUser(userId).child(INFO)
+    }
+
     fun getUserIsDriver(userId: String): DatabaseReference {
-        return getUser(userId).child(IS_DRIVER)
+        return getUserInfo(userId).child(IS_DRIVER)
     }
 
     // customer
     fun getCustomer(customerId: String): DatabaseReference {
-        return getReference().child(USERS).child(CUSTOMERS).child(customerId)
+//        return getReference().child(USERS).child(CUSTOMERS).child(customerId)
+        return getUser(customerId)
     }
 
     fun getCustomerRating(customerId: String): DatabaseReference {
@@ -74,7 +90,8 @@ object FirebaseHelper {
 
     // driver
     fun getDriver(driverID: String): DatabaseReference {
-        return getReference().child(USERS).child(DRIVERS).child(driverID)
+//        return getReference().child(USERS).child(DRIVERS).child(driverID)
+        return getUser(driverID)
     }
 
     fun getDriverRating(driverID: String): DatabaseReference {
@@ -135,5 +152,41 @@ object FirebaseHelper {
     // auth
     fun getUserId(): String {
         return FirebaseAuth.getInstance().currentUser!!.uid
+    }
+
+    // history
+    fun addHistoryForDriverCustomer(
+            driverID: String,
+            customerID: String,
+            pickupTime: Long?,
+            arrivingTime: Long,
+            destination: String?,
+            rideDistance: Float,
+            locFromLat: Double?,
+            locFromLng: Double?,
+            locToLat: Double?,
+            locToLng: Double?
+    ) {
+        val driverHistoryRef = FirebaseHelper.getDriverHistory(driverID)
+        val customerHistoryRef = FirebaseHelper.getCustomerHistory(customerID)
+        val historyRef = FirebaseHelper.getHistory()
+
+        val requestId = historyRef.push().key
+        driverHistoryRef.child(requestId!!).setValue(true)
+        customerHistoryRef.child(requestId).setValue(true)
+
+        val map = hashMapOf<String, Any?>(
+                DRIVER to driverID,
+                CUSTOMER to customerID,
+                PICKUP_TIME to pickupTime,
+                ARRIVING_TIME to arrivingTime,
+                DESTINATION to destination,
+                LOC_FROM_LAT to locFromLat,
+                LOC_FROM_LNG to locFromLng,
+                LOC_TO_LAT to locToLat,
+                LOC_TO_LNG to locToLng,
+                DISTANCE to rideDistance
+        )
+        historyRef.child(requestId).updateChildren(map)
     }
 }

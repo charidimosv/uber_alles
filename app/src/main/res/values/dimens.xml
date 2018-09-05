@@ -20,7 +20,6 @@
     <dimen name="shr_staggered_product_grid_card_width_landscape">188dp</dimen>
     <dimen name="shr_staggered_product_grid_card_height_landscape">140dp</dimen>
 
-
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="app_bar_height">200dp</dimen>
 
@@ -32,4 +31,7 @@
     <dimen name="navigation_drawer_header_height">192dp</dimen>
     <dimen name="navigation_drawer_header_padding">16dp</dimen>
     <dimen name="navigation_drawer_image_width">100dp</dimen>
+
+    <dimen name="row_padding_vertical">10dp</dimen>
+
 </resources>

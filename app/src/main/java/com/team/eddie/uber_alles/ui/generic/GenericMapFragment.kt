@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.ui
+package com.team.eddie.uber_alles.ui.generic
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
