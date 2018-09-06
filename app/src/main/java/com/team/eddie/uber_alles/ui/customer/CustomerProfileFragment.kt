@@ -80,16 +80,11 @@ class CustomerProfileFragment : Fragment() {
         mCustomerDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>
+                    val map = dataSnapshot.value as Map<String, Any?>
 
-                    if (map[NAME] != null)
-                        mNameField.setText(map[NAME].toString())
-
-                    if (map[PHONE] != null)
-                        mPhoneField.setText(map[PHONE].toString())
-
-                    if (map[PROFILE_IMG_URL] != null)
-                        Glide.with(activity?.application!!).load(map[PROFILE_IMG_URL].toString()).into(mProfileImage)
+                    map[NAME]?.let { mNameField.setText(it.toString()) }
+                    map[PHONE]?.let { mPhoneField.setText(it.toString()) }
+                    map[PROFILE_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mProfileImage) }
                 }
             }
 
@@ -101,7 +96,7 @@ class CustomerProfileFragment : Fragment() {
         val mName = mNameField.text.toString()
         val mPhone = mPhoneField.text.toString()
 
-        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone)
+        val userInfo: HashMap<String, Any> = hashMapOf(NAME to mName, PHONE to mPhone)
         mCustomerDatabase.updateChildren(userInfo)
 
         if (resultUri != null) {

@@ -50,13 +50,12 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun onLoginSuccess() {
-
         val userId = mAuth.currentUser!!.uid
         FirebaseHelper.getUserIsDriver(userId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
 
-                    val isDriver: Boolean = dataSnapshot.getValue().toString().toBoolean()
+                    val isDriver: Boolean = dataSnapshot.value.toString().toBoolean()
 
                     SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
                     SaveSharedPreference.setUserType(applicationContext, isDriver)
@@ -87,49 +86,38 @@ class LoginActivity : AppCompatActivity() {
 
     private fun localLogin(): Boolean {
 
-        var success = true
         var failedFocusView: View? = null
 
         emailTextInput.error = null
         passwordTextInput.error = null
 
-        if (!checkPassword(passwordTextInputEdit.text.toString())) {
+        if (!checkPassword(passwordTextInputEdit.text.toString()))
             failedFocusView = passwordTextInput
-            success = false
-        }
 
-        if (!checkEmail(emailTextInputEdit.text.toString())) {
+        if (!checkEmail(emailTextInputEdit.text.toString()))
             failedFocusView = emailTextInput
-            success = false
-        }
 
-        if (!success) failedFocusView?.requestFocus()
+        failedFocusView?.requestFocus()
 
-        return success
+        return failedFocusView == null
     }
 
     private fun checkEmail(email: String): Boolean {
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email))
             emailTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isEmailValid(email)) {
+        else if (!isEmailValid(email))
             emailTextInput.error = getString(R.string.error_invalid_email)
-            return false
-        }
 
-        return true
+        return emailTextInput.error == null
     }
 
     private fun checkPassword(password: String): Boolean {
-        if (TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password))
             passwordTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isPasswordValid(password)) {
+        else if (!isPasswordValid(password))
             passwordTextInput.error = getString(R.string.error_invalid_password)
-            return false
-        }
 
-        return true
+        return passwordTextInput.error == null
     }
 
 }

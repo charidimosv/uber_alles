@@ -46,20 +46,25 @@ class DriverMapFragment : GenericMapFragment() {
     private var pickupLatLng: LatLng? = null
     private var rideDistance: Float = 0.toFloat()
 
-    private var mCustomerInfo: LinearLayout? = null
+    private lateinit var mCustomerInfo: LinearLayout
 
-    private var mCustomerProfileImage: ImageView? = null
+    private lateinit var mCustomerProfileImage: ImageView
 
-    private var mCustomerName: TextView? = null
-    private var mCustomerPhone: TextView? = null
-    private var mCustomerDestination: TextView? = null
-    private var mRatingBar: RatingBar? = null
-    private var mRatingText: EditText? = null
-    private var mRatingButton: Button? = null
-    private var mRatingAvg: TextView? = null
+    private lateinit var mCustomerName: TextView
+    private lateinit var mCustomerPhone: TextView
+    private lateinit var mCustomerDestination: TextView
+    private lateinit var mRatingBar: RatingBar
+    private lateinit var mRatingText: EditText
+    private lateinit var mRatingButton: Button
+    private lateinit var mRatingAvg: TextView
 
     private var newIncomeMessageRef: DatabaseReference? = null
     private var newIncomeMessageListener: ValueEventListener? = null
+
+    private var pickupMarker: Marker? = null
+    private var assignedCustomerPickupLocationRef: DatabaseReference? = null
+    private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -69,7 +74,6 @@ class DriverMapFragment : GenericMapFragment() {
         binding = FragmentDriverMapBinding.inflate(inflater, container, false)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -78,6 +82,22 @@ class DriverMapFragment : GenericMapFragment() {
             }
         }
 
+        val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
+
+        mCustomerInfo = binding.customerInfo
+        mCustomerProfileImage = binding.customerProfileImage
+
+        mCustomerName = binding.customerName
+        mCustomerPhone = binding.customerPhone
+        mCustomerDestination = binding.customerDestination
+
+        mRatingBar = binding.ratingBar
+        mRatingText = binding.ratingText
+        mRatingButton = binding.ratingButton
+        mRatingAvg = binding.ratingAvg
+
+
         binding.rideStatus.setOnClickListener {
 
             if (status == 1) {
@@ -85,14 +105,13 @@ class DriverMapFragment : GenericMapFragment() {
                 erasePolylines()
                 if (destinationLatLng?.latitude != 0.0 && destinationLatLng?.longitude != 0.0) {
                     destinationMarker = mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title("Destination").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-                    getRouteToMarker(destinationLatLng);
+                    getRouteToMarker(destinationLatLng)
                 }
                 binding.rideStatus.text = "Drive completed"
                 pickupTime = getCurrentTimestamp()
 
                 val pickUpRef = FirebaseHelper.getDriverCustomerReqPickup(currentUserId)
                 pickUpRef.setValue(true)
-
 
                 binding.callCustomer.visibility = View.GONE
                 binding.chatCustomer.visibility = View.GONE
@@ -103,18 +122,11 @@ class DriverMapFragment : GenericMapFragment() {
             }
         }
 
-        mRatingBar = binding.ratingBar
-        mRatingText = binding.ratingText
-        mRatingButton = binding.ratingButton
-        mRatingAvg = binding.ratingAvg
-
-        mRatingButton!!.setOnClickListener {
-
+        mRatingButton.setOnClickListener {
             val ratingRef = FirebaseHelper.getUserRating(customerId)
             val ratingRefId = ratingRef.push().key
 
-            val map = hashMapOf<String, Any?>("value" to mRatingBar!!.rating/*,"comment" to mRatingText*/)
-
+            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating/*,"comment" to mRatingText*/)
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
             clearCustomersInfo()
@@ -127,17 +139,6 @@ class DriverMapFragment : GenericMapFragment() {
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
         }*/
-
-        val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
-
-        mCustomerInfo = binding.customerInfo
-
-        mCustomerProfileImage = binding.customerProfileImage
-
-        mCustomerName = binding.customerName
-        mCustomerPhone = binding.customerPhone
-        mCustomerDestination = binding.customerDestination
 
         getAssignedCustomer()
 
@@ -163,18 +164,15 @@ class DriverMapFragment : GenericMapFragment() {
         })
     }
 
-    private var pickupMarker: Marker? = null
-    private var assignedCustomerPickupLocationRef: DatabaseReference? = null
-    private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
     private fun getAssignedCustomerPickupLocation() {
         assignedCustomerPickupLocationRef = FirebaseHelper.getCustomerRequestLocation(customerId)
         assignedCustomerPickupLocationRefListener = assignedCustomerPickupLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && customerId != "") {
-                    val map: List<*> = dataSnapshot.value as List<*>
+                    val map = dataSnapshot.value as List<Any?>
 
-                    val locationLat: Double = if (map[0] == null) 0.0 else map[0].toString().toDouble()
-                    val locationLng: Double = if (map[1] == null) 0.0 else map[1].toString().toDouble()
+                    val locationLat: Double = map[0]?.toString()?.toDouble() ?: 0.0
+                    val locationLng: Double = map[1]?.toString()?.toDouble() ?: 0.0
 
                     pickupLatLng = LatLng(locationLat, locationLng)
                     pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title("pickup location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
@@ -192,19 +190,15 @@ class DriverMapFragment : GenericMapFragment() {
         assignedCustomerRequestRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    val map: Map<String, Any> = dataSnapshot.value as Map<String, Any>
+                    val map = dataSnapshot.value as Map<String, Any>
 
-                    if (map["destination"] != null) {
-                        destination = map["destination"].toString()
-                        mCustomerDestination?.text = "Destination: $destination"
-                    } else
-                        mCustomerDestination?.text = "Destination: --"
+                    destination = map["destination"]?.toString() ?: "--"
+                    mCustomerDestination.text = "Destination: $destination"
 
-                    val destinationLat: Double = if (map["destinationLat"] == null) 0.0 else map["destinationLat"].toString().toDouble()
-                    val destinationLng: Double = if (map["destinationLng"] == null) 0.0 else map["destinationLng"].toString().toDouble()
+                    val destinationLat = map["destinationLat"]?.toString()?.toDouble() ?: 0.0
+                    val destinationLng = map["destinationLng"]?.toString()?.toDouble() ?: 0.0
 
                     destinationLatLng = LatLng(destinationLat, destinationLng)
-
                 }
 
             }
@@ -215,21 +209,16 @@ class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun getAssignedCustomerInfo() {
-        mCustomerInfo?.visibility = View.VISIBLE
+        mCustomerInfo.visibility = View.VISIBLE
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerId)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map: Map<String, Any> = dataSnapshot.value as Map<String, Any>
+                    val map = dataSnapshot.value as Map<String, Any>
 
-                    if (map["name"] != null)
-                        mCustomerName?.text = map["name"].toString()
-
-                    if (map["phone"] != null)
-                        mCustomerPhone?.text = map["phone"].toString()
-
-                    if (map["profileImageUrl"] != null)
-                        Glide.with(mCustomerInfo!!).load(map["profileImageUrl"].toString()).into(mCustomerProfileImage!!)
+                    map["name"]?.let { mCustomerName.text = it.toString() }
+                    map["phone"]?.let { mCustomerPhone.text = it.toString() }
+                    map["profileImageUrl"]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mCustomerProfileImage) }
                 }
             }
 
@@ -251,9 +240,9 @@ class DriverMapFragment : GenericMapFragment() {
                 }
                 if (ratingsTotal != 0.toFloat()) {
                     ratingsAvg = ratingSum / ratingsTotal
-                    mRatingBar?.rating = ratingsAvg
+                    mRatingBar.rating = ratingsAvg
                 }
-                mRatingAvg?.text = "Average Rating: " + ratingsAvg.toString() + "/5"
+                mRatingAvg.text = "Average Rating: " + ratingsAvg.toString() + "/5"
 
             }
 
@@ -261,7 +250,7 @@ class DriverMapFragment : GenericMapFragment() {
 
         SaveSharedPreference.setChatSender(activity!!.applicationContext, currentUserId)
         SaveSharedPreference.setChatReceiver(activity!!.applicationContext, customerId)
-        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + customerId).child("newMessagePushed")
+        newIncomeMessageRef = FirebaseHelper.getMessageUsers(currentUserId + "_to_" + customerId)
 
         binding.callCustomer.visibility = View.VISIBLE
         binding.chatCustomer.visibility = View.VISIBLE
@@ -270,9 +259,7 @@ class DriverMapFragment : GenericMapFragment() {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    binding.chatCustomer.text = "Message (!)"
-                }
+                if (dataSnapshot.exists()) binding.chatCustomer.text = "Message (!)"
             }
 
         })
@@ -283,7 +270,7 @@ class DriverMapFragment : GenericMapFragment() {
         binding.rideStatus.text = "Picked Customer"
 
         val driverRef = FirebaseHelper.getDriverCustomerReq(currentUserId)
-        driverRef.removeValue();
+        driverRef.removeValue()
 
         val ref = FirebaseHelper.getCustomerRequest()
         val geoFire = GeoFire(ref)
@@ -297,12 +284,12 @@ class DriverMapFragment : GenericMapFragment() {
         erasePolylines()
 
         if (status == 2) {
-            mRatingBar?.rating = 0.toFloat()
-            mRatingBar?.setIsIndicator(false)
-            mRatingBar?.numStars = 5
-            mRatingAvg?.visibility = View.GONE
-            mRatingButton?.visibility = View.VISIBLE
-            mRatingText?.visibility = View.VISIBLE
+            mRatingBar.rating = 0.toFloat()
+            mRatingBar.setIsIndicator(false)
+            mRatingBar.numStars = 5
+            mRatingAvg.visibility = View.GONE
+            mRatingButton.visibility = View.VISIBLE
+            mRatingText.visibility = View.VISIBLE
         } else
             clearCustomersInfo()
 
@@ -310,23 +297,23 @@ class DriverMapFragment : GenericMapFragment() {
 
     private fun clearCustomersInfo() {
         status = 0
-        mRatingBar?.rating = 0.toFloat()
-        mRatingAvg?.text = ""
+        mRatingBar.rating = 0.toFloat()
+        mRatingAvg.text = ""
         //mRatingText = null
-        mRatingButton?.visibility = View.GONE
-        mRatingText?.visibility = View.GONE
+        mRatingButton.visibility = View.GONE
+        mRatingText.visibility = View.GONE
 
         customerId = ""
-        mRatingBar?.rating = 0.toFloat()
-        mRatingBar?.setIsIndicator(false)
-        mRatingBar?.numStars = 1
-        mRatingAvg?.text = ""
-        mRatingAvg?.visibility = View.VISIBLE
-        mCustomerInfo?.visibility = View.GONE
-        mCustomerName?.text = ""
-        mCustomerPhone?.text = ""
-        mCustomerDestination?.text = "Destination: --"
-        mCustomerProfileImage?.setImageResource(R.mipmap.ic_default_user)
+        mRatingBar.rating = 0.toFloat()
+        mRatingBar.setIsIndicator(false)
+        mRatingBar.numStars = 1
+        mRatingAvg.text = ""
+        mRatingAvg.visibility = View.VISIBLE
+        mCustomerInfo.visibility = View.GONE
+        mCustomerName.text = ""
+        mCustomerPhone.text = ""
+        mCustomerDestination.text = "Destination: --"
+        mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user)
 
     }
 

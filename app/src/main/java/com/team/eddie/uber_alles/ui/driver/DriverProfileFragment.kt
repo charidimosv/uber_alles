@@ -83,19 +83,12 @@ class DriverProfileFragment : Fragment() {
         mDriverDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>?
+                    val map = dataSnapshot.value as Map<String, Any?>
 
-                    if (map!![NAME] != null)
-                        mNameField.setText(map[NAME].toString())
-
-                    if (map[PHONE] != null)
-                        mPhoneField.setText(map[PHONE].toString())
-
-                    if (map[CAR] != null)
-                        mCarField.setText(map[CAR].toString())
-
-                    if (map[PROFILE_IMG_URL] != null)
-                        Glide.with(activity?.application!!).load(map[PROFILE_IMG_URL].toString()).into(mProfileImage)
+                    map[NAME]?.let { mNameField.setText(it.toString()) }
+                    map[PHONE]?.let { mPhoneField.setText(it.toString()) }
+                    map[CAR]?.let { mCarField.setText(it.toString()) }
+                    map[PROFILE_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mProfileImage) }
                 }
             }
 

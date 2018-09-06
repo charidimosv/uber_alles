@@ -104,60 +104,47 @@ class RegisterActivity : AppCompatActivity() {
         if (!checkUsername(usernameTextInputEdit.text.toString()))
             failedFocusView = usernameTextInput
 
-        if (!(failedFocusView != null)) failedFocusView?.requestFocus()
+        failedFocusView?.requestFocus()
 
         return failedFocusView == null
     }
 
     private fun checkUsername(username: String): Boolean {
-        if (TextUtils.isEmpty(username)) {
+        if (TextUtils.isEmpty(username))
             usernameTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isUsernameValid(username)) {
+        else if (!isUsernameValid(username))
             usernameTextInput.error = getString(R.string.error_invalid_email)
-            return false
-        }
 
-        return true
+        return usernameTextInput.error == null
     }
 
     private fun checkEmail(email: String): Boolean {
-        if (TextUtils.isEmpty(email)) {
+        if (TextUtils.isEmpty(email))
             emailTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isEmailValid(email)) {
+        else if (!isEmailValid(email))
             emailTextInput.error = getString(R.string.error_invalid_email)
-            return false
-        }
 
-        return true
+        return emailTextInput.error == null
     }
 
     private fun checkPassword(password: String): Boolean {
-        if (TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password))
             passwordTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isPasswordValid(password)) {
+        else if (!isPasswordValid(password))
             passwordTextInput.error = getString(R.string.error_invalid_password)
-            return false
-        }
 
-        return true
+        return passwordTextInput.error == null
     }
 
     private fun checkRepeatPassword(password: String, repeatPassword: String): Boolean {
-        if (TextUtils.isEmpty(repeatPassword)) {
+        if (TextUtils.isEmpty(repeatPassword))
             repeatPasswordTextInput.error = getString(R.string.error_field_required)
-            return false
-        } else if (!isPasswordValid(repeatPassword)) {
+        else if (!isPasswordValid(repeatPassword))
             repeatPasswordTextInput.error = getString(R.string.error_invalid_password)
-            return false
-        } else if (!arePasswordsSame(password, repeatPassword)) {
+        else if (!arePasswordsSame(password, repeatPassword))
             repeatPasswordTextInput.error = getString(R.string.error_password_match)
-            return false
-        }
 
-        return true
+        return repeatPasswordTextInput.error == null
     }
 
 }

@@ -42,6 +42,7 @@ object FirebaseHelper {
     const val RATING: String = "rating"
     private const val HISTORY: String = "history"
     private const val MESSAGE: String = "message"
+    private const val NEW_MESSAGE: String = "newMessagePushed"
     private const val PICKUP: String = "pickup"
 
     private const val CUSTOMER_REQ: String = "customerRequest"
@@ -116,14 +117,17 @@ object FirebaseHelper {
         return getReference().child(HISTORY)
     }
 
-    // misc
+    fun getHistoryKey(key: String): DatabaseReference {
+        return getHistory().child(key)
+    }
+
+    // messages
     fun getMessage(): DatabaseReference {
         return getReference().child(MESSAGE)
     }
 
-
-    fun getHistoryKey(key: String): DatabaseReference {
-        return getHistory().child(key)
+    fun getMessageUsers(users: String): DatabaseReference {
+        return getMessage().child(users).child(NEW_MESSAGE)
     }
 
     // storage

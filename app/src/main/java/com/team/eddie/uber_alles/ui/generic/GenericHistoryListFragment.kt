@@ -77,11 +77,8 @@ class GenericHistoryListFragment : Fragment() {
                     var location: String? = ""
                     var ridePrice: Double? = 0.0
 
-                    if (dataSnapshot.child(ARRIVING_TIME).value != null)
-                        timestamp = dataSnapshot.child(ARRIVING_TIME).value.toString().toLong()
-
-                    if (dataSnapshot.child(DESTINATION).value != null)
-                        location = dataSnapshot.child(DESTINATION).value.toString()
+                    dataSnapshot.child(ARRIVING_TIME).value?.let { timestamp = it.toString().toLong() }
+                    dataSnapshot.child(DESTINATION).value?.let { location = it.toString() }
 
                     if (dataSnapshot.child(COST).value != null && dataSnapshot.child("driverPaidOut").value == null) {
                         if (dataSnapshot.child(DISTANCE).value != null) {

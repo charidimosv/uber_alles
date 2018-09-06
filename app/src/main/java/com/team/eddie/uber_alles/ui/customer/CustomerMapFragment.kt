@@ -51,19 +51,6 @@ class CustomerMapFragment : GenericMapFragment() {
     private var driverFound: Boolean = false
     private var driverFoundID: String? = null
 
-    private var mDriverMarker: Marker? = null
-    private var driverLocationRef: DatabaseReference? = null
-    private var driverLocationRefListener: ValueEventListener? = null
-
-    private var driveHasEndedRef: DatabaseReference? = null
-    private var driveHasEndedRefListener: ValueEventListener? = null
-
-    var customerPickedUpRef: DatabaseReference? = null
-    var customerPickedUpRefListener: ValueEventListener? = null
-
-    private var newIncomeMessageRef: DatabaseReference? = null
-    private var newIncomeMessageListener: ValueEventListener? = null
-
     private lateinit var autocompleteFragment: SupportPlaceAutocompleteFragment
 
     private lateinit var mDriverInfo: LinearLayout
@@ -80,7 +67,6 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mRatingButton: Button
     private var mRatingAvg: TextView? = null
 
-
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
     private var destinationMarker: Marker? = null
@@ -89,6 +75,19 @@ class CustomerMapFragment : GenericMapFragment() {
     private var followMeFlag: Boolean = true
     private var isPickedUp: Boolean = false
 
+    private var mDriverMarker: Marker? = null
+    private var driverLocationRef: DatabaseReference? = null
+    private var driverLocationRefListener: ValueEventListener? = null
+
+    private var driveHasEndedRef: DatabaseReference? = null
+    private var driveHasEndedRefListener: ValueEventListener? = null
+
+    private var customerPickedUpRef: DatabaseReference? = null
+    private var customerPickedUpRefListener: ValueEventListener? = null
+
+    private var newIncomeMessageRef: DatabaseReference? = null
+    private var newIncomeMessageListener: ValueEventListener? = null
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -96,6 +95,18 @@ class CustomerMapFragment : GenericMapFragment() {
             savedInstanceState: Bundle?
     ): View? {
         binding = FragmentCustomerMapBinding.inflate(inflater, container, false)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations)
+                    onLocationChanged(location)
+            }
+        }
+
+        val mapFragment = childFragmentManager.findFragmentById(R.id.customer_map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
 
         mDriverInfo = binding.driverInfo
         mDriverProfileImage = binding.driverProfileImage
@@ -111,18 +122,6 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingButton = binding.ratingButton
         mRatingAvg = binding.ratingAvg
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
-
-        locationCallback = object : LocationCallback() {
-            override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                for (location in locationResult.locations)
-                    onLocationChanged(location)
-            }
-        }
-
-        val mapFragment = childFragmentManager.findFragmentById(R.id.customer_map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
 
         autocompleteFragment = childFragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as SupportPlaceAutocompleteFragment
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
@@ -169,9 +168,9 @@ class CustomerMapFragment : GenericMapFragment() {
 
         mMap.setOnMyLocationButtonClickListener {
             followMeFlag = true
-            if (mLastLocation != null) moveCamera(mLastLocation!!)
-            true;
-        };
+            mLastLocation?.let { moveCamera(it) }
+            true
+        }
     }
 
     override fun onLocationChanged(location: Location?) {
@@ -182,12 +181,12 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun getClosestDriver() {
-        val driversAvailable: DatabaseReference = FirebaseHelper.getDriversAvailable()
-
+        val driversAvailable = FirebaseHelper.getDriversAvailable()
         val geoFire = GeoFire(driversAvailable)
-        geoQuery = geoFire.queryAtLocation(GeoLocation(pickupLocation!!.latitude, pickupLocation!!.longitude), radius.toDouble())
-        geoQuery?.removeAllListeners()
 
+        geoQuery = pickupLocation?.let { geoFire.queryAtLocation(GeoLocation(it.latitude, it.longitude), radius.toDouble()) }
+
+        geoQuery?.removeAllListeners()
         geoQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
                 if (!driverFound && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
@@ -200,8 +199,7 @@ class CustomerMapFragment : GenericMapFragment() {
                             CUSTOMER_RIDE_ID to currentUserId,
                             DESTINATION to destination,
                             DESTINATION_LAT to (destinationLatLng?.latitude),
-                            DESTINATION_LOT to (destinationLatLng?.longitude)
-                    )
+                            DESTINATION_LOT to (destinationLatLng?.longitude))
                     driverCustReqRef.updateChildren(map)
 
                     getHasCustomerPickedUp()
@@ -238,10 +236,10 @@ class CustomerMapFragment : GenericMapFragment() {
         driverLocationRefListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
-                    val map: List<*> = dataSnapshot.value as List<*>
+                    val map = dataSnapshot.value as List<Any?>
 
-                    val locationLat: Double = if (map[0] == null) 0.0 else map[0].toString().toDouble()
-                    val locationLng: Double = if (map[1] == null) 0.0 else map[1].toString().toDouble()
+                    val locationLat: Double = map[0]?.toString()?.toDouble() ?: 0.0
+                    val locationLng: Double = map[1]?.toString()?.toDouble() ?: 0.0
 
                     val driverLatLng = LatLng(locationLat, locationLng)
 
@@ -277,18 +275,10 @@ class CustomerMapFragment : GenericMapFragment() {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                     val map = dataSnapshot.value as Map<String, Any>
 
-                    if (map["name"] != null)
-                        mDriverName.text = map["name"].toString()
-
-                    if (map["phone"] != null)
-                        mDriverPhone.text = map["phone"].toString()
-
-                    if (map["car"] != null)
-                        mDriverCar.text = map["car"].toString()
-
-                    if (map["profileImageUrl"] != null)
-                        Glide.with(activity?.application!!).load(map["profileImageUrl"].toString()).into(mDriverProfileImage)
-
+                    map["name"]?.let { mDriverName.text = it.toString() }
+                    map["phone"]?.let { mDriverPhone.text = it.toString() }
+                    map["car"]?.let { mDriverCar.text = it.toString() }
+                    map["profileImageUrl"]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mDriverProfileImage) }
                 }
             }
 
@@ -310,14 +300,12 @@ class CustomerMapFragment : GenericMapFragment() {
                 }
                 if (ratingsTotal != 0.toFloat()) {
                     ratingsAvg = ratingSum / ratingsTotal
-                    mRatingBar?.rating = ratingsAvg
+                    mRatingBar.rating = ratingsAvg
                 }
                 mRatingAvg?.text = "Average Rating: " + ratingsAvg.toString() + "/5"
             }
 
         })
-
-
     }
 
     private fun getHasCustomerPickedUp() {
@@ -339,9 +327,7 @@ class CustomerMapFragment : GenericMapFragment() {
                         override fun onCancelled(p0: DatabaseError) {}
 
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            if (dataSnapshot.exists()) {
-                                binding.chatDriver.text = "Message (!)"
-                            }
+                            if (dataSnapshot.exists()) binding.chatDriver.text = "Message (!)"
                         }
 
                     })
@@ -422,8 +408,8 @@ class CustomerMapFragment : GenericMapFragment() {
             completedRide = false
             isPickedUp = false
             mRatingBar.rating = 0.toFloat()
-            mRatingBar?.setIsIndicator(false)
-            mRatingBar?.numStars = 5
+            mRatingBar.setIsIndicator(false)
+            mRatingBar.numStars = 5
             mRatingAvg?.visibility = View.GONE
             mRatingButton.visibility = View.VISIBLE
             mRatingText.visibility = View.VISIBLE
@@ -433,8 +419,8 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun clearDriversInfo() {
-        if (driverFoundID != null) {
-            val driverRef = FirebaseHelper.getDriverCustomerReq(driverFoundID!!)
+        driverFoundID?.let {
+            val driverRef = FirebaseHelper.getDriverCustomerReq(it)
             driverRef.removeValue()
             driverFoundID = null
             driverFound = false
@@ -449,8 +435,8 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingButton.visibility = View.GONE
         mRatingText.visibility = View.GONE
         mRatingBar.rating = 0.toFloat()
-        mRatingBar?.setIsIndicator(false)
-        mRatingBar?.numStars = 1
+        mRatingBar.setIsIndicator(false)
+        mRatingBar.numStars = 1
         mRatingAvg?.text = ""
         mRatingAvg?.visibility = View.VISIBLE
         mRatingText.setText("", TextView.BufferType.EDITABLE)

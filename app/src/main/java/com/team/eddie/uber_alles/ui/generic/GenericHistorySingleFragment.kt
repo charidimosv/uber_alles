@@ -166,11 +166,11 @@ class GenericHistorySingleFragment :
         mOtherUserDB.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    val map = dataSnapshot.value as Map<String, Any>
+                    val map = dataSnapshot.value as Map<String, Any?>
 
-                    if (map[NAME] != null) userName.text = map[NAME].toString()
-                    if (map[PHONE] != null) userPhone.text = map[PHONE].toString()
-                    if (map[PROFILE_IMG_URL] != null) Glide.with(activity!!.applicationContext).load(map[PROFILE_IMG_URL].toString()).into(userImage)
+                    map[NAME]?.let { userName.text = it.toString() }
+                    map[PHONE]?.let { userPhone.text = it.toString() }
+                    map[PROFILE_IMG_URL]?.let { Glide.with(activity!!.applicationContext).load(it.toString()).into(userImage) }
                 }
 
             }
