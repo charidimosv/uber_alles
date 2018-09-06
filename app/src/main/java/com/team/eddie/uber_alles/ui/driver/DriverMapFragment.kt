@@ -1,9 +1,7 @@
 package com.team.eddie.uber_alles.ui.driver
 
-import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
-import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,9 +26,8 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.FirebaseHelper
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import kotlinx.android.synthetic.main.fragment_customer_map.*
 import com.team.eddie.uber_alles.utils.FirebaseHelper.addHistoryForDriverCustomer
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 
 class DriverMapFragment : GenericMapFragment() {
@@ -97,8 +94,8 @@ class DriverMapFragment : GenericMapFragment() {
                 pickUpRef.setValue(true)
 
 
-                binding.callCustomer.visibility =  View.GONE
-                binding.chatCustomer.visibility =  View.GONE
+                binding.callCustomer.visibility = View.GONE
+                binding.chatCustomer.visibility = View.GONE
 
             } else if (status == 2) {
                 recordRide()
@@ -109,7 +106,7 @@ class DriverMapFragment : GenericMapFragment() {
         mRatingBar = binding.ratingBar
         mRatingText = binding.ratingText
         mRatingButton = binding.ratingButton
-        mRatingAvg =  binding.ratingAvg
+        mRatingAvg = binding.ratingAvg
 
         mRatingButton!!.setOnClickListener {
 
@@ -256,25 +253,25 @@ class DriverMapFragment : GenericMapFragment() {
                     ratingsAvg = ratingSum / ratingsTotal
                     mRatingBar?.rating = ratingsAvg
                 }
-                mRatingAvg?.text = "Average Rating: "+ratingsAvg.toString()+"/5"
+                mRatingAvg?.text = "Average Rating: " + ratingsAvg.toString() + "/5"
 
             }
 
         })
 
-        SaveSharedPreference.setChatSender(activity!!.applicationContext,currentUserId)
-        SaveSharedPreference.setChatReceiver(activity!!.applicationContext,customerId)
-        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId+"_to_"+customerId).child("newMessagePushed")
+        SaveSharedPreference.setChatSender(activity!!.applicationContext, currentUserId)
+        SaveSharedPreference.setChatReceiver(activity!!.applicationContext, customerId)
+        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + customerId).child("newMessagePushed")
 
-        binding.callCustomer.visibility =  View.VISIBLE
-        binding.chatCustomer.visibility =  View.VISIBLE
+        binding.callCustomer.visibility = View.VISIBLE
+        binding.chatCustomer.visibility = View.VISIBLE
 
-        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object :ValueEventListener{
+        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.exists()){
-                    binding.chatCustomer.text =  "Message (!)"
+                if (dataSnapshot.exists()) {
+                    binding.chatCustomer.text = "Message (!)"
                 }
             }
 

@@ -24,7 +24,10 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
@@ -106,7 +109,7 @@ class CustomerMapFragment : GenericMapFragment() {
         mRatingBar = binding.ratingBar
         mRatingText = binding.ratingText
         mRatingButton = binding.ratingButton
-        mRatingAvg =  binding.ratingAvg
+        mRatingAvg = binding.ratingAvg
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
 
@@ -309,7 +312,7 @@ class CustomerMapFragment : GenericMapFragment() {
                     ratingsAvg = ratingSum / ratingsTotal
                     mRatingBar?.rating = ratingsAvg
                 }
-                mRatingAvg?.text = "Average Rating: "+ratingsAvg.toString()+"/5"
+                mRatingAvg?.text = "Average Rating: " + ratingsAvg.toString() + "/5"
             }
 
         })
@@ -325,29 +328,28 @@ class CustomerMapFragment : GenericMapFragment() {
                 if (!dataSnapshot.exists() && !isPickedUp) {
                     getDriverLocation()
 
-                    SaveSharedPreference.setChatSender(activity!!.applicationContext,currentUserId)
-                    SaveSharedPreference.setChatReceiver(activity!!.applicationContext,driverFoundID!!)
-                    newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId+"_to_"+driverFoundID).child("newMessagePushed")
+                    SaveSharedPreference.setChatSender(activity!!.applicationContext, currentUserId)
+                    SaveSharedPreference.setChatReceiver(activity!!.applicationContext, driverFoundID!!)
+                    newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + driverFoundID).child("newMessagePushed")
 
-                    binding.callDriver.visibility =  View.VISIBLE
-                    binding.chatDriver.visibility =  View.VISIBLE
+                    binding.callDriver.visibility = View.VISIBLE
+                    binding.chatDriver.visibility = View.VISIBLE
 
-                    newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object :ValueEventListener{
+                    newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
                         override fun onCancelled(p0: DatabaseError) {}
 
                         override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            if(dataSnapshot.exists()){
-                                binding.chatDriver.text =  "Message (!)"
+                            if (dataSnapshot.exists()) {
+                                binding.chatDriver.text = "Message (!)"
                             }
                         }
 
                     })
-                }
-                else {
+                } else {
 
-                    isPickedUp=true
-                    binding.callDriver.visibility =  View.GONE
-                    binding.chatDriver.visibility =  View.GONE
+                    isPickedUp = true
+                    binding.callDriver.visibility = View.GONE
+                    binding.chatDriver.visibility = View.GONE
 
                     mRequest.text = getString(R.string.ride_started)
                     mRequest.isClickable = false

@@ -12,10 +12,29 @@
         tools:layout="@layout/fragment_customer_map" />
 
     <fragment
-        android:id="@+id/generic_history_fragment"
-        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistoryFragment"
+        android:id="@+id/generic_history_list_fragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistoryListFragment"
         android:label="History"
-        tools:layout="@layout/fragment_generic_history" />
+        tools:layout="@layout/fragment_generic_history_list">
+
+        <action
+            android:id="@+id/action_generic_history_fragment_to_generic_history_single_fragment"
+            app:destination="@id/generic_history_single_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/generic_history_single_fragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistorySingleFragment"
+        android:label="GenericHistorySingleFragment"
+        tools:layout="@layout/fragment_generic_history_single">
+        <argument
+            android:name="rideId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/chat_fragment"

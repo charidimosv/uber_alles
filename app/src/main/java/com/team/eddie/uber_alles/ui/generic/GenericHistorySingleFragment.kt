@@ -2,13 +2,14 @@ package com.team.eddie.uber_alles.ui.generic
 
 import android.os.Bundle
 import android.text.format.DateFormat
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.directions.route.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,7 +22,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.databinding.ActivityGenericHistorySingleBinding
+import com.team.eddie.uber_alles.databinding.FragmentGenericHistorySingleBinding
 import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.FirebaseHelper.ARRIVING_TIME
 import com.team.eddie.uber_alles.utils.FirebaseHelper.COST
@@ -36,12 +37,12 @@ import com.team.eddie.uber_alles.utils.FirebaseHelper.PROFILE_IMG_URL
 import com.team.eddie.uber_alles.utils.FirebaseHelper.RATING
 import java.util.*
 
-class GenericHistorySingleActivity :
-        AppCompatActivity(),
+class GenericHistorySingleFragment :
+        Fragment(),
         OnMapReadyCallback,
         RoutingListener {
 
-    private lateinit var binding: ActivityGenericHistorySingleBinding
+    private lateinit var binding: FragmentGenericHistorySingleBinding
 
     private lateinit var mMap: GoogleMap
     private lateinit var mapFragment: SupportMapFragment
@@ -68,17 +69,17 @@ class GenericHistorySingleActivity :
     private var ridePrice: Double? = null
     private var customerPaid: Boolean? = false
 
-    private var polylines: MutableList<Polyline>? = null
+    private var polylines: MutableList<Polyline> = ArrayList()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_generic_history_single)
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentGenericHistorySingleBinding.inflate(inflater, container, false)
+        rideId = GenericHistorySingleFragmentArgs.fromBundle(arguments).rideId
 
-        polylines = ArrayList()
-
-        rideId = intent.extras!!.getString("rideId")
-
-        mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
         rideLocation = binding.rideLocation
@@ -93,6 +94,8 @@ class GenericHistorySingleActivity :
 
         historyRideInfoDb = FirebaseHelper.getHistoryKey(rideId!!)
         getRideInformation()
+
+        return binding.root
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -125,7 +128,7 @@ class GenericHistorySingleActivity :
                         if (child.key == RATING) mRatingBar.rating = Integer.valueOf(child.value!!.toString()).toFloat()
 
                         if (child.key == COST) customerPaid = true
-                        
+
                         if (child.key == DISTANCE) {
                             distance = child.value!!.toString()
                             rideDistance.text = distance!!.substring(0, Math.min(distance!!.length, 5)) + " km"
@@ -167,7 +170,7 @@ class GenericHistorySingleActivity :
 
                     if (map[NAME] != null) userName.text = map[NAME].toString()
                     if (map[PHONE] != null) userPhone.text = map[PHONE].toString()
-                    if (map[PROFILE_IMG_URL] != null) Glide.with(application).load(map[PROFILE_IMG_URL].toString()).into(userImage)
+                    if (map[PROFILE_IMG_URL] != null) Glide.with(activity!!.applicationContext).load(map[PROFILE_IMG_URL].toString()).into(userImage)
                 }
 
             }
@@ -194,9 +197,9 @@ class GenericHistorySingleActivity :
 
     override fun onRoutingFailure(e: RouteException?) {
         if (e != null) {
-            Toast.makeText(this, "Error: " + e.message, Toast.LENGTH_LONG).show()
+            Toast.makeText(activity!!.applicationContext, "Error: " + e.message, Toast.LENGTH_LONG).show()
         } else {
-            Toast.makeText(this, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity!!.applicationContext, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -219,11 +222,7 @@ class GenericHistorySingleActivity :
         mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title("pickup location").icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
         mMap.addMarker(MarkerOptions().position(destinationLatLng!!).title("destination"))
 
-        if (polylines!!.size > 0) {
-            for (poly in polylines!!) {
-                poly.remove()
-            }
-        }
+        if (polylines.size > 0) for (poly in polylines) poly.remove()
 
         polylines = ArrayList()
         //add route(s) to the map.
@@ -237,9 +236,9 @@ class GenericHistorySingleActivity :
             polyOptions.width((10 + i * 3).toFloat())
             polyOptions.addAll(route[i].points)
             val polyline = mMap.addPolyline(polyOptions)
-            polylines!!.add(polyline)
+            polylines.add(polyline)
 
-            Toast.makeText(applicationContext, "Route " + (i + 1) + ": distance - " + route[i].distanceValue + ": duration - " + route[i].durationValue, Toast.LENGTH_SHORT).show()
+            Toast.makeText(activity!!.applicationContext, "Route " + (i + 1) + ": distance - " + route[i].distanceValue + ": duration - " + route[i].durationValue, Toast.LENGTH_SHORT).show()
         }
 
     }

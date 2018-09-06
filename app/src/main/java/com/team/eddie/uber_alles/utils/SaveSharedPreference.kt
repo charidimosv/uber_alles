@@ -5,12 +5,10 @@ import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.text.TextUtils
 import com.team.eddie.uber_alles.utils.PreferencesUtility.ACTIVE_REQUEST_PREF
-
 import com.team.eddie.uber_alles.utils.PreferencesUtility.LOGGED_IN_EMAIL_PREF
-import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_TYPE_PREF
-
-import com.team.eddie.uber_alles.utils.PreferencesUtility.SENDER_NAME
 import com.team.eddie.uber_alles.utils.PreferencesUtility.RECEIVER_NAME
+import com.team.eddie.uber_alles.utils.PreferencesUtility.SENDER_NAME
+import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_TYPE_PREF
 
 
 object SaveSharedPreference {

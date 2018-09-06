@@ -122,7 +122,6 @@ object FirebaseHelper {
     }
 
 
-
     fun getHistoryKey(key: String): DatabaseReference {
         return getHistory().child(key)
     }
