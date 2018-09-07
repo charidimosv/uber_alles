@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
@@ -28,6 +29,8 @@ import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.FirebaseHelper
 import com.team.eddie.uber_alles.utils.FirebaseHelper.addHistoryForDriverCustomer
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import java.math.RoundingMode
+import java.text.DecimalFormat
 
 
 class DriverMapFragment : GenericMapFragment() {
@@ -132,13 +135,10 @@ class DriverMapFragment : GenericMapFragment() {
             clearCustomersInfo()
         }
 
-        /*binding.chatCustomer.setOnClickListener{
-            val chatFragment = GenericChatFragment()
-            val fragmentTransaction = childFragmentManager!!.beginTransaction()
-            fragmentTransaction.replace(R.id.generic_driver_fragment, chatFragment)
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-        }*/
+        binding.chatCustomer.setOnClickListener{
+            val direction = DriverMapFragmentDirections.actionDriverMapFragmentToChatFragment()
+            it.findNavController().navigate(direction)
+        }
 
         getAssignedCustomer()
 
@@ -234,6 +234,8 @@ class DriverMapFragment : GenericMapFragment() {
                 var ratingSum = 0.toFloat()
                 var ratingsTotal = 0.toFloat()
                 var ratingsAvg = 0.toFloat()
+                val df = DecimalFormat("#.##")
+                df.roundingMode = RoundingMode.CEILING
                 for (rating in dataSnapshot.children) {
                     ratingSum += rating.child("value").value.toString().toFloat()
                     ratingsTotal++
@@ -242,7 +244,7 @@ class DriverMapFragment : GenericMapFragment() {
                     ratingsAvg = ratingSum / ratingsTotal
                     mRatingBar.rating = ratingsAvg
                 }
-                mRatingAvg.text = "Average Rating: " + ratingsAvg.toString() + "/5"
+                mRatingAvg.text = "Average Rating: " + df.format(ratingsAvg).toString() + "/5"
 
             }
 

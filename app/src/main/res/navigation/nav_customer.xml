@@ -9,7 +9,15 @@
         android:id="@+id/customer_map_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerMapFragment"
         android:label="Map"
-        tools:layout="@layout/fragment_customer_map" />
+        tools:layout="@layout/fragment_customer_map" >
+        <action
+            android:id="@+id/action_customer_map_fragment_to_chat_fragment"
+            app:destination="@id/chat_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+    </fragment>
 
     <fragment
         android:id="@+id/generic_history_list_fragment"
