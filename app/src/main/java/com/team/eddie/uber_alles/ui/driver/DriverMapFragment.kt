@@ -135,7 +135,7 @@ class DriverMapFragment : GenericMapFragment() {
             clearCustomersInfo()
         }
 
-        binding.chatCustomer.setOnClickListener{
+        binding.chatCustomer.setOnClickListener {
             val direction = DriverMapFragmentDirections.actionDriverMapFragmentToChatFragment()
             it.findNavController().navigate(direction)
         }

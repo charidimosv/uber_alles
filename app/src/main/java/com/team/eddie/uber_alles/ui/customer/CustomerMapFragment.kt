@@ -40,13 +40,14 @@ import com.team.eddie.uber_alles.utils.FirebaseHelper.DESTINATION_LOT
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.util.*
 
 
 class CustomerMapFragment : GenericMapFragment() {
 
     lateinit var binding: FragmentCustomerMapBinding
 
-    private var geoQuery: GeoQuery? = null
+    private var pickupLocationQuery: GeoQuery? = null
     private var pickupLocation: LatLng? = null
     private var pickupMarker: Marker? = null
 
@@ -80,16 +81,25 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private var mDriverMarker: Marker? = null
     private var driverLocationRef: DatabaseReference? = null
-    private var driverLocationRefListener: ValueEventListener? = null
+    private var driverLocationListener: ValueEventListener? = null
 
     private var driveHasEndedRef: DatabaseReference? = null
-    private var driveHasEndedRefListener: ValueEventListener? = null
+    private var driveHasEndedListener: ValueEventListener? = null
 
     private var customerPickedUpRef: DatabaseReference? = null
-    private var customerPickedUpRefListener: ValueEventListener? = null
+    private var customerPickedUpListener: ValueEventListener? = null
 
     private var newIncomeMessageRef: DatabaseReference? = null
     private var newIncomeMessageListener: ValueEventListener? = null
+
+    // drivers around vars
+    private val DEFAULT_SEARCH_RADIUS: Double = 5000.0
+    private val DEFAULT_SEARCH_LOC_DIF: Float = 1F
+
+    private var showDriversAround: Boolean = true
+    private var driversAroundLatestLoc: Location? = null
+    private var driversAroundQuery: GeoQuery? = null
+    private var driversAroundMarkerMap = mutableMapOf<String, Marker>()
 
 
     override fun onCreateView(
@@ -144,10 +154,6 @@ class CustomerMapFragment : GenericMapFragment() {
             override fun onError(status: Status) {}
         })
 
-        destination="Athens"
-        destinationLatLng =  LatLng(37.983810, 23.727539)
-        mRequest.visibility = View.VISIBLE
-
         mRequest.setOnClickListener {
             if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext))
                 endRide()
@@ -155,7 +161,7 @@ class CustomerMapFragment : GenericMapFragment() {
                 startRideRequest()
         }
 
-        binding.chatDriver.setOnClickListener{
+        binding.chatDriver.setOnClickListener {
             val direction = CustomerMapFragmentDirections.actionCustomerMapFragmentToChatFragment()
             it.findNavController().navigate(direction)
         }
@@ -189,6 +195,8 @@ class CustomerMapFragment : GenericMapFragment() {
         if (activity!!.applicationContext != null && location != null) {
             mLastLocation = location
             if (followMeFlag) moveCamera(location)
+
+            if (shouldRefreshDriversAround()) getDriversAround()
         }
     }
 
@@ -196,10 +204,10 @@ class CustomerMapFragment : GenericMapFragment() {
         val driversAvailable = FirebaseHelper.getDriversAvailable()
         val geoFire = GeoFire(driversAvailable)
 
-        geoQuery = pickupLocation?.let { geoFire.queryAtLocation(GeoLocation(it.latitude, it.longitude), radius.toDouble()) }
+        pickupLocationQuery = pickupLocation?.let { geoFire.queryAtLocation(GeoLocation(it.latitude, it.longitude), radius.toDouble()) }
 
-        geoQuery?.removeAllListeners()
-        geoQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
+        pickupLocationQuery?.removeAllListeners()
+        pickupLocationQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
                 if (!driverFound && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
                     driverFound = true
@@ -245,7 +253,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private fun getDriverLocation() {
         driverLocationRef = FirebaseHelper.getDriversWorkingLocation(driverFoundID!!)
-        driverLocationRefListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
+        driverLocationListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
                     val map = dataSnapshot.value as List<Any?>
@@ -324,7 +332,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private fun getHasCustomerPickedUp() {
         customerPickedUpRef = FirebaseHelper.getDriverCustomerReqPickup(driverFoundID!!)
-        customerPickedUpRefListener = customerPickedUpRef!!.addValueEventListener(object : ValueEventListener {
+        customerPickedUpListener = customerPickedUpRef!!.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists() && !isPickedUp) {
@@ -355,7 +363,7 @@ class CustomerMapFragment : GenericMapFragment() {
                     mRequest.isClickable = false
                     getRouteToMarker(destinationLatLng)
 
-                    driverLocationRef?.removeEventListener(driverLocationRefListener!!)
+                    driverLocationRef?.removeEventListener(driverLocationListener!!)
                 }
             }
 
@@ -366,7 +374,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private fun getHasRideEnded() {
         driveHasEndedRef = FirebaseHelper.getDriverCustomerRide(driverFoundID!!)
-        driveHasEndedRefListener = driveHasEndedRef!!.addValueEventListener(object : ValueEventListener {
+        driveHasEndedListener = driveHasEndedRef!!.addValueEventListener(object : ValueEventListener {
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (!dataSnapshot.exists()) {
@@ -399,11 +407,11 @@ class CustomerMapFragment : GenericMapFragment() {
         SaveSharedPreference.setActiveRequest(activity!!.applicationContext, false)
         radius = 1
 
-        geoQuery!!.removeAllListeners()
-        driverLocationRef?.removeEventListener(driverLocationRefListener!!)
-        driveHasEndedRef?.removeEventListener(driveHasEndedRefListener!!)
+        pickupLocationQuery!!.removeAllListeners()
+        driverLocationRef?.removeEventListener(driverLocationListener!!)
+        driveHasEndedRef?.removeEventListener(driveHasEndedListener!!)
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
-        customerPickedUpRef?.removeEventListener(customerPickedUpRefListener!!)
+        customerPickedUpRef?.removeEventListener(customerPickedUpListener!!)
 
         val ref = FirebaseHelper.getCustomerRequest()
         val geoFire = GeoFire(ref)
@@ -460,4 +468,41 @@ class CustomerMapFragment : GenericMapFragment() {
         mRequest.text = getString(R.string.call_uber)
     }
 
+    private fun shouldRefreshDriversAround(): Boolean {
+        val distance: Float = driversAroundLatestLoc?.distanceTo(mLastLocation)
+                ?: DEFAULT_SEARCH_LOC_DIF+1
+        return showDriversAround && distance > DEFAULT_SEARCH_LOC_DIF
+    }
+
+    private fun getDriversAround() {
+        val driversLocation = FirebaseHelper.getDriversAvailable()
+        val geoFire = GeoFire(driversLocation)
+
+        driversAroundLatestLoc = mLastLocation
+        driversAroundQuery = mLastLocation?.let { geoFire.queryAtLocation(GeoLocation(it.longitude, it.latitude), DEFAULT_SEARCH_RADIUS) }
+
+        driversAroundQuery?.removeAllListeners()
+        driversAroundQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
+            override fun onKeyEntered(key: String, location: GeoLocation) {
+                if (driversAroundMarkerMap.containsKey(key)) return
+
+                val driverLocation = LatLng(location.latitude, location.longitude)
+                val mDriverMarker = mMap.addMarker(MarkerOptions().position(driverLocation).title(key).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
+                mDriverMarker?.let { driversAroundMarkerMap[key] = it }
+            }
+
+            override fun onKeyExited(key: String) {
+                driversAroundMarkerMap[key]?.remove()
+                driversAroundMarkerMap.remove(key)
+            }
+
+            override fun onKeyMoved(key: String, location: GeoLocation) {
+                driversAroundMarkerMap[key]?.position = LatLng(location.latitude, location.longitude)
+            }
+
+            override fun onGeoQueryReady() {}
+
+            override fun onGeoQueryError(error: DatabaseError) {}
+        })
+    }
 }
