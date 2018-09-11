@@ -2,20 +2,44 @@
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item
-        android:id="@+id/customer_map_fragment"
-        android:title="Map" />
+    <group
+        android:id="@+id/map"
+        android:checkableBehavior="single">
 
-    <item
-        android:id="@+id/generic_history_list_fragment"
-        android:title="History" />
+        <item
+            android:id="@+id/customer_map_fragment"
+            android:title="Map" />
 
-    <item
-        android:id="@+id/customer_profile_fragment"
-        android:title="Profile" />
+    </group>
 
-    <item
-        android:id="@+id/customer_logout_fragment"
-        android:title="Sign Out" />
+    <group
+        android:id="@+id/history"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/generic_history_list_fragment"
+            android:title="History" />
+
+    </group>
+
+    <group
+        android:id="@+id/account"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/customer_profile_fragment"
+            android:title="Profile" />
+
+    </group>
+
+    <group
+        android:id="@+id/logout"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/customer_logout_fragment"
+            android:title="Sign Out" />
+
+    </group>
 
 </menu>
