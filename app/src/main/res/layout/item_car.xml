@@ -18,18 +18,35 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/margin_small"
+        android:layout_marginTop="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:layout_marginBottom="@dimen/margin_normal"
         android:onClick="@{clickListener}"
         android:orientation="vertical"
         android:paddingTop="@dimen/row_padding_vertical"
         android:paddingBottom="@dimen/row_padding_vertical">
 
+        <ImageView
+            android:id="@+id/image"
+            android:layout_width="80sp"
+            android:layout_height="80sp"
+            android:contentDescription="@string/a11y_plant_item_image"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/ic_default_car"
+            app:imageFromUrl="@{carItem.image}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <TextView
             android:id="@+id/brand"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
             android:text="@{carItem.brand}"
             android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/image"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Brand" />
 
@@ -39,8 +56,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="@{carItem.model}"
-            app:layout_constraintStart_toEndOf="@+id/brand"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/image"
+            app:layout_constraintTop_toBottomOf="@+id/brand"
             tools:text="Model" />
 
         <TextView
@@ -50,7 +68,8 @@
             android:layout_marginEnd="12dp"
             android:text="@{carItem.plate}"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@+id/year"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Plate" />
 
@@ -59,8 +78,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@{carItem.year}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/plate"
+            app:layout_constraintTop_toBottomOf="@+id/plate"
             tools:text="Year" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

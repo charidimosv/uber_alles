@@ -12,8 +12,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentChatBinding
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
 
 class GenericChatFragment : androidx.fragment.app.Fragment() {

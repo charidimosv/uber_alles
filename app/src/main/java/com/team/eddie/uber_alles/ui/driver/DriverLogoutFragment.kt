@@ -13,8 +13,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.databinding.FragmentDriverLogoutBinding
 import com.team.eddie.uber_alles.ui.session.WelcomeActivity
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
 class DriverLogoutFragment : Fragment() {
 

@@ -13,7 +13,7 @@
             android:layout_width="100sp"
             android:layout_height="100sp"
             android:layout_marginBottom="20sp"
-            android:src="@mipmap/ic_default_user" />
+            android:src="@mipmap/ic_default_car" />
 
         <EditText
             android:id="@+id/brand"

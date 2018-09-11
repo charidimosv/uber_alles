@@ -78,13 +78,15 @@ class DriverCarListFragment : Fragment() {
                     var model: String? = ""
                     var plate: String? = ""
                     var year: String? = ""
+                    var image: String? = ""
 
                     dataSnapshot.child(FirebaseHelper.CAR_BRAND).value?.let { brand = it.toString() }
                     dataSnapshot.child(FirebaseHelper.CAR_MODEL).value?.let { model = it.toString() }
                     dataSnapshot.child(FirebaseHelper.CAR_PLATE).value?.let { plate = it.toString() }
                     dataSnapshot.child(FirebaseHelper.CAR_YEAR).value?.let { year = it.toString() }
+                    dataSnapshot.child(FirebaseHelper.CAR_IMG_URL).value?.let { image = it.toString() }
 
-                    resultsCarList.add(CarItem(carId!!, brand!!, model!!, year!!, plate!!))
+                    resultsCarList.add(CarItem(carId!!, brand!!, model!!, year!!, plate!!, image!!))
                     mAdapter.notifyDataSetChanged()
                 }
             }

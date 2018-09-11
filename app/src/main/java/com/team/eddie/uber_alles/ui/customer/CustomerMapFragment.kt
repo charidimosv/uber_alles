@@ -32,12 +32,12 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CUSTOMER_RIDE_ID
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LAT
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LOT
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
