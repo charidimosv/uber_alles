@@ -24,10 +24,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerProfileBinding
-import com.team.eddie.uber_alles.utils.FirebaseHelper
-import com.team.eddie.uber_alles.utils.FirebaseHelper.NAME
-import com.team.eddie.uber_alles.utils.FirebaseHelper.PHONE
-import com.team.eddie.uber_alles.utils.FirebaseHelper.PROFILE_IMG_URL
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.NAME
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PHONE
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PROFILE_IMG_URL
 import java.io.ByteArrayOutputStream
 
 class CustomerProfileFragment : Fragment() {

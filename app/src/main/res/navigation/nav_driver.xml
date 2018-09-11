@@ -10,13 +10,14 @@
         android:name="com.team.eddie.uber_alles.ui.driver.DriverMapFragment"
         android:label="Map"
         tools:layout="@layout/fragment_driver_map">
+
         <action
             android:id="@+id/action_driver_map_fragment_to_chat_fragment"
             app:destination="@id/chat_fragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
-            app:popExitAnim="@anim/slide_out_right"/>
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
 
     <fragment
@@ -39,6 +40,7 @@
         android:name="com.team.eddie.uber_alles.ui.generic.GenericHistorySingleFragment"
         android:label="GenericHistorySingleFragment"
         tools:layout="@layout/fragment_generic_history_single">
+
         <argument
             android:name="rideId"
             app:argType="string" />
@@ -50,12 +52,37 @@
         android:label="Chat"
         tools:layout="@layout/fragment_chat" />
 
-
     <fragment
         android:id="@+id/driver_profile_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverProfileFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_driver_profile" />
+
+    <fragment
+        android:id="@+id/driver_car_list_fragment"
+        android:name="com.team.eddie.uber_alles.ui.driver.DriverCarListFragment"
+        android:label="Car"
+        tools:layout="@layout/fragment_driver_car_list">
+
+        <action
+            android:id="@+id/action_driver_car_list_fragment_to_driver_car_single_fragment"
+            app:destination="@id/driver_car_single_fragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/driver_car_single_fragment"
+        android:name="com.team.eddie.uber_alles.ui.driver.DriverCarSingleFragment"
+        android:label="DriverCarSingleFragment"
+        tools:layout="@layout/fragment_driver_car_single">
+
+        <argument
+            android:name="carId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/driver_logout_fragment"

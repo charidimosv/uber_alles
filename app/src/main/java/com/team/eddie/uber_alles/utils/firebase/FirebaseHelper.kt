@@ -1,4 +1,4 @@
-package com.team.eddie.uber_alles.utils
+package com.team.eddie.uber_alles.utils.firebase
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DatabaseReference
@@ -18,7 +18,6 @@ object FirebaseHelper {
     const val PASSWORD: String = "password"
     const val IS_DRIVER: String = "is_driver"
     const val PROFILE_IMG_URL: String = "profileImageUrl"
-    const val CAR: String = "car"
 
     // history related
     const val DRIVER: String = "driver"
@@ -34,6 +33,13 @@ object FirebaseHelper {
     const val DISTANCE: String = "distance"
     const val COST: String = "cost"
 
+    // car related
+    const val CAR_BRAND: String = "brand"
+    const val CAR_MODEL: String = "model"
+    const val CAR_PLATE: String = "plate"
+    const val CAR_YEAR: String = "year"
+    const val CAR_IMG_URL: String = "carImageUrl"
+
     const val DESTINATION_LAT: String = "destinationLat"
     const val DESTINATION_LOT: String = "destinationLng"
     const val CUSTOMER_RIDE_ID: String = "customerRideId";
@@ -41,6 +47,7 @@ object FirebaseHelper {
     private const val INFO: String = "info"
     const val RATING: String = "rating"
     private const val HISTORY: String = "history"
+    const val CAR: String = "car"
     private const val MESSAGE: String = "message"
     private const val NEW_MESSAGE: String = "newMessagePushed"
     private const val PICKUP: String = "pickup"
@@ -50,6 +57,7 @@ object FirebaseHelper {
     private const val DRIVERS_AVAILABLE: String = "driversAvailable"
 
     private const val PROFILE_IMGS: String = "profile_images"
+    private const val CAR_IMGS: String = "car_images"
 
 
     // general
@@ -76,6 +84,14 @@ object FirebaseHelper {
 
     fun getUserHistory(userId: String): DatabaseReference {
         return getUser(userId).child(HISTORY)
+    }
+
+    fun getUserCar(userId: String): DatabaseReference {
+        return getUser(userId).child(CAR)
+    }
+
+    fun getUserCarKey(userId: String, carId: String): DatabaseReference {
+        return getUserCar(userId).child(carId)
     }
 
     // driver
@@ -112,7 +128,7 @@ object FirebaseHelper {
         return getReference().child(CUSTOMER_REQ).child(customerId).child("l")
     }
 
-    // misc
+    // history
     fun getHistory(): DatabaseReference {
         return getReference().child(HISTORY)
     }
@@ -121,26 +137,6 @@ object FirebaseHelper {
         return getHistory().child(key)
     }
 
-    // messages
-    fun getMessage(): DatabaseReference {
-        return getReference().child(MESSAGE)
-    }
-
-    fun getMessageUsers(users: String): DatabaseReference {
-        return getMessage().child(users).child(NEW_MESSAGE)
-    }
-
-    // storage
-    fun getProfileImages(userId: String): StorageReference {
-        return FirebaseStorage.getInstance().reference.child(PROFILE_IMGS).child(userId)
-    }
-
-    // auth
-    fun getUserId(): String {
-        return FirebaseAuth.getInstance().currentUser!!.uid
-    }
-
-    // history
     fun addHistoryForDriverCustomer(
             driverID: String,
             customerID: String,
@@ -153,9 +149,10 @@ object FirebaseHelper {
             locToLat: Double?,
             locToLng: Double?
     ) {
-        val driverHistoryRef = FirebaseHelper.getUserHistory(driverID)
-        val customerHistoryRef = FirebaseHelper.getUserHistory(customerID)
-        val historyRef = FirebaseHelper.getHistory()
+        val driverHistoryRef = getUserHistory(driverID)
+        val customerHistoryRef = getUserHistory(customerID)
+
+        val historyRef = getHistory()
 
         val requestId = historyRef.push().key
         driverHistoryRef.child(requestId!!).setValue(true)
@@ -171,8 +168,60 @@ object FirebaseHelper {
                 LOC_FROM_LNG to locFromLng,
                 LOC_TO_LAT to locToLat,
                 LOC_TO_LNG to locToLng,
-                DISTANCE to rideDistance
-        )
+                DISTANCE to rideDistance)
         historyRef.child(requestId).updateChildren(map)
     }
+
+
+    // car
+    fun getCar(): DatabaseReference {
+        return getReference().child(CAR)
+    }
+
+    fun getCarKey(carId: String): DatabaseReference {
+        return getCar().child(carId)
+    }
+
+    fun createCarForDriver(driverID: String): String {
+        val driverCarRef = getUserCar(driverID)
+        val carRef = getCar()
+
+        val carId = carRef.push().key
+        driverCarRef.child(carId!!).setValue(true)
+
+        return carId
+    }
+
+    fun deleteCar(carId: String, driverID: String) {
+        val driverCarRef = getUserCarKey(driverID, carId)
+        val carRef = getCarKey(carId)
+
+        driverCarRef.setValue(null)
+        carRef.setValue(null)
+    }
+
+
+    // messages
+    fun getMessage(): DatabaseReference {
+        return getReference().child(MESSAGE)
+    }
+
+    fun getMessageUsers(users: String): DatabaseReference {
+        return getMessage().child(users).child(NEW_MESSAGE)
+    }
+
+    // storage
+    fun getProfileImages(userId: String): StorageReference {
+        return FirebaseStorage.getInstance().reference.child(PROFILE_IMGS).child(userId)
+    }
+
+    fun getCarImages(carId: String): StorageReference {
+        return FirebaseStorage.getInstance().reference.child(CAR_IMGS).child(carId)
+    }
+
+    // auth
+    fun getUserId(): String {
+        return FirebaseAuth.getInstance().currentUser!!.uid
+    }
+
 }

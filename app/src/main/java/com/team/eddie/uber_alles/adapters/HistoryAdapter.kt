@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.team.eddie.uber_alles.databinding.HistoryItemBinding
+import com.team.eddie.uber_alles.databinding.ItemHistoryBinding
 import com.team.eddie.uber_alles.ui.generic.GenericHistoryListFragmentDirections
 import com.team.eddie.uber_alles.view.HistoryItem
 
@@ -15,7 +15,7 @@ class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.ViewHolder>(Histo
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        return ViewHolder(HistoryItemBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+        return ViewHolder(ItemHistoryBinding.inflate(LayoutInflater.from(parent.context), parent, false))
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -34,7 +34,7 @@ class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.ViewHolder>(Histo
     }
 
     inner class ViewHolder(
-            private val binding: HistoryItemBinding
+            private val binding: ItemHistoryBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(listener: View.OnClickListener, item: HistoryItem) {

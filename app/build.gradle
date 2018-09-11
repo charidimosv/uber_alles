@@ -65,7 +65,7 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.0-alpha2'
     implementation 'androidx.room:room-runtime:2.0.0-rc01'
     implementation 'androidx.recyclerview:recyclerview:1.0.0-rc02'
-    implementation 'com.google.android.material:material:1.0.0-rc01'
+    implementation 'com.google.android.material:material:1.0.0-rc02'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0-rc02'
     implementation 'androidx.cardview:cardview:1.0.0-rc02'
 
@@ -89,9 +89,9 @@ dependencies {
 
     // firebase + geofire
     implementation 'com.google.firebase:firebase-core:16.0.3'
-    implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.google.firebase:firebase-database:16.0.2'
     implementation 'com.google.firebase:firebase-auth:16.0.3'
-    implementation 'com.google.firebase:firebase-storage:16.0.1'
+    implementation 'com.google.firebase:firebase-storage:16.0.2'
     implementation 'com.firebase:geofire-android:2.1.1'
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.8.0'

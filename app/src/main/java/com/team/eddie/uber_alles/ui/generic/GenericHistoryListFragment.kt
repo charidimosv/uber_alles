@@ -13,11 +13,11 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.adapters.HistoryAdapter
 import com.team.eddie.uber_alles.databinding.FragmentGenericHistoryListBinding
-import com.team.eddie.uber_alles.utils.FirebaseHelper
-import com.team.eddie.uber_alles.utils.FirebaseHelper.ARRIVING_TIME
-import com.team.eddie.uber_alles.utils.FirebaseHelper.COST
-import com.team.eddie.uber_alles.utils.FirebaseHelper.DESTINATION
-import com.team.eddie.uber_alles.utils.FirebaseHelper.DISTANCE
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.ARRIVING_TIME
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.COST
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DISTANCE
 import com.team.eddie.uber_alles.view.HistoryItem
 import java.util.*
 
@@ -25,7 +25,6 @@ class GenericHistoryListFragment : Fragment() {
 
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var recyclerView: RecyclerView
-    private lateinit var layoutManager: RecyclerView.LayoutManager
 
     private lateinit var userId: String
     private var resultsHistoryList = ArrayList<HistoryItem>()

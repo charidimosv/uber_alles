@@ -15,6 +15,10 @@
         android:title="Profile" />
 
     <item
+        android:id="@+id/driver_car_list_fragment"
+        android:title="Car" />
+
+    <item
         android:id="@+id/driver_logout_fragment"
         android:title="Sign Out" />
 

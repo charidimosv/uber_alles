@@ -10,10 +10,11 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.*
-import com.team.eddie.uber_alles.utils.FirebaseHelper.EMAIL
-import com.team.eddie.uber_alles.utils.FirebaseHelper.IS_DRIVER
-import com.team.eddie.uber_alles.utils.FirebaseHelper.PASSWORD
-import com.team.eddie.uber_alles.utils.FirebaseHelper.USERNAME
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.EMAIL
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.IS_DRIVER
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PASSWORD
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.USERNAME
 import kotlinx.android.synthetic.main.activity_register.*
 
 class RegisterActivity : AppCompatActivity() {

@@ -17,78 +17,78 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.databinding.FragmentDriverProfileBinding
+import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CAR
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.NAME
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PHONE
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PROFILE_IMG_URL
 import java.io.ByteArrayOutputStream
 
+class DriverCarSingleFragment : Fragment() {
 
-class DriverProfileFragment : Fragment() {
+    private lateinit var binding: FragmentDriverCarSingleBinding
 
-    private lateinit var mDriverDatabase: DatabaseReference
+    private lateinit var carDatabase: DatabaseReference
+    private lateinit var carId: String
 
-    private var userID: String? = null
+    private val userId: String = FirebaseHelper.getUserId()
 
-    private lateinit var mProfileImage: ImageView
     private var resultUri: Uri? = null
+    private lateinit var mCarImage: ImageView
 
-    private lateinit var mNameField: EditText
-    private lateinit var mPhoneField: EditText
-    private lateinit var mCarField: EditText
+    private lateinit var mBrandField: EditText
+    private lateinit var mModelField: EditText
+    private lateinit var mPlateField: EditText
+    private lateinit var mYearField: EditText
 
-    private lateinit var mConfirm: Button
+    private lateinit var mSave: Button
+    private lateinit var mDelete: Button
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentDriverProfileBinding.inflate(inflater, container, false)
+        binding = FragmentDriverCarSingleBinding.inflate(inflater, container, false)
 
-        setHasOptionsMenu(true)
+        mCarImage = binding.carImage
+        mBrandField = binding.brand
+        mModelField = binding.model
+        mPlateField = binding.plate
+        mYearField = binding.year
 
-        mNameField = binding.name
-        mPhoneField = binding.phone
-        mCarField = binding.car
-        mProfileImage = binding.profileImage
+        mSave = binding.save
+        mDelete = binding.delete
 
-        mConfirm = binding.confirm
+        carId = DriverCarSingleFragmentArgs.fromBundle(arguments).carId
+        if (!carId.isBlank()) syncCarInfo()
 
-        userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mDriverDatabase = FirebaseHelper.getUserInfo(userID!!)
-
-        getUserInfo()
-
-        mProfileImage.setOnClickListener {
+        mCarImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
             intent.type = "image/*"
             startActivityForResult(intent, 1)
         }
 
-        mConfirm.setOnClickListener { saveUserInformation() }
+        mSave.setOnClickListener { saveCarInfo() }
+        mDelete.setOnClickListener { deleteCarInfo() }
 
         return binding.root
     }
 
-    private fun getUserInfo() {
-        mDriverDatabase.addValueEventListener(object : ValueEventListener {
+    private fun syncCarInfo() {
+        carDatabase = FirebaseHelper.getCarKey(carId)
+        carDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                     val map = dataSnapshot.value as Map<String, Any?>
 
-                    map[NAME]?.let { mNameField.setText(it.toString()) }
-                    map[PHONE]?.let { mPhoneField.setText(it.toString()) }
-                    map[CAR]?.let { mCarField.setText(it.toString()) }
-                    map[PROFILE_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mProfileImage) }
+                    map[FirebaseHelper.CAR_BRAND]?.let { mBrandField.setText(it.toString()) }
+                    map[FirebaseHelper.CAR_MODEL]?.let { mModelField.setText(it.toString()) }
+                    map[FirebaseHelper.CAR_PLATE]?.let { mPlateField.setText(it.toString()) }
+                    map[FirebaseHelper.CAR_YEAR]?.let { mYearField.setText(it.toString()) }
+                    map[FirebaseHelper.CAR_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mCarImage) }
                 }
             }
 
@@ -96,17 +96,28 @@ class DriverProfileFragment : Fragment() {
         })
     }
 
-    private fun saveUserInformation() {
-        val mName = mNameField.text.toString()
-        val mPhone = mPhoneField.text.toString()
-        val mCar = mCarField.text.toString()
+    private fun saveCarInfo() {
 
-        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone, CAR to mCar)
-        mDriverDatabase.updateChildren(userInfo)
+        if (carId.isBlank()) {
+            carId = FirebaseHelper.createCarForDriver(userId)
+            syncCarInfo()
+        }
+
+        val mBrand = mBrandField.text.toString()
+        val mModel = mModelField.text.toString()
+        val mPlate = mPlateField.text.toString()
+        val mYear = mYearField.text.toString()
+
+        val userInfo: HashMap<String, *> = hashMapOf(
+                FirebaseHelper.CAR_BRAND to mBrand,
+                FirebaseHelper.CAR_MODEL to mModel,
+                FirebaseHelper.CAR_PLATE to mPlate,
+                FirebaseHelper.CAR_YEAR to mYear)
+        carDatabase.updateChildren(userInfo)
 
         if (resultUri != null) {
 
-            val filePath = FirebaseHelper.getProfileImages(userID!!)
+            val filePath = FirebaseHelper.getCarImages(carId)
             val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
 
             val baos = ByteArrayOutputStream()
@@ -127,8 +138,8 @@ class DriverProfileFragment : Fragment() {
                     }
                 }
                 downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(PROFILE_IMG_URL to downloadUrl.toString())
-                    mDriverDatabase.updateChildren(newImage)
+                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.CAR_IMG_URL to downloadUrl.toString())
+                    carDatabase.updateChildren(newImage)
                     Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
                     return@OnSuccessListener
                 })
@@ -137,11 +148,16 @@ class DriverProfileFragment : Fragment() {
         } else Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
     }
 
+    private fun deleteCarInfo() {
+        if (!carId.isBlank()) FirebaseHelper.deleteCar(carId, userId)
+        activity!!.supportFragmentManager.popBackStack()
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 1 && resultCode == Activity.RESULT_OK) {
             resultUri = data!!.data
-            mProfileImage.setImageURI(resultUri)
+            mCarImage.setImageURI(resultUri)
         }
     }
 

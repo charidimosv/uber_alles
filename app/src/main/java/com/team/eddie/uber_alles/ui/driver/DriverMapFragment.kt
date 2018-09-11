@@ -26,8 +26,8 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
-import com.team.eddie.uber_alles.utils.FirebaseHelper
-import com.team.eddie.uber_alles.utils.FirebaseHelper.addHistoryForDriverCustomer
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.addHistoryForDriverCustomer
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import java.math.RoundingMode
 import java.text.DecimalFormat

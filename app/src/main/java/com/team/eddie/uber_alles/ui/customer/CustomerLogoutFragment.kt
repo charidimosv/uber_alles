@@ -10,7 +10,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerLogoutBinding
 import com.team.eddie.uber_alles.ui.session.WelcomeActivity
-import com.team.eddie.uber_alles.utils.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 
 class CustomerLogoutFragment : Fragment() {
