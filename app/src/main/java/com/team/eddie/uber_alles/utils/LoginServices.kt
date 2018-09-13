@@ -2,10 +2,7 @@ package com.team.eddie.uber_alles.utils
 
 import io.reactivex.Single
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
+import retrofit2.http.*
 
 
 interface LoginServices {
@@ -16,9 +13,8 @@ interface LoginServices {
      * @param username
      * @param password
      */
-    @FormUrlEncoded
-    @POST("login/previous")
-    fun userLogin(@Field("username") username: String, @Field("password") password: String): Call<Void>
+    @POST("user/login")
+    fun userLogin(@QueryMap params: Map<String, String>): Call<Void>
 
     @POST("login")
     fun login(@Body user: User): Single<User>

@@ -27,7 +27,7 @@ interface RetrofitClient {
     companion object Factory {
 
         //TODO: ENTER YOUR API BASE URL
-        val BASE_URL = "https://192.168.1.3:8443/"  // Production
+        val BASE_URL = "https://SNF-838608.vm.okeanos.grnet.gr:8443/"  // Production
 
         var retrofit: Retrofit? = null
             private set
@@ -45,7 +45,7 @@ interface RetrofitClient {
             interceptor.level = HttpLoggingInterceptor.Level.BODY
 
             val cookieHandler = CookieManager()
-            val clientBuilder = sslConnection(context)
+                    val clientBuilder = sslConnection(context)
             val client = clientBuilder!!.addNetworkInterceptor(interceptor)
                     .cookieJar(JavaNetCookieJar(cookieHandler))
                     .connectTimeout(10, TimeUnit.SECONDS)
@@ -90,14 +90,14 @@ interface RetrofitClient {
 
             // Create a KeyStore containing our trusted CAs
             val keyStore = KeyStore.getInstance("PKCS12").apply {
-                load(cidInput, "changeit".toCharArray())
+                load(cidInput, "eddie123".toCharArray())
                 setCertificateEntry("localhost", ca)
             }
 
             // Create a TrustManager that trusts the CAs inputStream our KeyStore
             val kmfAlgorithm: String = KeyManagerFactory.getDefaultAlgorithm()
             val kmf: KeyManagerFactory = KeyManagerFactory.getInstance(kmfAlgorithm).apply {
-                init(keyStore, "changeit".toCharArray())
+                init(keyStore, "eddie123".toCharArray())
             }
             // Create a TrustManager that trusts the CAs inputStream our KeyStore
             val tmfAlgorithm: String = TrustManagerFactory.getDefaultAlgorithm()

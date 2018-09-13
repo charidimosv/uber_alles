@@ -19,10 +19,13 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentLoginBinding
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.*
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginFragment : Fragment() {
 
@@ -109,6 +112,23 @@ class LoginFragment : Fragment() {
         if (localLogin()) {
             val email = emailTextInputEdit.text.toString()
             val password = passwordTextInputEdit.text.toString()
+
+            //TODO add login to backend server
+            /*val retrofit = RetrofitClient.getClient(applicationContext)
+            val loginServices = retrofit!!.create(LoginServices::class.java)
+
+            val params: HashMap<String, String> = hashMapOf("email" to email, "password" to password)
+            val call = loginServices.userLogin(params)
+                    call.enqueue(object : Callback<Void> {
+                        override fun onFailure(call: Call<Void>?, t: Throwable?) {
+                            Toast.makeText(applicationContext, "Failure", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
+                            Toast.makeText(applicationContext, "All good", Toast.LENGTH_SHORT).show()
+                        }
+                    })*/
+
 
             mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
