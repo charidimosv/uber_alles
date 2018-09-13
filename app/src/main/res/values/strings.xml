@@ -40,6 +40,18 @@
     <string name="pref_default_display_name">John Smith</string>
 
     <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+
+    <string-array name="car_brands_array">
+        <item>Toyota</item>
+        <item>Opel</item>
+        <item>Hyundai</item>
+        <item>BMW</item>
+        <item>Mercedes</item>
+        <item>Lamborghini</item>
+        <item>Ford</item>
+        <item>Subaru</item>
+    </string-array>
+
     <string-array name="pref_example_list_titles">
         <item>Always</item>
         <item>When possible</item>
@@ -195,6 +207,8 @@
     <string name="destination_here">Destination Here</string>
     <string name="problem_saving_photo">There is a problem saving the photo</string>
     <string name="saved_successfully">Saved successfully</string>
+    <string name="next">Next</string>
+    <string name="complete">Complete</string>
 
 
 </resources>

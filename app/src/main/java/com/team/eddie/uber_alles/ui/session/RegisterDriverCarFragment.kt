@@ -1,7 +1,6 @@
-package com.team.eddie.uber_alles.ui.driver
+package com.team.eddie.uber_alles.ui.session
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
@@ -10,27 +9,26 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
+import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import java.io.ByteArrayOutputStream
 
-class DriverCarSingleFragment : Fragment() {
+class RegisterDriverCarFragment : Fragment() {
 
     private lateinit var binding: FragmentDriverCarSingleBinding
-    private lateinit var applicationContext: Context
 
     private lateinit var carDatabase: DatabaseReference
-    private lateinit var carId: String
+    private var carId: String? = null
 
     private val userId: String = FirebaseHelper.getUserId()
 
@@ -42,8 +40,6 @@ class DriverCarSingleFragment : Fragment() {
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
 
-    private lateinit var spOption: Spinner
-
     private lateinit var mSave: Button
     private lateinit var mDelete: Button
 
@@ -51,10 +47,8 @@ class DriverCarSingleFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
-
     ): View? {
         binding = FragmentDriverCarSingleBinding.inflate(inflater, container, false)
-        applicationContext = activity?.applicationContext!!
 
         mCarImage = binding.carImage
         mBrandField = binding.brand
@@ -62,13 +56,8 @@ class DriverCarSingleFragment : Fragment() {
         mPlateField = binding.plate
         mYearField = binding.year
 
-        spOption = binding.spOption
-
         mSave = binding.save
         mDelete = binding.delete
-
-        carId = DriverCarSingleFragmentArgs.fromBundle(arguments).carId
-        if (!carId.isBlank()) syncCarInfo()
 
         mCarImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_PICK)
@@ -76,48 +65,17 @@ class DriverCarSingleFragment : Fragment() {
             startActivityForResult(intent, 1)
         }
 
+        mSave.text = getString(R.string.complete)
         mSave.setOnClickListener { saveCarInfo() }
-        mDelete.setOnClickListener { deleteCarInfo() }
-
-        val adapter: ArrayAdapter<CharSequence> = ArrayAdapter.createFromResource(applicationContext, R.array.car_brands_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spOption.adapter = adapter;
-        spOption.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onNothingSelected(parent: AdapterView<*>) {}
-
-            override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
-                Toast.makeText(applicationContext, parent.getItemAtPosition(pos).toString(), Toast.LENGTH_SHORT).show()
-            }
-        }
+        mDelete.visibility = View.GONE
 
         return binding.root
     }
 
-    private fun syncCarInfo() {
-        carDatabase = FirebaseHelper.getCarKey(carId)
-        carDatabase.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any?>
-
-                    map[FirebaseHelper.CAR_BRAND]?.let { mBrandField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_MODEL]?.let { mModelField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_PLATE]?.let { mPlateField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_YEAR]?.let { mYearField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mCarImage) }
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
-    }
-
     private fun saveCarInfo() {
 
-        if (carId.isBlank()) {
-            carId = FirebaseHelper.createCarForDriver(userId)
-            syncCarInfo()
-        }
+        carId = FirebaseHelper.createCarForDriver(userId)
+        carDatabase = FirebaseHelper.getCarKey(carId!!)
 
         val mBrand = mBrandField.text.toString()
         val mModel = mModelField.text.toString()
@@ -133,7 +91,7 @@ class DriverCarSingleFragment : Fragment() {
 
         if (resultUri != null) {
 
-            val filePath = FirebaseHelper.getCarImages(carId)
+            val filePath = FirebaseHelper.getCarImages(carId!!)
             val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
 
             val baos = ByteArrayOutputStream()
@@ -153,20 +111,15 @@ class DriverCarSingleFragment : Fragment() {
                         return@OnFailureListener
                     }
                 }
-                downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
+                downloadUrlTask.addOnSuccessListener { downloadUrl ->
                     val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.CAR_IMG_URL to downloadUrl.toString())
                     carDatabase.updateChildren(newImage)
-                    Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
-                    return@OnSuccessListener
-                })
+
+                    startActivity(DriverActivity.getLaunchIntent(activity!!))
+                }
                 return@OnSuccessListener
             })
-        } else Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
-    }
-
-    private fun deleteCarInfo() {
-        if (!carId.isBlank()) FirebaseHelper.deleteCar(carId, userId)
-        activity!!.supportFragmentManager.popBackStack()
+        } else startActivity(DriverActivity.getLaunchIntent(activity!!))
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

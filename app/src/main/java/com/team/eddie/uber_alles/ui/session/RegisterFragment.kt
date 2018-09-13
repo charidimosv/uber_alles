@@ -1,46 +1,103 @@
 package com.team.eddie.uber_alles.ui.session
 
+import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.widget.Switch
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.navigation.NavDirections
+import androidx.navigation.findNavController
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.ui.customer.CustomerActivity
-import com.team.eddie.uber_alles.ui.driver.DriverActivity
+import com.team.eddie.uber_alles.databinding.FragmentRegisterBinding
 import com.team.eddie.uber_alles.utils.*
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.EMAIL
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.IS_DRIVER
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PASSWORD
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.USERNAME
-import kotlinx.android.synthetic.main.activity_register.*
 
-class RegisterActivity : AppCompatActivity() {
+class RegisterFragment : Fragment() {
+
+    private lateinit var binding: FragmentRegisterBinding
+    private lateinit var applicationContext: Context
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_register)
+    private lateinit var usernameTextInput: TextInputLayout
+    private lateinit var usernameTextInputEdit: TextInputEditText
+
+    private lateinit var emailTextInput: TextInputLayout
+    private lateinit var emailTextInputEdit: TextInputEditText
+
+    private lateinit var passwordTextInput: TextInputLayout
+    private lateinit var passwordTextInputEdit: TextInputEditText
+
+    private lateinit var repeatPasswordTextInput: TextInputLayout
+    private lateinit var repeatPasswordTextInputEdit: TextInputEditText
+
+    private lateinit var registerButton: MaterialButton
+    private lateinit var backButton: MaterialButton
+
+    private lateinit var driverSwitch: Switch
+
+
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
+        binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        applicationContext = activity?.applicationContext!!
+
+        usernameTextInput = binding.usernameTextInput
+        usernameTextInputEdit = binding.usernameTextInputEdit
+
+        emailTextInput = binding.emailTextInput
+        emailTextInputEdit = binding.emailTextInputEdit
+
+        passwordTextInput = binding.passwordTextInput
+        passwordTextInputEdit = binding.passwordTextInputEdit
+
+        repeatPasswordTextInput = binding.repeatPasswordTextInput
+        repeatPasswordTextInputEdit = binding.repeatPasswordTextInputEdit
+
+        registerButton = binding.registerButton
+        backButton = binding.backButton
+
+        driverSwitch = binding.driverSwitch
+
 
         mAuth = FirebaseAuth.getInstance()
-
         firebaseAuthListener = FirebaseAuth.AuthStateListener {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) onRegisterSuccess()
         }
 
         registerButton.setOnClickListener { attemptRegister() }
-        backButton.setOnClickListener { startActivity(WelcomeActivity.getLaunchIntent(this)) }
+        backButton.setOnClickListener { activity!!.supportFragmentManager.popBackStack() }
 
+        return binding.root
     }
 
     override fun onStart() {
         super.onStart()
-        mAuth.addAuthStateListener(firebaseAuthListener)
+
+        if (SaveSharedPreference.isLoggedIn(applicationContext)) {
+            FirebaseHelper.cleanUser(FirebaseHelper.getUserId())
+            mAuth.currentUser?.delete()?.addOnCompleteListener {
+                SaveSharedPreference.cleanAll(applicationContext)
+                mAuth.addAuthStateListener(firebaseAuthListener)
+            }
+        } else mAuth.addAuthStateListener(firebaseAuthListener)
     }
 
     override fun onStop() {
@@ -52,10 +109,10 @@ class RegisterActivity : AppCompatActivity() {
         SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
         SaveSharedPreference.setUserType(applicationContext, driverSwitch.isChecked)
 
-        if (driverSwitch.isChecked)
-            startActivity(DriverActivity.getLaunchIntent(this))
-        else
-            startActivity(CustomerActivity.getLaunchIntent(this))
+        val direction: NavDirections =
+                if (driverSwitch.isChecked) RegisterFragmentDirections.actionRegisterFragmentToRegisterDriverProfileFragment()
+                else RegisterFragmentDirections.actionRegisterFragmentToRegisterCustomerProfileFragment()
+        binding.root.findNavController().navigate(direction)
     }
 
     private fun attemptRegister() {
@@ -65,9 +122,9 @@ class RegisterActivity : AppCompatActivity() {
             val password = passwordTextInputEdit.text.toString()
             val username = usernameTextInputEdit.text.toString()
 
-            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
+            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                 if (!task.isSuccessful)
-                    Toast.makeText(this, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
                 else {
                     val userId = mAuth.currentUser!!.uid
                     val userReference = FirebaseHelper.getUserInfo(userId)

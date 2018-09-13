@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_intro"
+    app:startDestination="@id/welcomeFragment">
+
+    <fragment
+        android:id="@+id/welcomeFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.WelcomeFragment"
+        android:label="WelcomeFragment"
+        tools:layout="@layout/fragment_welcome">
+
+        <action
+            android:id="@+id/action_welcomeFragment_to_loginFragment"
+            app:destination="@id/loginFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_welcomeFragment_to_registerFragment"
+            app:destination="@id/registerFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.LoginFragment"
+        android:label="LoginFragment"
+        tools:layout="@layout/fragment_login" />
+
+    <fragment
+        android:id="@+id/registerFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.RegisterFragment"
+        android:label="RegisterFragment"
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_registerFragment_to_registerCustomerProfileFragment"
+            app:destination="@id/registerCustomerProfileFragment" />
+        <action
+            android:id="@+id/action_registerFragment_to_registerDriverProfileFragment"
+            app:destination="@id/registerDriverProfileFragment" />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/registerDriverProfileFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.RegisterDriverProfileFragment"
+        android:label="RegisterDriverProfileFragment"
+        tools:layout="@layout/fragment_driver_profile">
+
+        <action
+            android:id="@+id/action_registerDriverProfileFragment_to_registerDriverCarFragment"
+            app:destination="@id/registerDriverCarFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/registerDriverCarFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.RegisterDriverCarFragment"
+        android:label="RegisterDriverCarFragment"
+        tools:layout="@layout/fragment_driver_car_single" />
+
+    <fragment
+        android:id="@+id/registerCustomerProfileFragment"
+        android:name="com.team.eddie.uber_alles.ui.session.RegisterCustomerProfileFragment"
+        android:label="RegisterCustomerProfileFragment"
+        tools:layout="@layout/fragment_customer_profile" />
+
+</navigation>

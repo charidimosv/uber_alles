@@ -94,6 +94,10 @@ object FirebaseHelper {
         return getUserCar(userId).child(carId)
     }
 
+    fun cleanUser(userId: String) {
+        getUser(userId).removeValue()
+    }
+
     // driver
     fun getDriverCustomerReq(driverID: String): DatabaseReference {
         return getUser(driverID).child(CUSTOMER_REQ)

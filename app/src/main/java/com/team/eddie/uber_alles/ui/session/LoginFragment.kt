@@ -1,31 +1,62 @@
 package com.team.eddie.uber_alles.ui.session
 
+import android.content.Context
 import android.os.Bundle
 import android.text.TextUtils
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.databinding.FragmentLoginBinding
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
-import kotlinx.android.synthetic.main.activity_login.*
 
-class LoginActivity : AppCompatActivity() {
+class LoginFragment : Fragment() {
+
+    private lateinit var applicationContext: Context
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var firebaseAuthListener: FirebaseAuth.AuthStateListener
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_login)
+    private lateinit var emailTextInput: TextInputLayout
+    private lateinit var emailTextInputEdit: TextInputEditText
+
+    private lateinit var passwordTextInput: TextInputLayout
+    private lateinit var passwordTextInputEdit: TextInputEditText
+
+    private lateinit var logInButton: MaterialButton
+    private lateinit var backButton: MaterialButton
+
+    override fun onCreateView(
+            inflater: LayoutInflater,
+            container: ViewGroup?,
+            savedInstanceState: Bundle?
+    ): View? {
+        val binding = FragmentLoginBinding.inflate(inflater, container, false)
+
+        applicationContext = activity?.applicationContext!!
+
+        emailTextInput = binding.emailTextInput
+        emailTextInputEdit = binding.emailTextInputEdit
+
+        passwordTextInput = binding.passwordTextInput
+        passwordTextInputEdit = binding.passwordTextInputEdit
+
+        logInButton = binding.logInButton
+        backButton = binding.backButton
 
         mAuth = FirebaseAuth.getInstance()
 
@@ -35,8 +66,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         logInButton.setOnClickListener { attemptLogin() }
-        backButton.setOnClickListener { startActivity(WelcomeActivity.getLaunchIntent(this)) }
+        backButton.setOnClickListener { activity!!.supportFragmentManager.popBackStack() }
 
+        return binding.root
     }
 
     override fun onStart() {
@@ -61,9 +93,9 @@ class LoginActivity : AppCompatActivity() {
                     SaveSharedPreference.setUserType(applicationContext, isDriver)
 
                     if (isDriver)
-                        startActivity(DriverActivity.getLaunchIntent(this@LoginActivity))
+                        startActivity(DriverActivity.getLaunchIntent(activity!!))
                     else
-                        startActivity(CustomerActivity.getLaunchIntent(this@LoginActivity))
+                        startActivity(CustomerActivity.getLaunchIntent(activity!!))
                 } else
                     Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT).show()
             }
@@ -78,8 +110,8 @@ class LoginActivity : AppCompatActivity() {
             val email = emailTextInputEdit.text.toString()
             val password = passwordTextInputEdit.text.toString()
 
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
-                if (!task.isSuccessful) Toast.makeText(this, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
+            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
             }
         }
     }

@@ -12,7 +12,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.databinding.FragmentDriverLogoutBinding
-import com.team.eddie.uber_alles.ui.session.WelcomeActivity
+import com.team.eddie.uber_alles.ui.session.IntroActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
@@ -31,7 +31,7 @@ class DriverLogoutFragment : Fragment() {
         FirebaseHelper.getDriverCustomerRide(userId)
                 .addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        var customerId: String? = if (dataSnapshot.exists()) dataSnapshot.value!!.toString() else ""
+                        val customerId: String? = if (dataSnapshot.exists()) dataSnapshot.value!!.toString() else ""
 
                         if (TextUtils.isEmpty(customerId)) {
                             isLoggingOut = true
@@ -39,7 +39,7 @@ class DriverLogoutFragment : Fragment() {
 
                             SaveSharedPreference.cleanAll(activity!!.applicationContext)
                             FirebaseAuth.getInstance().signOut()
-                            startActivity(WelcomeActivity.getLaunchIntent(activity!!))
+                            startActivity(IntroActivity.getLaunchIntent(activity!!))
                         } else
                             binding.driverLogout.setText("Ride must be ended before you can logout")
                     }

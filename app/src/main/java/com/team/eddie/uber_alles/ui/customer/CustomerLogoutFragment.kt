@@ -9,7 +9,7 @@ import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerLogoutBinding
-import com.team.eddie.uber_alles.ui.session.WelcomeActivity
+import com.team.eddie.uber_alles.ui.session.IntroActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
@@ -30,7 +30,7 @@ class CustomerLogoutFragment : Fragment() {
 
             SaveSharedPreference.cleanAll(activity!!.applicationContext)
             FirebaseAuth.getInstance().signOut()
-            startActivity(WelcomeActivity.getLaunchIntent(activity!!))
+            startActivity(IntroActivity.getLaunchIntent(activity!!))
         } else
             binding.customerLogout.text = getString(R.string.end_ride_before_logout)
 

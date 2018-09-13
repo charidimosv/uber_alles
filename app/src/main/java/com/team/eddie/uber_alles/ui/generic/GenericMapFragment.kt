@@ -19,7 +19,6 @@ import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import java.lang.Exception
 import java.util.*
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1

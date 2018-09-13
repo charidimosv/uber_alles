@@ -45,7 +45,7 @@ import java.util.*
 
 class CustomerMapFragment : GenericMapFragment() {
 
-    lateinit var binding: FragmentCustomerMapBinding
+    private lateinit var binding: FragmentCustomerMapBinding
 
     private var pickupLocationQuery: GeoQuery? = null
     private var pickupLocation: LatLng? = null

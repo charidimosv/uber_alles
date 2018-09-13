@@ -32,8 +32,8 @@ class CustomerActivity : AppCompatActivity() {
         val navController = Navigation.findNavController(this, R.id.customer_nav_fragment)
 
         // Set up ActionBar
-        setSupportActionBar(binding.toolbar)
-        NavigationUI.setupActionBarWithNavController(this, navController, drawerLayout)
+//        setSupportActionBar(binding.toolbar)
+//        NavigationUI.setupActionBarWithNavController(this, navController, drawerLayout)
 
         // Set up navigation menu
         binding.navigationView.setupWithNavController(navController)
