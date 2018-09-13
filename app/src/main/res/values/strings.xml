@@ -2,10 +2,10 @@
     <string name="app_name">uber_alles</string>
     <string name="app_real_name">uber alles</string>
 
-    <string name="prompt_username">Username</string>
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password</string>
-    <string name="prompt_repeat_password">Repeat Password</string>
+    <string name="prompt_username">"   "Username</string>
+    <string name="prompt_email">"   "Email</string>
+    <string name="prompt_password">"   "Password</string>
+    <string name="prompt_repeat_password">"   "Repeat Password</string>
     <string name="prompt_driver">I \'m a driver</string>
 
     <string name="action_sign_in">Sign in</string>

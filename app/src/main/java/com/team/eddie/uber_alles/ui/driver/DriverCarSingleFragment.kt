@@ -9,10 +9,9 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
+import android.widget.ArrayAdapter
+import android.widget.Toast.LENGTH_LONG
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
@@ -24,6 +23,7 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import kotlinx.android.synthetic.main.fragment_driver_car_single.*
 import java.io.ByteArrayOutputStream
 
 class DriverCarSingleFragment : Fragment() {
@@ -43,6 +43,8 @@ class DriverCarSingleFragment : Fragment() {
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
 
+
+
     private lateinit var mSave: Button
     private lateinit var mDelete: Button
 
@@ -50,6 +52,7 @@ class DriverCarSingleFragment : Fragment() {
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
+
     ): View? {
         binding = FragmentDriverCarSingleBinding.inflate(inflater, container, false)
 
@@ -71,9 +74,25 @@ class DriverCarSingleFragment : Fragment() {
             startActivityForResult(intent, 1)
         }
 
+
+
         mSave.setOnClickListener { saveCarInfo() }
         mDelete.setOnClickListener { deleteCarInfo() }
 
+//        val cars = arrayOf("Toyota", "Opel", "Hyundai", "BMW", "Mercedes", "Lamborghini", "Ford", "Subaru")
+//        sp_option.setOnClickListener {
+//            sp_option.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, cars)
+//            sp_option.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+//                override fun onNothingSelected(parent: AdapterView<*>?) {
+//                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//                }
+//
+//                override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
+//                    Toast.makeText(this@DriverCarSingleFragment, sp_option[p2], LENGTH_LONG).show()
+//                }
+//
+//            }
+//        }
         return binding.root
     }
 
