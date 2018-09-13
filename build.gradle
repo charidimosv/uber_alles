@@ -8,9 +8,9 @@ buildscript {
         minSdkVersion = 24
 
         // App dependencies
-        kotlinVersion = '1.2.61'
-        gradleVersion = '3.3.0-alpha07'
-        gradleVersionOld = '3.2.0-rc02'
+        kotlinVersion = '1.2.70'
+        gradleVersion = '3.2.0-rc03'
+        // DO NOT UPDATE IT - NEVER!
     }
 
     repositories {

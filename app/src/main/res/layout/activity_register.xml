@@ -38,6 +38,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/usernameTextInput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_username"
@@ -53,12 +54,13 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailTextInput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_email"
                 app:errorEnabled="true">
 
-                <AutoCompleteTextView
+                <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/emailTextInputEdit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -69,6 +71,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordTextInput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_password"
@@ -84,6 +87,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/repeatPasswordTextInput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/prompt_repeat_password"

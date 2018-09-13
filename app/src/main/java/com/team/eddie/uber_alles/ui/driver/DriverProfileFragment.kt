@@ -25,7 +25,6 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverProfileBinding
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CAR
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.NAME
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PHONE
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PROFILE_IMG_URL
@@ -43,7 +42,6 @@ class DriverProfileFragment : Fragment() {
 
     private lateinit var mNameField: EditText
     private lateinit var mPhoneField: EditText
-    private lateinit var mCarField: EditText
 
     private lateinit var mConfirm: Button
 
@@ -58,7 +56,6 @@ class DriverProfileFragment : Fragment() {
 
         mNameField = binding.name
         mPhoneField = binding.phone
-        mCarField = binding.car
         mProfileImage = binding.profileImage
 
         mConfirm = binding.confirm
@@ -87,7 +84,6 @@ class DriverProfileFragment : Fragment() {
 
                     map[NAME]?.let { mNameField.setText(it.toString()) }
                     map[PHONE]?.let { mPhoneField.setText(it.toString()) }
-                    map[CAR]?.let { mCarField.setText(it.toString()) }
                     map[PROFILE_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mProfileImage) }
                 }
             }
@@ -99,9 +95,8 @@ class DriverProfileFragment : Fragment() {
     private fun saveUserInformation() {
         val mName = mNameField.text.toString()
         val mPhone = mPhoneField.text.toString()
-        val mCar = mCarField.text.toString()
 
-        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone, CAR to mCar)
+        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone)
         mDriverDatabase.updateChildren(userInfo)
 
         if (resultUri != null) {
