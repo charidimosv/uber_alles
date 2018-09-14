@@ -23,6 +23,9 @@ import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.EMAIL
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.IS_DRIVER
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PASSWORD
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.USERNAME
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class RegisterFragment : Fragment() {
 
@@ -122,22 +125,47 @@ class RegisterFragment : Fragment() {
             val password = passwordTextInputEdit.text.toString()
             val username = usernameTextInputEdit.text.toString()
 
-            mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                if (!task.isSuccessful)
-                    Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
-                else {
-                    val userId = mAuth.currentUser!!.uid
-                    val userReference = FirebaseHelper.getUserInfo(userId)
+            val retrofit = RetrofitClient.getClient(applicationContext)
+            val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-                    val userInfo: HashMap<String, *> = hashMapOf(
-                            EMAIL to email,
-                            USERNAME to username,
-                            PASSWORD to password,
-                            IS_DRIVER to driverSwitch.isChecked)
-                    userReference.updateChildren(userInfo)
+            val params: HashMap<String, String> = hashMapOf("email" to email, "password" to password)
+            val call = sessionServices.registerCheck(params)
+            call.enqueue(object : Callback<Boolean> {
+                override fun onFailure(call: Call<Boolean>?, t: Throwable?) {
+                    Toast.makeText(applicationContext, "Service is anavailable right now", Toast.LENGTH_SHORT).show()
                 }
-            }
 
+                override fun onResponse(call: Call<Boolean>?, response: Response<Boolean>?) {
+                    val userExists = response!!.body()
+                    if (userExists!!)
+                        Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
+                    else{
+                        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                            if (!task.isSuccessful)
+                                Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
+                            else {
+
+                                val userId = mAuth.currentUser!!.uid
+
+                                val userInfo = hashMapOf(
+                                        EMAIL to email,
+                                        USERNAME to username,
+                                        PASSWORD to password,
+                                        IS_DRIVER to driverSwitch.isChecked)
+                                
+                                val registerCall = sessionServices.register(userId, userInfo)
+                                registerCall.enqueue(object : Callback<Void> {
+                                    override fun onFailure(call: Call<Void>, t: Throwable) {
+                                        Toast.makeText(applicationContext, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
+                                    }
+                                    override fun onResponse(call: Call<Void>, response: Response<Void>) {}
+                                })
+                            }
+                        }
+
+                    }
+                }
+            })
         }
     }
 

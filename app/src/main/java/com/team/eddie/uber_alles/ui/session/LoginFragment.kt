@@ -12,17 +12,14 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentLoginBinding
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
-import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.isEmailValid
-import com.team.eddie.uber_alles.utils.isPasswordValid
+import com.team.eddie.uber_alles.utils.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class LoginFragment : Fragment() {
 
@@ -39,6 +36,9 @@ class LoginFragment : Fragment() {
 
     private lateinit var logInButton: MaterialButton
     private lateinit var backButton: MaterialButton
+
+    private var isDriver: Boolean = false
+    private var userExists: Boolean = false
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -82,26 +82,13 @@ class LoginFragment : Fragment() {
     }
 
     private fun onLoginSuccess() {
-        val userId = mAuth.currentUser!!.uid
-        FirebaseHelper.getUserIsDriver(userId).addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
+        SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
+        SaveSharedPreference.setUserType(applicationContext, isDriver)
 
-                    val isDriver: Boolean = dataSnapshot.value.toString().toBoolean()
-
-                    SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
-                    SaveSharedPreference.setUserType(applicationContext, isDriver)
-
-                    if (isDriver)
-                        startActivity(DriverActivity.getLaunchIntent(activity!!))
-                    else
-                        startActivity(CustomerActivity.getLaunchIntent(activity!!))
-                } else
-                    Toast.makeText(applicationContext, "There is a problem retrieving info", Toast.LENGTH_SHORT).show()
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+        if (isDriver)
+            startActivity(DriverActivity.getLaunchIntent(activity!!))
+        else
+            startActivity(CustomerActivity.getLaunchIntent(activity!!))
     }
 
     private fun attemptLogin() {
@@ -110,26 +97,29 @@ class LoginFragment : Fragment() {
             val email = emailTextInputEdit.text.toString()
             val password = passwordTextInputEdit.text.toString()
 
-            //TODO add login to backend server
-            /*val retrofit = RetrofitClient.getClient(applicationContext)
-            val loginServices = retrofit!!.create(LoginServices::class.java)
+            val retrofit = RetrofitClient.getClient(applicationContext)
+            val sessionServices = retrofit!!.create(SessionServices::class.java)
 
             val params: HashMap<String, String> = hashMapOf("email" to email, "password" to password)
-            val call = loginServices.userLogin(params)
-                    call.enqueue(object : Callback<Void> {
-                        override fun onFailure(call: Call<Void>?, t: Throwable?) {
-                            Toast.makeText(applicationContext, "Failure", Toast.LENGTH_SHORT).show()
+            val call = sessionServices.login(params)
+            call.enqueue(object : Callback<Map<String, Boolean>> {
+                override fun onFailure(call: Call<Map<String, Boolean>>?, t: Throwable?) {
+                    Toast.makeText(applicationContext, "Service is anavailable right now", Toast.LENGTH_SHORT).show()
+                }
+
+                override fun onResponse(call: Call<Map<String, Boolean>>?, response: Response<Map<String, Boolean>>?) {
+                    val result = response!!.body()
+                    isDriver = result!!["isDriver"]!!
+                    userExists = result!!["userExists"]!!
+                    if (userExists)
+                        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
+                            if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
                         }
+                    else
+                        Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
+                }
+            })
 
-                        override fun onResponse(call: Call<Void>?, response: Response<Void>?) {
-                            Toast.makeText(applicationContext, "All good", Toast.LENGTH_SHORT).show()
-                        }
-                    })*/
-
-
-            mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
-                if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 

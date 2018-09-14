@@ -5,6 +5,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.database.DataSnapshot
+import android.R.attr.countDown
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
+import java.util.concurrent.CountDownLatch
 
 
 object FirebaseHelper {
@@ -42,7 +47,12 @@ object FirebaseHelper {
 
     const val DESTINATION_LAT: String = "destinationLat"
     const val DESTINATION_LOT: String = "destinationLng"
-    const val CUSTOMER_RIDE_ID: String = "customerRideId";
+    const val CUSTOMER_RIDE_ID: String = "customerRideId"
+
+    const val RIDE_STATUS: String = "rideStatus"
+    const val RIDE_STATUS_REQUEST: String = "request"
+    const val RIDE_STATUS_ACCEPTED: String = "accepted"
+    const val RIDE_STATUS_RIDE: String = "ride"
 
     private const val INFO: String = "info"
     const val RATING: String = "rating"
@@ -58,6 +68,8 @@ object FirebaseHelper {
 
     private const val PROFILE_IMGS: String = "profile_images"
     private const val CAR_IMGS: String = "car_images"
+
+    private lateinit var snapshot: DataSnapshot
 
 
     // general
@@ -226,6 +238,27 @@ object FirebaseHelper {
     // auth
     fun getUserId(): String {
         return FirebaseAuth.getInstance().currentUser!!.uid
+    }
+
+
+    fun loadSynchronous(databaseReference: DatabaseReference): DataSnapshot? {
+        val latch = CountDownLatch(1)
+        val listener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                snapshot = dataSnapshot
+                latch.countDown()
+            }
+
+            override fun onCancelled(dbError: DatabaseError) {
+                println("Error loading location")
+                latch.countDown()
+            }
+        }
+        databaseReference.addListenerForSingleValueEvent(listener)
+        latch.await()
+        databaseReference.removeEventListener(listener)
+        return snapshot
+
     }
 
 }
