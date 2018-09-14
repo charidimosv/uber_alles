@@ -6,6 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -17,15 +20,16 @@ import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
 
 class GenericChatFragment : androidx.fragment.app.Fragment() {
-    var layout: LinearLayout? = null
-    var layout_2: RelativeLayout? = null
-    var sendButton: ImageView? = null
-    var messageArea: EditText? = null
-    var scrollView: ScrollView? = null
-    var reference1: DatabaseReference? = null
-    var reference2: DatabaseReference? = null
+    private lateinit var layout: LinearLayout
+    private lateinit var layout_2: RelativeLayout
+    private lateinit var sendButton: MaterialButton
+    private lateinit var messageAreaLayout: TextInputLayout
+    private lateinit var messageArea: TextInputEditText
+    private lateinit var scrollView: ScrollView
+    private lateinit var reference1: DatabaseReference
+    private lateinit var reference2: DatabaseReference
 
-    var addListener: ChildEventListener? = null
+    private lateinit var addListener: ChildEventListener
 
     var NEW_MESSAGE_PUSHED: String = "newMessagePushed"
 
@@ -42,6 +46,7 @@ class GenericChatFragment : androidx.fragment.app.Fragment() {
         layout_2 = binding.layout2
         sendButton = binding.sendButton
         messageArea = binding.messageArea
+        messageAreaLayout = binding.messageAreaLayout
         scrollView = binding.scrollView
 
         val senderName = SaveSharedPreference.getChatSender(activity!!.applicationContext)
@@ -49,18 +54,18 @@ class GenericChatFragment : androidx.fragment.app.Fragment() {
         reference1 = FirebaseHelper.getMessage().child(senderName + "_to_" + receiverName)
         reference2 = FirebaseHelper.getMessage().child(receiverName + "_to_" + senderName)
 
-        sendButton?.setOnClickListener {
-            val messageText = messageArea?.text.toString()
+        sendButton.setOnClickListener {
+            val messageText = messageArea.text.toString()
             if (messageText != "") {
                 val map = hashMapOf("message" to messageText, "user" to senderName)
-                reference1?.push()?.setValue(map)
-                reference2?.child("newMessagePushed")?.setValue(true)
-                reference2?.push()?.setValue(map)
+                reference1.push().setValue(map)
+                reference2.child("newMessagePushed").setValue(true)
+                reference2.push().setValue(map)
 
             }
         }
 
-        addListener = reference1?.addChildEventListener(object : ChildEventListener {
+        addListener = reference1.addChildEventListener(object : ChildEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onChildMoved(p0: DataSnapshot, p1: String?) {}
@@ -79,14 +84,13 @@ class GenericChatFragment : androidx.fragment.app.Fragment() {
                         if (userName == senderName)
                             addMessageBox("You:-\n" + message, 1)
                         else
-                            addMessageBox(receiverName + ":-\n" + message, 2)
+                            addMessageBox("$receiverName:-\n$message", 2)
                     } else
-                        reference1!!.child("newMessagePushed").removeValue()
+                        reference1.child("newMessagePushed").removeValue()
                 }
             }
 
         })
-
 
         return binding.root
     }
@@ -100,21 +104,21 @@ class GenericChatFragment : androidx.fragment.app.Fragment() {
         lp2.weight = 1.0f
 
         if (type == 1) {
-            lp2.gravity = Gravity.RIGHT
+            lp2.gravity = Gravity.END
             textView.setBackgroundResource(R.drawable.bubble_out)
         } else {
-            lp2.gravity = Gravity.LEFT
+            lp2.gravity = Gravity.START
             textView.setBackgroundResource(R.drawable.bubble_in)
         }
         textView.layoutParams = lp2
-        layout?.addView(textView)
-        scrollView?.fullScroll(View.FOCUS_DOWN)
+        layout.addView(textView)
+        scrollView.fullScroll(View.FOCUS_DOWN)
 
-        messageArea?.text?.clear()
+        messageArea.text?.clear()
     }
 
     override fun onStop() {
         super.onStop()
-        reference1?.removeEventListener(addListener!!)
+        reference1.removeEventListener(addListener)
     }
 }

@@ -6,8 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:padding="20sp"
-        tools:context="com.simcoder.uber.CustomerSettingsActivity">
+        android:padding="20sp">
 
         <ImageView
             android:id="@+id/profileImage"
@@ -30,7 +29,6 @@
                 android:inputType="text"
                 android:maxLines="1"
                 android:singleLine="true" />
-
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout

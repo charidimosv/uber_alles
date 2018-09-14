@@ -5,7 +5,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RatingBar
+import android.widget.TextView
 import androidx.navigation.findNavController
 import com.bumptech.glide.Glide
 import com.firebase.geofire.GeoFire
@@ -26,6 +29,8 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -68,7 +73,9 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mDriverCar: TextView
 
     private lateinit var mRatingBar: RatingBar
-    private lateinit var mRatingText: EditText
+
+    private lateinit var ratingTextLayout: TextInputLayout
+    private lateinit var mRatingText: TextInputEditText
     private lateinit var mRatingButton: MaterialButton
     private var mRatingAvg: TextView? = null
 
@@ -133,6 +140,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         mRatingBar = binding.ratingBar
         mRatingText = binding.ratingText
+        ratingTextLayout = binding.ratingTextLayout
         mRatingButton = binding.ratingButton
         mRatingAvg = binding.ratingAvg
 
@@ -435,7 +443,7 @@ class CustomerMapFragment : GenericMapFragment() {
             mRatingBar.numStars = 5
             mRatingAvg?.visibility = View.GONE
             mRatingButton.visibility = View.VISIBLE
-            mRatingText.visibility = View.VISIBLE
+            ratingTextLayout.visibility = View.VISIBLE
             mRequest.text = getString(R.string.ride_ended)
         } else
             clearDriversInfo()
@@ -456,7 +464,7 @@ class CustomerMapFragment : GenericMapFragment() {
         mDriverProfileImage.setImageResource(R.mipmap.ic_default_user)
 
         mRatingButton.visibility = View.GONE
-        mRatingText.visibility = View.GONE
+        ratingTextLayout.visibility = View.GONE
         mRatingBar.rating = 0.toFloat()
         mRatingBar.setIsIndicator(false)
         mRatingBar.numStars = 1

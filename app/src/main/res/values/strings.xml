@@ -211,6 +211,9 @@
     <string name="saved_successfully">Saved successfully</string>
     <string name="next">Next</string>
     <string name="complete">Complete</string>
+    <string name="rate_your_driver">Rate your driver</string>
+    <string name="write_message">Write a message...</string>
+    <string name="send_button">Send Button</string>
 
 
 </resources>
