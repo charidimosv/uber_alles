@@ -45,6 +45,7 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ui.generic.UserActivity" />
         <activity android:name=".ui.customer.CustomerActivity" />
         <activity android:name=".ui.driver.DriverActivity" />
 

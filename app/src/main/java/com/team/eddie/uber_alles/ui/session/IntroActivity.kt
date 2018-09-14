@@ -21,7 +21,6 @@ class IntroActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        // Check if user is already LoggedIn
         if (SaveSharedPreference.isLoggedIn(applicationContext)) {
             if (SaveSharedPreference.isDriver(applicationContext))
                 startActivity(DriverActivity.getLaunchIntent(this))
@@ -30,7 +29,6 @@ class IntroActivity : AppCompatActivity() {
         }
 
         super.onCreate(savedInstanceState)
-        val binding: ActivityIntroBinding = DataBindingUtil.setContentView(this, R.layout.activity_intro)
+        DataBindingUtil.setContentView(this, R.layout.activity_intro) as ActivityIntroBinding
     }
-
 }
