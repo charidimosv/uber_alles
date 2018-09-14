@@ -9,6 +9,8 @@
     <string name="prompt_driver">I \'m a driver</string>
 
     <string name="action_sign_in">Sign in</string>
+    <string name="action_log_in">Log in</string>
+    <string name="action_sing_up">Sign up</string>
     <string name="logout">Logout</string>
 
     <string name="error_invalid_email">This email address is invalid</string>

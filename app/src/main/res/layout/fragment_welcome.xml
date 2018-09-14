@@ -15,7 +15,7 @@
             android:layout_width="64dp"
             android:layout_height="64dp"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="150dp"
             android:layout_marginBottom="16dp"
             android:contentDescription="@string/app_real_name"
             app:srcCompat="@drawable/shr_logo" />
@@ -33,19 +33,39 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/loginButton"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:text="@string/log_in_button" />
+                android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
+                tools:ignore="UselessParent">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/registerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:text="@string/register_button" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/loginButton"
+                    android:padding="20sp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="70dp"
+                    android:backgroundTint="@color/colorTeal"
+                    android:text="@string/action_log_in"
+                    android:drawableStart="@drawable/ic_sign"
+                    android:textColor="@android:color/white" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:padding="20sp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:background="@color/colorAccent"
+                    android:text="@string/action_sing_up"
+                    android:id="@+id/registerButton"
+                    android:drawableLeft="@drawable/ic_signup"
+                    android:textColor="@android:color/white" />
+
+
+            </LinearLayout>
+
+
         </RelativeLayout>
 
     </LinearLayout>
