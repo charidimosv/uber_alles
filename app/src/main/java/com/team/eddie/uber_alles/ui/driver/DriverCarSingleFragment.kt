@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -44,8 +45,8 @@ class DriverCarSingleFragment : Fragment() {
 
     private lateinit var spOption: Spinner
 
-    private lateinit var mSave: Button
-    private lateinit var mDelete: Button
+    private lateinit var mSave: MaterialButton
+    private lateinit var mDelete: MaterialButton
 
     override fun onCreateView(
             inflater: LayoutInflater,

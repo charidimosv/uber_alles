@@ -25,6 +25,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -60,7 +61,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mDriverInfo: LinearLayout
     private lateinit var mDriverProfileImage: ImageView
 
-    private lateinit var mRequest: Button
+    private lateinit var mRequest: MaterialButton
 
     private lateinit var mDriverName: TextView
     private lateinit var mDriverPhone: TextView
@@ -68,7 +69,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
     private lateinit var mRatingBar: RatingBar
     private lateinit var mRatingText: EditText
-    private lateinit var mRatingButton: Button
+    private lateinit var mRatingButton: MaterialButton
     private var mRatingAvg: TextView? = null
 
     private var destination: String? = null

@@ -45,7 +45,7 @@ interface RetrofitClient {
             interceptor.level = HttpLoggingInterceptor.Level.BODY
 
             val cookieHandler = CookieManager()
-                    val clientBuilder = sslConnection(context)
+            val clientBuilder = sslConnection(context)
             val client = clientBuilder!!.addNetworkInterceptor(interceptor)
                     .cookieJar(JavaNetCookieJar(cookieHandler))
                     .connectTimeout(10, TimeUnit.SECONDS)

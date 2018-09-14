@@ -19,13 +19,10 @@ import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentLoginBinding
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
-import com.team.eddie.uber_alles.utils.*
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.isEmailValid
 import com.team.eddie.uber_alles.utils.isPasswordValid
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class LoginFragment : Fragment() {
 

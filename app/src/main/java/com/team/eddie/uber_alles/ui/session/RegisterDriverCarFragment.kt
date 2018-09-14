@@ -9,13 +9,13 @@ import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.database.DatabaseReference
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
@@ -40,8 +40,8 @@ class RegisterDriverCarFragment : Fragment() {
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
 
-    private lateinit var mSave: Button
-    private lateinit var mDelete: Button
+    private lateinit var mSave: MaterialButton
+    private lateinit var mDelete: MaterialButton
 
     override fun onCreateView(
             inflater: LayoutInflater,

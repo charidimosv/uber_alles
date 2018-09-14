@@ -89,14 +89,14 @@
                 android:stepSize="1"
                 android:visibility="gone" />
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/pay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false"
                 android:text="Pay Here"
                 android:visibility="gone" />
-        </LinearLayout>
 
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </layout>

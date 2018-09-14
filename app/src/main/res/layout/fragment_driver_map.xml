@@ -94,7 +94,7 @@
                         android:paddingBottom="10sp"
                         android:visibility="gone" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/ratingButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -107,14 +107,14 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal">
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/callCustomer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
                             android:text="Call" />
 
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/chatCustomer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -126,13 +126,11 @@
 
             </LinearLayout>
 
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/rideStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Picked Customer" />
-
-
         </LinearLayout>
 
     </FrameLayout>
