@@ -48,9 +48,9 @@ interface RetrofitClient {
             val clientBuilder = sslConnection(context)
             val client = clientBuilder!!.addNetworkInterceptor(interceptor)
                     .cookieJar(JavaNetCookieJar(cookieHandler))
-                    .connectTimeout(10, TimeUnit.SECONDS)
-                    .writeTimeout(10, TimeUnit.SECONDS)
-                    .readTimeout(30, TimeUnit.SECONDS)
+                    .connectTimeout(1000, TimeUnit.SECONDS)
+                    .writeTimeout(1000, TimeUnit.SECONDS)
+                    .readTimeout(3000, TimeUnit.SECONDS)
                     .build()
 
             val gson = GsonBuilder()

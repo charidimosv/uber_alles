@@ -17,6 +17,7 @@ import com.team.eddie.uber_alles.databinding.FragmentLoginBinding
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
 import com.team.eddie.uber_alles.utils.*
+import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -99,21 +100,21 @@ class LoginFragment : Fragment() {
             val retrofit = RetrofitClient.getClient(applicationContext)
             val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-            val params: HashMap<String, String> = hashMapOf("email" to email, "password" to password)
-            val call = sessionServices.login(params)
-            call.enqueue(object : Callback<Map<String, Boolean>> {
-                override fun onFailure(call: Call<Map<String, Boolean>>?, t: Throwable?) {
+            val userInfo = UserInfo("",email,"",password,"","","",null)
+            val call = sessionServices.login(userInfo)
+            call.enqueue(object : Callback<UserInfo> {
+                override fun onFailure(call: Call<UserInfo>?, t: Throwable?) {
                     Toast.makeText(applicationContext, "Service is unavailable right now", Toast.LENGTH_SHORT).show()
                 }
 
-                override fun onResponse(call: Call<Map<String, Boolean>>?, response: Response<Map<String, Boolean>>?) {
+                override fun onResponse(call: Call<UserInfo>?, response: Response<UserInfo>?) {
                     val result = response!!.body()
-                    isDriver = result!!["driver"]!!
-                    userExists = result["userExists"]!!
-                    if (userExists)
+                    if (result != null) {
+                        isDriver = result.driver.toBoolean()
                         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                             if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
                         }
+                    }
                     else
                         Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
                 }

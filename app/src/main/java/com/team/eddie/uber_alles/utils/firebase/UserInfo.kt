@@ -10,7 +10,7 @@ class UserInfo(
         var name: String = "",
         var phone: String = "",
 
-        var driver: String = "",
+        var driver: String = "false",
 
         var imageUrl: String? = null
 ) {

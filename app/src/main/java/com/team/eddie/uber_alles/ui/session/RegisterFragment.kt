@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserInfo
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentRegisterBinding
 import com.team.eddie.uber_alles.utils.*
@@ -146,13 +147,10 @@ class RegisterFragment : Fragment() {
                             else {
                                 val userId = mAuth.currentUser!!.uid
 
-                                val userInfo = hashMapOf(
-                                        EMAIL to email,
-                                        USERNAME to username,
-                                        PASSWORD to password,
-                                        IS_DRIVER to driverSwitch.isChecked)
+                                val userInfo : com.team.eddie.uber_alles.utils.firebase.UserInfo =
+                                        com.team.eddie.uber_alles.utils.firebase.UserInfo(userId,email,username,password,"","",driverSwitch.isChecked.toString(),null)
 
-                                val registerCall = sessionServices.register(userId, userInfo)
+                                val registerCall = sessionServices.register(userInfo)
                                 registerCall.enqueue(object : Callback<Void> {
                                     override fun onFailure(call: Call<Void>, t: Throwable) {
                                         Toast.makeText(applicationContext, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
