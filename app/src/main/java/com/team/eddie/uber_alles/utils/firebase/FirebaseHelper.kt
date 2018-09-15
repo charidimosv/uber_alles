@@ -20,7 +20,7 @@ TABLES
             userID
                 UserInfo
                     email
-                    driver
+                    driverId
                     name
                     password
                     phone
@@ -61,7 +61,6 @@ HELPERS
     private const val CAR_LIST: String = "CarList"
     private const val HISTORY_LIST: String = "HistoryList"
     private const val RATING_LIST: String = "RatingList"
-    private const val DESTINATION_LIST: String = "DestinationList"
 
     private const val CAR: String = "Car"
     private const val HISTORY: String = "History"
@@ -80,7 +79,7 @@ HELPERS
     const val USERNAME: String = "username"
     const val EMAIL: String = "email"
     const val PASSWORD: String = "password"
-    const val IS_DRIVER: String = "driver"
+    const val IS_DRIVER: String = "driverId"
     const val DESTINATION: String = "destination"
 
 
@@ -174,10 +173,6 @@ HELPERS
         return getRequest().child(requestId)
     }
 
-    fun getRequestKeyDestinationList(requestId: String): DatabaseReference {
-        return getRequestKey(requestId).child(DESTINATION_LIST)
-    }
-
     fun getPendingRequest(): DatabaseReference {
         return getReference().child(PENDING_REQUEST)
     }
@@ -186,19 +181,12 @@ HELPERS
         return getPendingRequest().child(requestId)
     }
 
-    fun createRequest(request: Request, locationList: List<Location>) {
+    fun createRequest(request: Request) {
         val requestRef = getRequest()
         val requestId = requestRef.push().key!!
 
         request.requestId = requestId
         requestRef.child(requestId).setValue(request)
-
-        val requestDestinationsRef = getRequestKeyDestinationList(requestId)
-        val geoFireRequest = GeoFire(requestDestinationsRef)
-        for (location in locationList) {
-            val locationId = requestDestinationsRef.push().key
-            geoFireRequest.setLocation(locationId, GeoLocation(location.latitude, location.longitude))
-        }
 
         val pendingRequestRef = getPendingRequest()
         pendingRequestRef.child(requestId).setValue(true)
@@ -207,10 +195,10 @@ HELPERS
     fun acceptRequest(request: Request) {
         val requestId = request.requestId
 
-        val customerARRef = getUserActiveRequest(request.customer)
+        val customerARRef = getUserActiveRequest(request.customerId)
         customerARRef.setValue(requestId)
 
-        val driverARRef = getUserActiveRequest(request.driver)
+        val driverARRef = getUserActiveRequest(request.driverId)
         driverARRef.setValue(requestId)
 
         val pendingRequestRef = getPendingRequestKey(requestId)
@@ -218,8 +206,8 @@ HELPERS
     }
 
     fun cleanRequest(request: Request) {
-        cleanUserRequest(request.customer)
-        cleanUserRequest(request.driver)
+        cleanUserRequest(request.customerId)
+        cleanUserRequest(request.driverId)
     }
 
     fun cleanUserRequest(userId: String) {

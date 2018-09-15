@@ -18,6 +18,8 @@ import java.util.*
 
 class GenericHistoryListFragment : Fragment() {
 
+    private lateinit var binding: FragmentGenericHistoryListBinding
+
     private lateinit var mAdapter: HistoryAdapter
     private lateinit var recyclerView: RecyclerView
 
@@ -32,7 +34,7 @@ class GenericHistoryListFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        val binding = FragmentGenericHistoryListBinding.inflate(inflater, container, false)
+        binding = FragmentGenericHistoryListBinding.inflate(inflater, container, false)
         context ?: return binding.root
         setHasOptionsMenu(true)
 
@@ -55,6 +57,14 @@ class GenericHistoryListFragment : Fragment() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists())
                     for (history in dataSnapshot.children) fetchRideInformation(history.key)
+
+                if (resultsHistoryList.isEmpty()) {
+                    binding.layout.visibility = View.GONE
+                    binding.noHistory.visibility = View.VISIBLE
+                } else {
+                    binding.layout.visibility = View.VISIBLE
+                    binding.noHistory.visibility = View.GONE
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}

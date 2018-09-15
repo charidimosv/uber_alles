@@ -105,6 +105,15 @@
     <string name="write_message">Write a message...</string>
     <string name="send_button">Send Button</string>
     <string name="car_image">Car Image</string>
+    <string name="profile_image">profile_image</string>
+    <string name="username">Username</string>
+    <string name="from_to">From - To</string>
+    <string name="distance">distance</string>
+    <string name="date">date</string>
+    <string name="phone">Phone</string>
+    <string name="name">Name</string>
+    <string name="pay_here">Pay Here</string>
+    <string name="do_some_trips_it_s_time">Do some trips, it\'s time!</string>
 
 
 </resources>

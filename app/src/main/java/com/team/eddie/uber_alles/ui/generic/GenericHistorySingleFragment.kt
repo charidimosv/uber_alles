@@ -48,7 +48,7 @@ class GenericHistorySingleFragment :
     private lateinit var rideLocation: TextView
     private lateinit var rideDistance: TextView
     private lateinit var rideDate: TextView
-    private lateinit var userName: TextView
+    private lateinit var name: TextView
     private lateinit var userPhone: TextView
     private lateinit var userImage: ImageView
     private lateinit var mRatingBar: RatingBar
@@ -75,7 +75,7 @@ class GenericHistorySingleFragment :
         rideLocation = binding.rideLocation
         rideDistance = binding.rideDistance
         rideDate = binding.rideDate
-        userName = binding.userName
+        name = binding.name
         userPhone = binding.userPhone
 
         userImage = binding.userImage
@@ -151,7 +151,7 @@ class GenericHistorySingleFragment :
                     val userInfo = dataSnapshot.getValue(UserInfo::class.java)
                     userInfo ?: return
 
-                    userInfo.name?.let { userName.text = it }
+                    userInfo.name?.let { name.text = it }
                     userInfo.phone.let { userPhone.text = it }
                     userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(userImage, it) }
                 }

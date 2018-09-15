@@ -44,9 +44,11 @@ import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CUSTOMER_RIDE_ID
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LAT
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LOT
+import com.team.eddie.uber_alles.utils.firebase.Request
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class CustomerMapFragment : GenericMapFragment() {
@@ -82,6 +84,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
     private var destinationMarker: Marker? = null
+    private var destinationList: ArrayList<Location> = ArrayList()
 
     private var completedRide: Boolean = false
     private var isPickedUp: Boolean = false
@@ -151,6 +154,11 @@ class CustomerMapFragment : GenericMapFragment() {
                 destination = place.name.toString()
                 destinationLatLng = place.latLng
 
+                val newDestination = Location("")
+                newDestination.latitude = destinationLatLng!!.latitude
+                newDestination.longitude = destinationLatLng!!.longitude
+                destinationList.add(newDestination)
+
                 destinationMarker?.remove()
                 destinationMarker = mMap.addMarker(MarkerOptions().position(place.latLng).title(getString(R.string.destination_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
@@ -164,10 +172,10 @@ class CustomerMapFragment : GenericMapFragment() {
         })
 
         mRequest.setOnClickListener {
-            if (SaveSharedPreference.getActiveRequest(applicationContext))
-                endRide()
-            else
-                startRideRequest()
+            //            if (SaveSharedPreference.getActiveRequest(applicationContext))
+//                endRide()
+//            else
+            startRideRequest()
         }
 
         binding.chatDriver.setOnClickListener {
@@ -395,6 +403,9 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun startRideRequest() {
+        val request = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = destinationList)
+        FirebaseHelper.createRequest(request)
+
         SaveSharedPreference.setActiveRequest(applicationContext, true)
 
         val ref = FirebaseHelper.getCustomerRequest()
