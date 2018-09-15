@@ -1,14 +1,16 @@
 package com.team.eddie.uber_alles.utils.firebase
 
 class UserInfo(
-        var userId: String? = "",
+        var userId: String = "",
 
-        var email: String? = "",
-        var isDriver: Boolean? = false,
-        var name: String? = "",
-        var password: String? = "",
+        var email: String = "",
+        var username: String = "",
+        var password: String = "",
+
+        var name: String = "",
         var phone: String = "",
-        var username: String? = "",
+
+        var driver: String = "",
 
         var imageUrl: String? = null
 ) {
@@ -18,9 +20,9 @@ class UserInfo(
                 FirebaseHelper.EMAIL to email,
                 FirebaseHelper.USERNAME to username,
                 FirebaseHelper.PASSWORD to password,
-                FirebaseHelper.PHONE to phone,
                 FirebaseHelper.NAME to name,
-                FirebaseHelper.IS_DRIVER to isDriver,
-                FirebaseHelper.IMG_URL to imageUrl)
+                FirebaseHelper.PHONE to phone,
+                FirebaseHelper.IMG_URL to imageUrl,
+                FirebaseHelper.IS_DRIVER to driver)
     }
 }

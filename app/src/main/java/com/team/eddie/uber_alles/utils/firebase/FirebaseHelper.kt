@@ -19,7 +19,7 @@ TABLES
             userID
                 UserInfo
                     email
-                    isDriver
+                    driver
                     name
                     password
                     phone
@@ -74,7 +74,7 @@ HELPERS
     const val USERNAME: String = "username"
     const val EMAIL: String = "email"
     const val PASSWORD: String = "password"
-    const val IS_DRIVER: String = "isDriver"
+    const val IS_DRIVER: String = "driver"
     const val DESTINATION: String = "destination"
 
     // history related

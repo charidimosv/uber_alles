@@ -103,12 +103,12 @@ class LoginFragment : Fragment() {
             val call = sessionServices.login(params)
             call.enqueue(object : Callback<Map<String, Boolean>> {
                 override fun onFailure(call: Call<Map<String, Boolean>>?, t: Throwable?) {
-                    Toast.makeText(applicationContext, "Service is anavailable right now", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Service is unavailable right now", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onResponse(call: Call<Map<String, Boolean>>?, response: Response<Map<String, Boolean>>?) {
                     val result = response!!.body()
-                    isDriver = result!!["isDriver"]!!
+                    isDriver = result!!["driver"]!!
                     userExists = result["userExists"]!!
                     if (userExists)
                         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->

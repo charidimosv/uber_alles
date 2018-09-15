@@ -132,7 +132,7 @@ class RegisterFragment : Fragment() {
             val call = sessionServices.registerCheck(params)
             call.enqueue(object : Callback<Boolean> {
                 override fun onFailure(call: Call<Boolean>?, t: Throwable?) {
-                    Toast.makeText(applicationContext, "Service is anavailable right now", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(applicationContext, "Service is unavailable right now", Toast.LENGTH_SHORT).show()
                 }
 
                 override fun onResponse(call: Call<Boolean>?, response: Response<Boolean>?) {
