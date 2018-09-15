@@ -53,50 +53,6 @@
         <item>Subaru</item>
     </string-array>
 
-    <string-array name="pref_example_list_titles">
-        <item>Always</item>
-        <item>When possible</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_example_list_values">
-        <item>1</item>
-        <item>0</item>
-        <item>-1</item>
-    </string-array>
-
-    <!-- Example settings for Data & Sync -->
-    <string name="pref_header_data_sync">Data &amp; sync</string>
-
-    <string name="pref_title_sync_frequency">Sync frequency</string>
-    <string-array name="pref_sync_frequency_titles">
-        <item>15 minutes</item>
-        <item>30 minutes</item>
-        <item>1 hour</item>
-        <item>3 hours</item>
-        <item>6 hours</item>
-        <item>Never</item>
-    </string-array>
-    <string-array name="pref_sync_frequency_values">
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>180</item>
-        <item>360</item>
-        <item>-1</item>
-    </string-array>
-
-    <string-array name="list_preference_entries">
-        <item>Entry 1</item>
-        <item>Entry 2</item>
-        <item>Entry 3</item>
-    </string-array>
-
-    <string-array name="list_preference_entry_values">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-    </string-array>
-
     <string-array name="multi_select_list_preference_default_value" />
 
     <string name="pref_title_system_sync_settings">System sync settings</string>
@@ -111,27 +67,6 @@
     <string name="pref_title_vibrate">Vibrate</string>
 
 
-    <string name="shr_hint_username">Username</string>
-    <string name="shr_hint_password">Password</string>
-    <string name="shr_button_next">Next</string>
-    <string name="shr_button_cancel">Cancel</string>
-    <string name="shr_error_password">Password must contain at least 8 characters.</string>
-    <string name="shr_filter_title">Filter</string>
-    <string name="shr_search_title">Search</string>
-    <string name="shr_product_title">Title</string>
-    <string name="shr_product_description">Secondary text</string>
-
-    <!-- Shrine backdrop menu labels -->
-    <string name="shr_featured_label">Featured</string>
-    <string name="shr_apartment_label">Apartment</string>
-    <string name="shr_accessories_label">Accessories</string>
-    <string name="shr_shoes_label">Shoes</string>
-    <string name="shr_tops_label">Tops</string>
-    <string name="shr_bottoms_label">Bottoms</string>
-    <string name="shr_dresses_label">Dresses</string>
-    <string name="shr_account_label">My Account</string>
-
-
     <string name="password_error">Password must have  at least 6 characters</string>
     <string name="email_error">Invalid email</string>
     <string name="email_hint">E-mail</string>
@@ -142,22 +77,6 @@
     <string name="username_error">Username needs to be at least 6 characters</string>
     <string name="repeat_password_error">Passwords do not match</string>
     <string name="log_in_button">Log in</string>
-    <string name="all_jokes_title">All jokes</string>
-    <string name="favorite_jokes_title">Favorite jokes</string>
-    <string name="my_profile_title">My profile</string>
-    <string name="log_out_button">Log out</string>
-    <string name="number_of_jokes_text">Number of favorite jokes: %d</string>
-    <string name="email_text">User email: %s</string>
-    <string name="username_text">Username: %s</string>
-    <string name="welcome_description">In order to join other Jokers, you first need to sign up :]</string>
-    <string name="no_items_text">There seems to be no items :[</string>
-    <string name="error_title">Oops</string>
-    <string name="error_message">Something went wrong! Please try again.</string>
-    <string name="general_positive_button">OK</string>
-    <string name="joke_hint">Enter your joke</string>
-    <string name="add_joke_text">Add joke</string>
-    <string name="joke_error">Each joke must have at least 10 characters</string>
-    <string name="welcome">Welcome to our Pun-ground</string>
 
     <string name="default_info_title">Default Location</string>
     <string name="default_info_snippet">No places found, because location permission is disabled.</string>
@@ -165,36 +84,8 @@
     <string name="pick_place">Choose a place</string>
 
     <string name="navigation_drawer_header_title" translatable="false">Sunflower</string>
-
-    <!-- Translatable resources -->
-    <string name="menu_filter_by_grow_zone" translation_description="The label for the menu item to filter the displayed plants by grow zone.">Filter by grow zone</string>
-    <string name="plant_detail_image_content_description" translation_description="Content description for the header / hero image that is show at the top of the plant detail screen.">Image of plant</string>
-    <string name="my_garden_title" translation_description="Title for the 'My garden' screen where the user can see the list of plants that have been added to their garden.">My garden</string>
-    <string name="plant_list_title" translation_description="Title for the plant list screen where the user can see a list of plants available to add to their garden.">Plant list</string>
-    <string name="plant_details_title" translation_description="Title for the plant details screen where the user can see the details for a specific plant.">Plant details</string>
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
-    <string name="added_plant_to_garden" translation_description="Confirmation text that is shown when a user adds a plant to their graden.">Added plant to garden</string>
-    <string name="garden_empty" translation_description="Text that is shown on the 'My Garden' screen when no plants have been added to the user's garden">Your garden is empty</string>
-    <string name="list_empty" translation_description="Text that is shown on the 'My Garden' screen when no plants have been added to the user's garden">Your plant list is empty</string>
-    <string name="planted_date" translation_description="Text with placeholders that indicates when the plant was planted. Example: 'Sunflower planted on May 24, 2018'.">%1$s planted on %2$s</string>
-    <string name="menu_item_share_plant" translation_description="The label for the Share menu item">Share</string>
-    <string name="share_text_plant" translation_description="The default messaged used when sharing a plant on SNS, etc.">Check out the %s plant in the Android Sunflower app</string>
-
-    <!-- String plurals and their related prefix / suffix strings -->
-    <string name="watering_needs_prefix" translation_description="Prefix for the text describing how often a plant should be watered. Used in combination with watering_needs_suffix.">Watering needs:</string>
-    <plurals name="watering_needs_suffix">
-        <item quantity="one" translation_description="Suffix for the text describing how often a plant should be watered, singular. Used in combination with watering_needs_prefix: 'Watering needs: every day'.">every day</item>
-        <item quantity="other" translation_description="Suffix for the text describing how often a plant should be watered, plural. Used in combination with watering_needs_prefix: 'Watering needs: every 8 days'.">every %d days</item>
-    </plurals>
-
-    <string name="watering_next_prefix" translation_description="Prefix for the text indicating when the plant should next be watered. Used in combination with watering_next_suffix.">Last watered on %s</string>
-    <plurals name="watering_next_suffix">
-        <item quantity="one" translation_description="Suffix for the text indicating when the the plant should next be watered, singular. Used in combination with watering_next_prefix: 'Last watered on May 24, 2018 - water tomorrow.'.">water tomorrow.</item>
-        <item quantity="other" translation_description="Suffix for the text indicating when the the plant should next be watered, plural. Used in combination with watering_next_prefix: 'Last watered on May 24, 2018 - water in 8 days.'.">water in %d days.</item>
-    </plurals>
-
     <!-- Accessibility -->
-    <string name="a11y_plant_item_image" translation_description="Accessibility text for each of the plant images shown in the 'My garden' and 'Plant list' screens.">Picture of plant</string>
     <string name="ride_started">Your ride has start</string>
     <string name="ride_ended">Your ride has end</string>
     <string name="getting_driver">Getting your Driver....</string>
@@ -213,6 +104,7 @@
     <string name="rate_your_driver">Rate your driver</string>
     <string name="write_message">Write a message...</string>
     <string name="send_button">Send Button</string>
+    <string name="car_image">Car Image</string>
 
 
 </resources>
