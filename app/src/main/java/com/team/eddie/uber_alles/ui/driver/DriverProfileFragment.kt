@@ -39,6 +39,8 @@ class DriverProfileFragment : Fragment() {
     private lateinit var mProfileImage: ImageView
     private var resultUri: Uri? = null
 
+    private lateinit var mEmail: EditText
+    private lateinit var mUsername: EditText
     private lateinit var mNameField: EditText
     private lateinit var mPhoneField: EditText
 
@@ -53,6 +55,8 @@ class DriverProfileFragment : Fragment() {
 
         setHasOptionsMenu(true)
 
+        mEmail = binding.email
+        mUsername = binding.username
         mNameField = binding.name
         mPhoneField = binding.phone
         mProfileImage = binding.profileImage
@@ -81,6 +85,8 @@ class DriverProfileFragment : Fragment() {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                     userInfo = dataSnapshot.getValue(UserInfo::class.java)
 
+                    userInfo?.email?.let { mEmail.setText(it) }
+                    userInfo?.username?.let { mUsername.setText(it) }
                     userInfo?.name?.let { mNameField.setText(it) }
                     userInfo?.phone.let { mPhoneField.setText(it.toString()) }
                     userInfo?.imageUrl?.let { ActivityHelper.bindImageFromUrl(mProfileImage, it) }

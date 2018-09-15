@@ -7,7 +7,7 @@ class UserInfo(
         var isDriver: Boolean? = null,
         var name: String? = null,
         var password: String? = null,
-        var phone: String? = null,
+        var phone: String = "",
         var username: String? = null,
 
         var imageUrl: String? = null
