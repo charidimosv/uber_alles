@@ -60,13 +60,18 @@ HELPERS
     private const val CAR_LIST: String = "CarList"
     private const val HISTORY_LIST: String = "HistoryList"
     private const val RATING_LIST: String = "RatingList"
+    private const val DESTINATION_LIST: String = "DestinationList"
 
     private const val CAR: String = "Car"
     private const val HISTORY: String = "History"
     private const val RATING: String = "Rating"
     private const val MESSAGE: String = "Message"
+    private const val REQUEST: String = "Request"
 
     private const val LOCATION: String = "location"
+
+    private const val PENDING_REQUEST: String = "PendingRequest"
+    private const val ACTIVE_REQUEST: String = "activeRequest"
 
     // user info
     const val NAME: String = "name"
@@ -76,6 +81,7 @@ HELPERS
     const val PASSWORD: String = "password"
     const val IS_DRIVER: String = "driver"
     const val DESTINATION: String = "destination"
+
 
     // history related
     const val IMG_URL: String = "imageUrl"
@@ -136,6 +142,10 @@ HELPERS
         return getUser(userId).child(RATING_LIST)
     }
 
+    fun getUserActiveRequest(userId: String): DatabaseReference {
+        return getUser(userId).child(PENDING_REQUEST)
+    }
+
     fun getUserIsDriver(userId: String): DatabaseReference {
         return getUserInfo(userId).child(IS_DRIVER)
     }
@@ -147,6 +157,73 @@ HELPERS
     fun setUserLocation(userId: String, location: GeoLocation) {
         val geoFireAvailable = GeoFire(getUser(userId))
         geoFireAvailable.setLocation(LOCATION, location)
+    }
+
+    /*
+    ----------------------------------
+    REQUEST
+    ----------------------------------
+    */
+
+    fun getRequest(): DatabaseReference {
+        return getReference().child(REQUEST)
+    }
+
+    fun getRequestKey(requestId: String): DatabaseReference {
+        return getRequest().child(requestId)
+    }
+
+    fun getRequestKeyDestinationList(requestId: String): DatabaseReference {
+        return getRequestKey(requestId).child(DESTINATION_LIST)
+    }
+
+    fun getPendingRequest(): DatabaseReference {
+        return getReference().child(PENDING_REQUEST)
+    }
+
+    fun getPendingRequestKey(requestId: String): DatabaseReference {
+        return getPendingRequest().child(requestId)
+    }
+
+    fun createRequest(request: Request, locationList: List<GeoLocation>) {
+        val requestRef = getRequest()
+        val requestId = requestRef.push().key!!
+
+        request.requestId = requestId
+        requestRef.child(requestId).setValue(request)
+
+        val requestDestinationsRef = getRequestKeyDestinationList(requestId)
+        val geoFireRequest = GeoFire(requestDestinationsRef)
+        for (location in locationList) {
+            val locationId = requestDestinationsRef.push().key
+            geoFireRequest.setLocation(locationId, location)
+        }
+
+        val pendingRequestRef = getPendingRequest()
+        pendingRequestRef.child(requestId).setValue(true)
+    }
+
+    fun acceptRequest(request: Request) {
+        val requestId = request.requestId
+
+        val customerARRef = getUserActiveRequest(request.customer)
+        customerARRef.setValue(requestId)
+
+        val driverARRef = getUserActiveRequest(request.driver)
+        driverARRef.setValue(requestId)
+
+        val pendingRequestRef = getPendingRequestKey(requestId)
+        pendingRequestRef.setValue(null)
+    }
+
+    fun cleanRequest(request: Request) {
+        cleanUserRequest(request.customer)
+        cleanUserRequest(request.driver)
+    }
+
+    fun cleanUserRequest(userId: String) {
+        val userARRef = getUserActiveRequest(userId)
+        userARRef.setValue(null)
     }
 
     /*
