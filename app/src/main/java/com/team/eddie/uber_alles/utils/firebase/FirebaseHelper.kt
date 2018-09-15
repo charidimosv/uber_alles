@@ -1,5 +1,6 @@
 package com.team.eddie.uber_alles.utils.firebase
 
+import android.location.Location
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.firebase.auth.FirebaseAuth
@@ -185,7 +186,7 @@ HELPERS
         return getPendingRequest().child(requestId)
     }
 
-    fun createRequest(request: Request, locationList: List<GeoLocation>) {
+    fun createRequest(request: Request, locationList: List<Location>) {
         val requestRef = getRequest()
         val requestId = requestRef.push().key!!
 
@@ -196,7 +197,7 @@ HELPERS
         val geoFireRequest = GeoFire(requestDestinationsRef)
         for (location in locationList) {
             val locationId = requestDestinationsRef.push().key
-            geoFireRequest.setLocation(locationId, location)
+            geoFireRequest.setLocation(locationId, GeoLocation(location.latitude, location.longitude))
         }
 
         val pendingRequestRef = getPendingRequest()
