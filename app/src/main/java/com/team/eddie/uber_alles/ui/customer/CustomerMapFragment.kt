@@ -414,6 +414,12 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
+        //Draw route for all destinations... TODO test
+        val waypoints = arrayListOf<LatLng>(LatLng(mLastLocation!!.latitude,mLastLocation!!.longitude))
+        for(destination in destinationList)
+            waypoints.add(LatLng(destination.latitude,destination.longitude))
+        getRouteToMarker(waypoints)
+
         autocompleteFragment.view?.visibility = View.GONE
         mRequest.text = getString(R.string.getting_driver)
 

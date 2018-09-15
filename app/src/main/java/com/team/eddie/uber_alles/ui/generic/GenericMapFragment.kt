@@ -219,6 +219,16 @@ abstract class GenericMapFragment :
         }
     }
 
+    protected fun getRouteToMarker(wayPoints: List<LatLng>) {
+            val routing = Routing.Builder()
+                    .travelMode(AbstractRouting.TravelMode.DRIVING)
+                    .withListener(this)
+                    .alternativeRoutes(false)
+                    .waypoints(wayPoints)
+                    .build()
+            routing.execute()
+    }
+
     protected fun getCurrentTimestamp(): Long {
         return System.currentTimeMillis() / 1000
     }
