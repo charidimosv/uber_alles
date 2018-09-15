@@ -46,7 +46,6 @@ class LoginFragment : Fragment() {
             savedInstanceState: Bundle?
     ): View? {
         val binding = FragmentLoginBinding.inflate(inflater, container, false)
-
         applicationContext = activity?.applicationContext!!
 
         emailTextInput = binding.emailTextInput

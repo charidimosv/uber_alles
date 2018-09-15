@@ -84,7 +84,6 @@ class CustomerMapFragment : GenericMapFragment() {
     private var destinationMarker: Marker? = null
 
     private var completedRide: Boolean = false
-    private var followMeFlag: Boolean = true
     private var isPickedUp: Boolean = false
 
     private var mDriverMarker: Marker? = null
@@ -116,6 +115,7 @@ class CustomerMapFragment : GenericMapFragment() {
             savedInstanceState: Bundle?
     ): View? {
         binding = FragmentCustomerMapBinding.inflate(inflater, container, false)
+        applicationContext = activity?.applicationContext!!
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
         locationCallback = object : LocationCallback() {
@@ -164,7 +164,7 @@ class CustomerMapFragment : GenericMapFragment() {
         })
 
         mRequest.setOnClickListener {
-            if (SaveSharedPreference.getActiveRequest(activity!!.applicationContext))
+            if (SaveSharedPreference.getActiveRequest(applicationContext))
                 endRide()
             else
                 startRideRequest()
@@ -201,12 +201,9 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     override fun onLocationChanged(location: Location?) {
-        if (activity!!.applicationContext != null && location != null) {
-            mLastLocation = location
-            if (followMeFlag) moveCamera(location)
+        super.onLocationChanged(location)
 
-            if (shouldRefreshDriversAround()) getDriversAround()
-        }
+        if (shouldRefreshDriversAround()) getDriversAround()
     }
 
     private fun getClosestDriver() {
@@ -218,7 +215,7 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupLocationQuery?.removeAllListeners()
         pickupLocationQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
-                if (!driverFound && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
+                if (!driverFound && SaveSharedPreference.getActiveRequest(applicationContext)) {
                     driverFound = true
                     driverFoundID = key
 
@@ -264,7 +261,7 @@ class CustomerMapFragment : GenericMapFragment() {
         driverLocationRef = FirebaseHelper.getDriversWorkingLocation(driverFoundID!!)
         driverLocationListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
+                if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(applicationContext)) {
                     val map = dataSnapshot.value as List<Any?>
 
                     val locationLat: Double = map[0]?.toString()?.toDouble() ?: 0.0
@@ -347,8 +344,8 @@ class CustomerMapFragment : GenericMapFragment() {
                 if (!dataSnapshot.exists() && !isPickedUp) {
                     getDriverLocation()
 
-                    SaveSharedPreference.setChatSender(activity!!.applicationContext, currentUserId)
-                    SaveSharedPreference.setChatReceiver(activity!!.applicationContext, driverFoundID!!)
+                    SaveSharedPreference.setChatSender(applicationContext, currentUserId)
+                    SaveSharedPreference.setChatReceiver(applicationContext, driverFoundID!!)
                     newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + driverFoundID).child("newMessagePushed")
 
                     binding.callDriver.visibility = View.VISIBLE
@@ -398,7 +395,7 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun startRideRequest() {
-        SaveSharedPreference.setActiveRequest(activity!!.applicationContext, true)
+        SaveSharedPreference.setActiveRequest(applicationContext, true)
 
         val ref = FirebaseHelper.getCustomerRequest()
         GeoFire(ref).setLocation(currentUserId, GeoLocation(mLastLocation!!.latitude, mLastLocation!!.longitude))
@@ -413,7 +410,7 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun endRide() {
-        SaveSharedPreference.setActiveRequest(activity!!.applicationContext, false)
+        SaveSharedPreference.setActiveRequest(applicationContext, false)
         radius = 1
 
         pickupLocationQuery!!.removeAllListeners()
@@ -478,6 +475,8 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun shouldRefreshDriversAround(): Boolean {
+        mLastLocation ?: return false
+
         val distance: Float = driversAroundLatestLoc?.distanceTo(mLastLocation)
                 ?: DEFAULT_SEARCH_LOC_DIF+1
         return showDriversAround && distance > DEFAULT_SEARCH_LOC_DIF

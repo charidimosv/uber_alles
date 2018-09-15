@@ -1,14 +1,14 @@
 package com.team.eddie.uber_alles.utils.firebase
 
 class UserInfo(
-        var userId: String? = null,
+        var userId: String? = "",
 
-        var email: String? = null,
-        var isDriver: Boolean? = null,
-        var name: String? = null,
-        var password: String? = null,
+        var email: String? = "",
+        var isDriver: Boolean? = false,
+        var name: String? = "",
+        var password: String? = "",
         var phone: String = "",
-        var username: String? = null,
+        var username: String? = "",
 
         var imageUrl: String? = null
 ) {

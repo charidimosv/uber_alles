@@ -31,7 +31,7 @@ import java.io.ByteArrayOutputStream
 
 class DriverProfileFragment : Fragment() {
 
-    private lateinit var mDriverDatabase: DatabaseReference
+    private lateinit var userDatabase: DatabaseReference
 
     private var userID: String? = null
     private var userInfo: UserInfo? = null
@@ -64,7 +64,7 @@ class DriverProfileFragment : Fragment() {
         mConfirm = binding.confirm
 
         userID = FirebaseAuth.getInstance().currentUser!!.uid
-        mDriverDatabase = FirebaseHelper.getUserInfo(userID!!)
+        userDatabase = FirebaseHelper.getUserInfo(userID!!)
 
         getUserInfo()
 
@@ -80,7 +80,7 @@ class DriverProfileFragment : Fragment() {
     }
 
     private fun getUserInfo() {
-        mDriverDatabase.addValueEventListener(object : ValueEventListener {
+        userDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                     userInfo = dataSnapshot.getValue(UserInfo::class.java)
@@ -103,39 +103,41 @@ class DriverProfileFragment : Fragment() {
 
         userInfo?.name = mName
         userInfo?.phone = mPhone
-        userInfo?.let { mDriverDatabase.setValue(it) }
+        userInfo?.let { userDatabase.setValue(it) }
+        userDatabase.setValue(userInfo).addOnCompleteListener {
 
-        if (resultUri != null) {
+            if (resultUri != null) {
 
-            val filePath = FirebaseHelper.getProfileImages(userID!!)
-            val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
+                val filePath = FirebaseHelper.getProfileImages(userID!!)
+                val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
 
-            val baos = ByteArrayOutputStream()
-            bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-            val data = baos.toByteArray()
-            val uploadTask = filePath.putBytes(data)
+                val baos = ByteArrayOutputStream()
+                bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, baos)
+                val data = baos.toByteArray()
+                val uploadTask = filePath.putBytes(data)
 
-            uploadTask.addOnFailureListener(OnFailureListener {
-                Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
-                return@OnFailureListener
-            })
-            uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
-                val downloadUrlTask = taskSnapshot.storage.downloadUrl
-                downloadUrlTask.addOnFailureListener {
-                    OnFailureListener {
-                        Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
-                        return@OnFailureListener
+                uploadTask.addOnFailureListener(OnFailureListener {
+                    Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
+                    return@OnFailureListener
+                })
+                uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
+                    val downloadUrlTask = taskSnapshot.storage.downloadUrl
+                    downloadUrlTask.addOnFailureListener {
+                        OnFailureListener {
+                            Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
+                            return@OnFailureListener
+                        }
                     }
-                }
-                downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
-                    mDriverDatabase.updateChildren(newImage)
-                    Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
+                    downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
+                        val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
+                        userDatabase.updateChildren(newImage)
+                        Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
+                        return@OnSuccessListener
+                    })
                     return@OnSuccessListener
                 })
-                return@OnSuccessListener
-            })
-        } else Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
+            } else Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

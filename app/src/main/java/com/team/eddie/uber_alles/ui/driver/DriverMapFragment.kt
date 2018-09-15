@@ -15,7 +15,6 @@ import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
@@ -34,7 +33,6 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.addHistoryForDriverCustomer
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -75,13 +73,13 @@ class DriverMapFragment : GenericMapFragment() {
     private var assignedCustomerPickupLocationRef: DatabaseReference? = null
     private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
 
-
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
         binding = FragmentDriverMapBinding.inflate(inflater, container, false)
+        applicationContext = activity?.applicationContext!!
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity!!)
         locationCallback = object : LocationCallback() {
@@ -258,8 +256,8 @@ class DriverMapFragment : GenericMapFragment() {
 
         })
 
-        SaveSharedPreference.setChatSender(activity!!.applicationContext, currentUserId)
-        SaveSharedPreference.setChatReceiver(activity!!.applicationContext, customerId)
+        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
+        SaveSharedPreference.setChatReceiver(applicationContext, customerId)
         newIncomeMessageRef = FirebaseHelper.getMessageUsers(currentUserId + "_to_" + customerId)
 
         binding.callCustomer.visibility = View.VISIBLE
@@ -328,35 +326,17 @@ class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun recordRide() {
-        addHistoryForDriverCustomer(currentUserId, customerId, pickupTime, getCurrentTimestamp(), destination, rideDistance,
+        FirebaseHelper.addHistoryForDriverCustomer(currentUserId, customerId, pickupTime, getCurrentTimestamp(), destination, rideDistance,
                 pickupLatLng?.latitude, pickupLatLng?.longitude, destinationLatLng?.latitude, destinationLatLng?.longitude)
     }
 
-    private fun getCurrentTimestamp(): Long {
-        return System.currentTimeMillis() / 1000
-    }
-
-
     override fun onLocationChanged(location: Location?) {
-        if (activity!!.applicationContext != null && location != null) {
+        super.onLocationChanged(location)
 
-            mLastLocation = location
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(location.latitude, location.longitude), DEFAULT_ZOOM))
-
-            val refAvailable = FirebaseHelper.getDriversAvailable()
-            val refWorking = FirebaseHelper.getDriversWorking()
-
-            val geoFireAvailable = GeoFire(refAvailable)
-            val geoFireWorking = GeoFire(refWorking)
-
-            if (customerId.isBlank()) {
-                geoFireWorking.removeLocation(currentUserId)
-                geoFireAvailable.setLocation(currentUserId, GeoLocation(location.latitude, location.longitude))
-            } else {
-                geoFireAvailable.removeLocation(currentUserId)
-                geoFireWorking.setLocation(currentUserId, GeoLocation(location.latitude, location.longitude))
-            }
-        }
+        if (customerId.isBlank() && location != null)
+            FirebaseHelper.addDriverAvailable(customerId, GeoLocation(location.latitude, location.longitude))
+        else
+            FirebaseHelper.removeDriverAvailable(customerId)
     }
 
 }

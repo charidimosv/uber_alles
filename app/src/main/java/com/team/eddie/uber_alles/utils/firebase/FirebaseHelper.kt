@@ -1,5 +1,7 @@
 package com.team.eddie.uber_alles.utils.firebase
 
+import com.firebase.geofire.GeoFire
+import com.firebase.geofire.GeoLocation
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
@@ -35,6 +37,9 @@ TABLES
             userID
                 HistoryItem
 
+        Request
+            requestID
+
         Message
             userID_to_userID
                 meesageID
@@ -61,13 +66,15 @@ HELPERS
     private const val RATING: String = "Rating"
     private const val MESSAGE: String = "Message"
 
+    private const val LOCATION: String = "location"
+
     // user info
     const val NAME: String = "name"
     const val PHONE: String = "phone"
     const val USERNAME: String = "username"
     const val EMAIL: String = "email"
     const val PASSWORD: String = "password"
-    const val IS_DRIVER: String = "is_driver"
+    const val IS_DRIVER: String = "isDriver"
     const val DESTINATION: String = "destination"
 
     // history related
@@ -137,6 +144,11 @@ HELPERS
         getUser(userId).removeValue()
     }
 
+    fun setUserLocation(userId: String, location: GeoLocation) {
+        val geoFireAvailable = GeoFire(getUser(userId))
+        geoFireAvailable.setLocation(LOCATION, location)
+    }
+
     /*
     ----------------------------------
     DRIVER
@@ -165,6 +177,16 @@ HELPERS
         return getReference().child(DRIVERS_AVAILABLE)
     }
 
+    fun addDriverAvailable(driverID: String, location: GeoLocation) {
+        val geoFireAvailable = GeoFire(getDriversAvailable())
+        geoFireAvailable.setLocation(driverID, location)
+    }
+
+    fun removeDriverAvailable(driverID: String) {
+        val geoFireAvailable = GeoFire(getDriversAvailable())
+        geoFireAvailable.removeLocation(driverID)
+    }
+
     fun getDriversWorking(): DatabaseReference {
         return getReference().child(DRIVERS_WORKING)
     }
@@ -178,7 +200,7 @@ HELPERS
     }
 
     fun getCustomerRequestLocation(customerId: String): DatabaseReference {
-        return getReference().child(CUSTOMER_REQ).child(customerId).child("l")
+        return getCustomerRequest().child(customerId).child("l")
     }
 
     /*

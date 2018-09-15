@@ -1,6 +1,7 @@
 package com.team.eddie.uber_alles.ui.generic
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import com.directions.route.*
+import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -29,12 +31,16 @@ abstract class GenericMapFragment :
         LocationListener,
         RoutingListener {
 
+    protected val currentUserId: String = FirebaseHelper.getUserId()
+
+    protected lateinit var applicationContext: Context
+
     protected lateinit var mMap: GoogleMap
 
     protected var mLastLocation: Location? = null
     protected var mLocationRequest: LocationRequest? = null
 
-    protected val currentUserId: String = FirebaseHelper.getUserId()
+    protected var followMeFlag: Boolean = true
 
     protected lateinit var fusedLocationClient: FusedLocationProviderClient
     protected lateinit var locationCallback: LocationCallback
@@ -120,7 +126,19 @@ abstract class GenericMapFragment :
         mMap.uiSettings.isMyLocationButtonEnabled = value
     }
 
-    abstract override fun onLocationChanged(location: Location?)
+    override fun onLocationChanged(location: Location?) {
+        if (location != null) {
+            if (followMeFlag) moveCamera(location)
+            saveLocation(location)
+        }
+    }
+
+    fun saveLocation(location: Location) {
+        mLastLocation = location
+
+        val geoLocation = GeoLocation(location.latitude, location.longitude)
+        FirebaseHelper.setUserLocation(currentUserId, geoLocation)
+    }
 
     fun moveCamera(location: Location) {
         moveCamera(LatLng(location.latitude, location.longitude))
@@ -201,4 +219,7 @@ abstract class GenericMapFragment :
         }
     }
 
+    protected fun getCurrentTimestamp(): Long {
+        return System.currentTimeMillis() / 1000
+    }
 }
