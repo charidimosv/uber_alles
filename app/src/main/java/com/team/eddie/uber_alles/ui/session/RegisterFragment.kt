@@ -139,12 +139,11 @@ class RegisterFragment : Fragment() {
                     val userExists = response!!.body()
                     if (userExists!!)
                         Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
-                    else{
+                    else {
                         mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                             if (!task.isSuccessful)
                                 Toast.makeText(applicationContext, "Couldn't Sign Up", Toast.LENGTH_SHORT).show()
                             else {
-
                                 val userId = mAuth.currentUser!!.uid
 
                                 val userInfo = hashMapOf(
@@ -152,12 +151,13 @@ class RegisterFragment : Fragment() {
                                         USERNAME to username,
                                         PASSWORD to password,
                                         IS_DRIVER to driverSwitch.isChecked)
-                                
+
                                 val registerCall = sessionServices.register(userId, userInfo)
                                 registerCall.enqueue(object : Callback<Void> {
                                     override fun onFailure(call: Call<Void>, t: Throwable) {
                                         Toast.makeText(applicationContext, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
                                     }
+
                                     override fun onResponse(call: Call<Void>, response: Response<Void>) {}
                                 })
                             }

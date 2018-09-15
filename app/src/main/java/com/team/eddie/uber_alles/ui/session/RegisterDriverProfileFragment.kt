@@ -14,7 +14,6 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.findNavController
-import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
@@ -25,10 +24,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverProfileBinding
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.NAME
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PHONE
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PROFILE_IMG_URL
+import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import java.io.ByteArrayOutputStream
 
 
@@ -39,6 +37,7 @@ class RegisterDriverProfileFragment : Fragment() {
     private lateinit var mDriverDatabase: DatabaseReference
 
     private var userID: String? = null
+    private var userInfo: UserInfo? = null
 
     private lateinit var mProfileImage: ImageView
     private var resultUri: Uri? = null
@@ -83,11 +82,11 @@ class RegisterDriverProfileFragment : Fragment() {
         mDriverDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any?>
+                    userInfo = dataSnapshot.getValue(UserInfo::class.java)
 
-                    map[NAME]?.let { mNameField.setText(it.toString()) }
-                    map[PHONE]?.let { mPhoneField.setText(it.toString()) }
-                    map[PROFILE_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mProfileImage) }
+                    userInfo?.name?.let { mNameField.setText(it) }
+                    userInfo?.phone.let { mPhoneField.setText(it.toString()) }
+                    userInfo?.imageUrl?.let { ActivityHelper.bindImageFromUrl(mProfileImage, it) }
                 }
             }
 
@@ -99,8 +98,9 @@ class RegisterDriverProfileFragment : Fragment() {
         val mName = mNameField.text.toString()
         val mPhone = mPhoneField.text.toString()
 
-        val userInfo: HashMap<String, *> = hashMapOf(NAME to mName, PHONE to mPhone)
-        mDriverDatabase.updateChildren(userInfo)
+        userInfo?.name = mName
+        userInfo?.phone = mPhone
+        userInfo?.let { mDriverDatabase.setValue(it) }
 
         if (resultUri != null) {
 
@@ -125,7 +125,7 @@ class RegisterDriverProfileFragment : Fragment() {
                     }
                 }
                 downloadUrlTask.addOnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(PROFILE_IMG_URL to downloadUrl.toString())
+                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
                     mDriverDatabase.updateChildren(newImage)
 
                     moveNextStep()

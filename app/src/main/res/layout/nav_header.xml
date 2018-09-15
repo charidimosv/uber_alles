@@ -16,7 +16,7 @@
         android:layout_gravity="center|start"
         android:layout_marginBottom="@dimen/nav_drawer_img_margin"
         android:contentDescription="@string/navigation_drawer_header_content_description"
-        android:src="@drawable/ic_navigation_drawer_header_logo" />
+        android:src="@mipmap/ic_default_user" />
 
     <TextView
         android:id="@+id/nameDrawer"

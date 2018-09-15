@@ -12,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
@@ -22,6 +21,8 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
+import com.team.eddie.uber_alles.ui.ActivityHelper
+import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import java.io.ByteArrayOutputStream
 
@@ -99,13 +100,14 @@ class DriverCarSingleFragment : Fragment() {
         carDatabase.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any?>
+                    val car = dataSnapshot.getValue(Car::class.java)
+                    car ?: return
 
-                    map[FirebaseHelper.CAR_BRAND]?.let { mBrandField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_MODEL]?.let { mModelField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_PLATE]?.let { mPlateField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_YEAR]?.let { mYearField.setText(it.toString()) }
-                    map[FirebaseHelper.CAR_IMG_URL]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mCarImage) }
+                    car.brand?.let { mBrandField.setText(it) }
+                    car.model?.let { mModelField.setText(it) }
+                    car.plate?.let { mPlateField.setText(it) }
+                    car.year?.let { mYearField.setText(it) }
+                    car.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCarImage, it) }
                 }
             }
 
@@ -115,22 +117,18 @@ class DriverCarSingleFragment : Fragment() {
 
     private fun saveCarInfo() {
 
-        if (carId.isBlank()) {
-            carId = FirebaseHelper.createCarForDriver(userId)
-            syncCarInfo()
-        }
-
         val mBrand = mBrandField.text.toString()
         val mModel = mModelField.text.toString()
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
 
-        val userInfo: HashMap<String, *> = hashMapOf(
-                FirebaseHelper.CAR_BRAND to mBrand,
-                FirebaseHelper.CAR_MODEL to mModel,
-                FirebaseHelper.CAR_PLATE to mPlate,
-                FirebaseHelper.CAR_YEAR to mYear)
-        carDatabase.updateChildren(userInfo)
+        if (carId.isBlank()) {
+            carId = FirebaseHelper.createCarForDriver(userId)
+            syncCarInfo()
+        }
+
+        val currentCar = Car(carId, mBrand, mModel, mPlate, mYear)
+        carDatabase.setValue(currentCar)
 
         if (resultUri != null) {
 
@@ -155,7 +153,7 @@ class DriverCarSingleFragment : Fragment() {
                     }
                 }
                 downloadUrlTask.addOnSuccessListener(OnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.CAR_IMG_URL to downloadUrl.toString())
+                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
                     carDatabase.updateChildren(newImage)
                     Toast.makeText(activity!!, getString(R.string.saved_successfully), Toast.LENGTH_SHORT).show()
                     return@OnSuccessListener

@@ -13,8 +13,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.adapters.CarAdapter
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarListBinding
+import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.view.CarItem
 import java.util.*
 
 class DriverCarListFragment : Fragment() {
@@ -25,7 +25,7 @@ class DriverCarListFragment : Fragment() {
     private lateinit var fab: FloatingActionButton
 
     private lateinit var userId: String
-    private var resultsCarList = ArrayList<CarItem>()
+    private var resultsCarList = ArrayList<Car>()
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -72,21 +72,14 @@ class DriverCarListFragment : Fragment() {
         val carDatabase = FirebaseHelper.getCarKey(carKey)
         carDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
+                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
+                    val car = dataSnapshot.getValue(Car::class.java)
+                    car ?: return
+
                     val carId = dataSnapshot.key
-                    var brand: String? = ""
-                    var model: String? = ""
-                    var plate: String? = ""
-                    var year: String? = ""
-                    var image: String? = ""
+                    car.carId = carId!!
 
-                    dataSnapshot.child(FirebaseHelper.CAR_BRAND).value?.let { brand = it.toString() }
-                    dataSnapshot.child(FirebaseHelper.CAR_MODEL).value?.let { model = it.toString() }
-                    dataSnapshot.child(FirebaseHelper.CAR_PLATE).value?.let { plate = it.toString() }
-                    dataSnapshot.child(FirebaseHelper.CAR_YEAR).value?.let { year = it.toString() }
-                    dataSnapshot.child(FirebaseHelper.CAR_IMG_URL).value?.let { image = it.toString() }
-
-                    resultsCarList.add(CarItem(carId!!, brand!!, model!!, year!!, plate!!, image!!))
+                    resultsCarList.add(car)
                     mAdapter.notifyDataSetChanged()
                 }
             }

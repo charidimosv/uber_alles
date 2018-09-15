@@ -1,7 +1,7 @@
 package com.team.eddie.uber_alles.adapters
 
 import androidx.recyclerview.widget.DiffUtil
-import com.team.eddie.uber_alles.view.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.HistoryItem
 
 class HistoryItemDiffCallback : DiffUtil.ItemCallback<HistoryItem>() {
 

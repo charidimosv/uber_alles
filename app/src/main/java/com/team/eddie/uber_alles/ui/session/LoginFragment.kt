@@ -110,7 +110,7 @@ class LoginFragment : Fragment() {
                 override fun onResponse(call: Call<Map<String, Boolean>>?, response: Response<Map<String, Boolean>>?) {
                     val result = response!!.body()
                     isDriver = result!!["isDriver"]!!
-                    userExists = result!!["userExists"]!!
+                    userExists = result["userExists"]!!
                     if (userExists)
                         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                             if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()

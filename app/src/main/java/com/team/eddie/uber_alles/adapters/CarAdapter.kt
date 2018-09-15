@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.team.eddie.uber_alles.databinding.ItemCarBinding
 import com.team.eddie.uber_alles.ui.driver.DriverCarListFragmentDirections
-import com.team.eddie.uber_alles.view.CarItem
+import com.team.eddie.uber_alles.utils.firebase.Car
 
 
-class CarAdapter : ListAdapter<CarItem, CarAdapter.ViewHolder>(CarItemDiffCallback()) {
+class CarAdapter : ListAdapter<Car, CarAdapter.ViewHolder>(CarDiffCallback()) {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -19,10 +19,10 @@ class CarAdapter : ListAdapter<CarItem, CarAdapter.ViewHolder>(CarItemDiffCallba
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val carItem = getItem(position)
+        val car = getItem(position)
         holder.apply {
-            bind(createOnClickListener(carItem.carId), carItem)
-            itemView.tag = carItem
+            bind(createOnClickListener(car.carId!!), car)
+            itemView.tag = car
         }
     }
 
@@ -37,7 +37,7 @@ class CarAdapter : ListAdapter<CarItem, CarAdapter.ViewHolder>(CarItemDiffCallba
             private val binding: ItemCarBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(listener: View.OnClickListener, item: CarItem) {
+        fun bind(listener: View.OnClickListener, item: Car) {
             binding.apply {
                 clickListener = listener
                 carItem = item

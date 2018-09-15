@@ -10,7 +10,6 @@ import android.widget.LinearLayout
 import android.widget.RatingBar
 import android.widget.TextView
 import androidx.navigation.findNavController
-import com.bumptech.glide.Glide
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.location.LocationCallback
@@ -31,6 +30,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
@@ -226,7 +226,7 @@ class DriverMapFragment : GenericMapFragment() {
 
                     map["name"]?.let { mCustomerName.text = it.toString() }
                     map["phone"]?.let { mCustomerPhone.text = it.toString() }
-                    map["profileImageUrl"]?.let { Glide.with(activity?.application!!).load(it.toString()).into(mCustomerProfileImage) }
+                    map["profileImageUrl"]?.let { ActivityHelper.bindImageFromUrl(mCustomerProfileImage, it) }
                 }
             }
 

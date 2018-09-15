@@ -7,13 +7,13 @@ import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.UserInfo
 
 open class UserActivity : AppCompatActivity() {
 
@@ -26,17 +26,18 @@ open class UserActivity : AppCompatActivity() {
         userInfoRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>
+                    val userInfo = dataSnapshot.getValue(UserInfo::class.java)
+                    userInfo ?: return
 
-                    map[FirebaseHelper.PROFILE_IMG_URL]?.let {
+                    userInfo.imageUrl?.let {
                         val profImage = findViewById<ImageView>(R.id.imageViewDrawer)
-                        Glide.with(application).load(it.toString()).apply(RequestOptions.circleCropTransform()).into(profImage)
+                        ActivityHelper.bindImageFromUrl(profImage, it)
                     }
-                    map[FirebaseHelper.NAME]?.let {
+                    userInfo.name.let {
                         val name = findViewById<TextView>(R.id.nameDrawer)
                         name.text = it.toString()
                     }
-                    map[FirebaseHelper.USERNAME]?.let {
+                    userInfo.email?.let {
                         val email = findViewById<TextView>(R.id.emailDrawer)
                         email.text = it.toString()
                     }

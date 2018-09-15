@@ -10,7 +10,6 @@ import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.bumptech.glide.Glide
 import com.directions.route.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -23,18 +22,11 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentGenericHistorySingleBinding
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.ARRIVING_TIME
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.COST
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CUSTOMER
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DISTANCE
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DRIVER
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.LOCATION
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.NAME
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PHONE
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.PROFILE_IMG_URL
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.RATING
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.RATING_LEG
+import com.team.eddie.uber_alles.utils.firebase.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import java.util.*
 
 class GenericHistorySingleFragment :
@@ -50,8 +42,6 @@ class GenericHistorySingleFragment :
     private val currentUserId: String = FirebaseHelper.getUserId()
 
     private var rideId: String? = null
-    private var customerId: String? = null
-    private var driverId: String? = null
 
     private lateinit var historyRideInfoDb: DatabaseReference
 
@@ -105,43 +95,35 @@ class GenericHistorySingleFragment :
     private fun getRideInformation() {
         historyRideInfoDb.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    for (child in dataSnapshot.children) {
+                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
+                    val historyItem = dataSnapshot.getValue(HistoryItem::class.java)
 
-                        if (child.key == CUSTOMER) {
-                            customerId = child.value!!.toString()
-                            if (customerId != currentUserId) {
-                                getUserInformation(customerId)
-                            }
-                        }
+                    historyItem?.let {
+                        it.rideId = dataSnapshot.key
 
-                        if (child.key == DRIVER) {
-                            driverId = child.value!!.toString()
-                            if (driverId != currentUserId) {
+                        if (currentUserId == it.driver)
+                            it.customer?.let { customerId -> getUserInformation(customerId) }
+
+                        if (currentUserId == it.customer) {
+                            it.driver?.let { driverId ->
                                 getUserInformation(driverId)
-                                displayCustomerRelatedObjects()
+                                displayCustomerRelatedObjects(driverId)
                             }
                         }
 
-                        if (child.key == ARRIVING_TIME) rideDate.text = getDate(java.lang.Long.valueOf(child.value!!.toString()))
+                        rideDate.text = getDate(it.arrivingTime)
 
-                        if (child.key == RATING) mRatingBar.rating = Integer.valueOf(child.value!!.toString()).toFloat()
-
-                        if (child.key == COST) customerPaid = true
-
-                        if (child.key == DISTANCE) {
-                            distance = child.value!!.toString()
+                        distance = it.distance?.toString()
+                        if (distance != null) {
                             rideDistance.text = distance!!.substring(0, Math.min(distance!!.length, 5)) + " km"
                             ridePrice = java.lang.Double.valueOf(distance!!) * 0.5
-
                         }
-                        if (child.key == DESTINATION) rideLocation.text = child.value!!.toString()
 
-                        if (child.key == LOCATION) {
-                            pickupLatLng = LatLng(child.child("from").child("lat").value!!.toString().toDouble(), child.child("from").child("lng").value!!.toString().toDouble())
-                            destinationLatLng = LatLng(child.child("to").child("lat").value!!.toString().toDouble(), child.child("to").child("lng").value!!.toString().toDouble())
-                            if (destinationLatLng !== LatLng(0.0, 0.0)) getRouteToMarker()
-                        }
+                        rideLocation.text = it.destination
+
+                        pickupLatLng = it.location?.from?.lat?.let { it1 -> it.location?.from?.lng?.let { it2 -> LatLng(it1, it2) } }
+                        destinationLatLng = it.location?.to?.lat?.let { it1 -> it.location?.to?.lng?.let { it2 -> LatLng(it1, it2) } }
+                        if (destinationLatLng !== LatLng(0.0, 0.0)) getRouteToMarker()
                     }
                 }
             }
@@ -150,29 +132,29 @@ class GenericHistorySingleFragment :
         })
     }
 
-    private fun displayCustomerRelatedObjects() {
+    private fun displayCustomerRelatedObjects(driverId: String) {
         mRatingBar.visibility = View.VISIBLE
         mRatingBar.onRatingBarChangeListener = RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
 
-            historyRideInfoDb.child(RATING).setValue(rating)
+            historyRideInfoDb.child(RATING_LEG).setValue(rating)
 
-            val mDriverRatingDb = FirebaseHelper.getUserRating(driverId!!)
+            val mDriverRatingDb = FirebaseHelper.getUserRating(driverId)
             mDriverRatingDb.child(rideId!!).setValue(rating)
         }
     }
 
-    private fun getUserInformation(otherUserId: String?) {
-        val mOtherUserDB = FirebaseHelper.getUserInfo(otherUserId!!)
+    private fun getUserInformation(otherUserId: String) {
+        val mOtherUserDB = FirebaseHelper.getUserInfo(otherUserId)
         mOtherUserDB.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
-                    val map = dataSnapshot.value as Map<String, Any?>
+                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
+                    val userInfo = dataSnapshot.getValue(UserInfo::class.java)
+                    userInfo ?: return
 
-                    map[NAME]?.let { userName.text = it.toString() }
-                    map[PHONE]?.let { userPhone.text = it.toString() }
-                    map[PROFILE_IMG_URL]?.let { Glide.with(activity!!.applicationContext).load(it.toString()).into(userImage) }
+                    userInfo.name?.let { userName.text = it }
+                    userInfo.phone.let { userPhone.text = it }
+                    userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(userImage, it) }
                 }
-
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -196,11 +178,8 @@ class GenericHistorySingleFragment :
     }
 
     override fun onRoutingFailure(e: RouteException?) {
-        if (e != null) {
-            Toast.makeText(activity!!.applicationContext, "Error: " + e.message, Toast.LENGTH_LONG).show()
-        } else {
-            Toast.makeText(activity!!.applicationContext, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
-        }
+        if (e != null) Toast.makeText(activity!!.applicationContext, "Error: " + e.message, Toast.LENGTH_LONG).show()
+        else Toast.makeText(activity!!.applicationContext, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
     }
 
     override fun onRoutingStart() {}
@@ -238,7 +217,8 @@ class GenericHistorySingleFragment :
             val polyline = mMap.addPolyline(polyOptions)
             polylines.add(polyline)
 
-            Toast.makeText(activity!!.applicationContext, "Route " + (i + 1) + ": distance - " + route[i].distanceValue + ": duration - " + route[i].durationValue, Toast.LENGTH_SHORT).show()
+
+//            Toast.makeText(activity!!.applicationContext, "Route " + (i + 1) + ": distance - " + route[i].distanceValue + ": duration - " + route[i].durationValue, Toast.LENGTH_SHORT).show()
         }
 
     }

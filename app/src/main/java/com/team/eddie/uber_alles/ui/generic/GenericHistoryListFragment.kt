@@ -1,7 +1,6 @@
 package com.team.eddie.uber_alles.ui.generic
 
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,11 +13,7 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.adapters.HistoryAdapter
 import com.team.eddie.uber_alles.databinding.FragmentGenericHistoryListBinding
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.ARRIVING_TIME
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.COST
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DISTANCE
-import com.team.eddie.uber_alles.view.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.HistoryItem
 import java.util.*
 
 class GenericHistoryListFragment : Fragment() {
@@ -71,34 +66,17 @@ class GenericHistoryListFragment : Fragment() {
         historyDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    val rideId = dataSnapshot.key
-                    var timestamp: Long? = 0L
-                    var location: String? = ""
-                    var ridePrice: Double? = 0.0
+                    val historyItem = dataSnapshot.getValue(HistoryItem::class.java)
+                    historyItem?.let {
+                        it.rideId = dataSnapshot.key
 
-                    dataSnapshot.child(ARRIVING_TIME).value?.let { timestamp = it.toString().toLong() }
-                    dataSnapshot.child(DESTINATION).value?.let { location = it.toString() }
-
-                    if (dataSnapshot.child(COST).value != null && dataSnapshot.child("driverPaidOut").value == null) {
-                        if (dataSnapshot.child(DISTANCE).value != null) {
-                            ridePrice = dataSnapshot.child("price").value!!.toString().toDouble()
-                            balance += ridePrice
-                            mBalance.text = "balance: " + balance.toString() + " $"
-                        }
+                        resultsHistoryList.add(it)
+                        mAdapter.notifyDataSetChanged()
                     }
-
-                    resultsHistoryList.add(HistoryItem(rideId!!, getDate(timestamp), location!!))
-                    mAdapter.notifyDataSetChanged()
                 }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
-    }
-
-    private fun getDate(time: Long?): String {
-        val cal = Calendar.getInstance(Locale.getDefault())
-        cal.timeInMillis = time!! * 1000
-        return DateFormat.format("MM-dd-yyyy hh:mm", cal).toString()
     }
 }

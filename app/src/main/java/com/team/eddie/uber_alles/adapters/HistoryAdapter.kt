@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.team.eddie.uber_alles.databinding.ItemHistoryBinding
 import com.team.eddie.uber_alles.ui.generic.GenericHistoryListFragmentDirections
-import com.team.eddie.uber_alles.view.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.HistoryItem
 
 
 class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.ViewHolder>(HistoryItemDiffCallback()) {
@@ -21,7 +21,7 @@ class HistoryAdapter : ListAdapter<HistoryItem, HistoryAdapter.ViewHolder>(Histo
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val historyItem = getItem(position)
         holder.apply {
-            bind(createOnClickListener(historyItem.rideId), historyItem)
+            bind(createOnClickListener(historyItem.rideId!!), historyItem)
             itemView.tag = historyItem
         }
     }

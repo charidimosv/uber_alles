@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
+import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import java.io.ByteArrayOutputStream
 
@@ -74,20 +75,16 @@ class RegisterDriverCarFragment : Fragment() {
 
     private fun saveCarInfo() {
 
-        carId = FirebaseHelper.createCarForDriver(userId)
-        carDatabase = FirebaseHelper.getCarKey(carId!!)
-
         val mBrand = mBrandField.text.toString()
         val mModel = mModelField.text.toString()
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
 
-        val userInfo: HashMap<String, *> = hashMapOf(
-                FirebaseHelper.CAR_BRAND to mBrand,
-                FirebaseHelper.CAR_MODEL to mModel,
-                FirebaseHelper.CAR_PLATE to mPlate,
-                FirebaseHelper.CAR_YEAR to mYear)
-        carDatabase.updateChildren(userInfo)
+        carId = FirebaseHelper.createCarForDriver(userId)
+        carDatabase = FirebaseHelper.getCarKey(carId!!)
+
+        val currentCar = Car(carId, mBrand, mModel, mPlate, mYear)
+        carDatabase.setValue(currentCar)
 
         if (resultUri != null) {
 
@@ -112,7 +109,7 @@ class RegisterDriverCarFragment : Fragment() {
                     }
                 }
                 downloadUrlTask.addOnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.CAR_IMG_URL to downloadUrl.toString())
+                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
                     carDatabase.updateChildren(newImage)
 
                     startActivity(DriverActivity.getLaunchIntent(activity!!))

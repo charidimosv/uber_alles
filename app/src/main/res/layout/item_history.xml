@@ -12,7 +12,7 @@
 
         <variable
             name="historyItem"
-            type="com.team.eddie.uber_alles.view.HistoryItem" />
+            type="com.team.eddie.uber_alles.utils.firebase.HistoryItem" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -27,7 +27,7 @@
             android:id="@+id/location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@{historyItem.location}"
+            android:text="@{historyItem.destination}"
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -38,7 +38,7 @@
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{historyItem.time}"
+            app:dateFromLong="@{historyItem.arrivingTime}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Time" />

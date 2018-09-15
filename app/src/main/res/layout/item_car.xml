@@ -12,7 +12,7 @@
 
         <variable
             name="carItem"
-            type="com.team.eddie.uber_alles.view.CarItem" />
+            type="com.team.eddie.uber_alles.utils.firebase.Car" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -34,7 +34,7 @@
             android:contentDescription="@string/a11y_plant_item_image"
             android:scaleType="centerCrop"
             android:src="@mipmap/ic_default_car"
-            app:imageFromUrl="@{carItem.image}"
+            app:imageFromUrl="@{carItem.imageUrl}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
