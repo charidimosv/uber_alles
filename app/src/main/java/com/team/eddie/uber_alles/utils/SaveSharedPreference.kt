@@ -4,10 +4,13 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.text.TextUtils
+import com.google.firebase.auth.UserInfo
+import com.google.gson.Gson
 import com.team.eddie.uber_alles.utils.PreferencesUtility.ACTIVE_REQUEST_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.LOGGED_IN_EMAIL_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.RECEIVER_NAME
 import com.team.eddie.uber_alles.utils.PreferencesUtility.SENDER_NAME
+import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_INFO
 import com.team.eddie.uber_alles.utils.PreferencesUtility.USER_TYPE_PREF
 
 
@@ -71,5 +74,15 @@ object SaveSharedPreference {
 
     fun getChatReceiver(context: Context): String {
         return getPreferences(context).getString(RECEIVER_NAME, "")
+    }
+
+    fun setUserInfo(context: Context, info: com.team.eddie.uber_alles.utils.firebase.UserInfo) {
+        val jsonInfo = Gson().toJson(info)
+        getPreferences(context).edit().putString(USER_INFO, jsonInfo).apply()
+    }
+
+    fun getUserInfo(context: Context): com.team.eddie.uber_alles.utils.firebase.UserInfo? {
+        val jsonInfo = getPreferences(context).getString(USER_INFO, "")
+        return Gson().fromJson(jsonInfo,com.team.eddie.uber_alles.utils.firebase.UserInfo::class.java)
     }
 }

@@ -11,4 +11,6 @@ object PreferencesUtility {
     val SENDER_NAME = "sender_name"
     val RECEIVER_NAME = "recveiver_name"
 
+    val USER_INFO = "user_info"
+
 }

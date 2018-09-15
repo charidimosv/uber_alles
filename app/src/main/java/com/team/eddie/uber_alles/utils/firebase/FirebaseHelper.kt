@@ -85,8 +85,8 @@ HELPERS
 
     // history related
     const val IMG_URL: String = "imageUrl"
-    private const val PROFILE_IMGS: String = "car_images"
-    private const val CAR_IMGS: String = "profile_images"
+    private const val PROFILE_IMGS: String = "profile_images"
+    private const val CAR_IMGS: String = "car_images"
 
     const val DESTINATION_LAT: String = "destinationLat"
     const val DESTINATION_LOT: String = "destinationLng"

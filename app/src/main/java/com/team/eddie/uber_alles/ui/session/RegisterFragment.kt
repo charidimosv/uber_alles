@@ -53,6 +53,8 @@ class RegisterFragment : Fragment() {
 
     private lateinit var driverSwitch: Switch
 
+    private lateinit var userInfo : com.team.eddie.uber_alles.utils.firebase.UserInfo
+
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -81,10 +83,10 @@ class RegisterFragment : Fragment() {
 
 
         mAuth = FirebaseAuth.getInstance()
-        firebaseAuthListener = FirebaseAuth.AuthStateListener {
+       /* firebaseAuthListener = FirebaseAuth.AuthStateListener {
             val user = FirebaseAuth.getInstance().currentUser
             if (user != null) onRegisterSuccess()
-        }
+        }*/
 
         registerButton.setOnClickListener { attemptRegister() }
         backButton.setOnClickListener { activity!!.supportFragmentManager.popBackStack() }
@@ -99,19 +101,19 @@ class RegisterFragment : Fragment() {
             FirebaseHelper.cleanUser(FirebaseHelper.getUserId())
             mAuth.currentUser?.delete()?.addOnCompleteListener {
                 SaveSharedPreference.cleanAll(applicationContext)
-                mAuth.addAuthStateListener(firebaseAuthListener)
             }
-        } else mAuth.addAuthStateListener(firebaseAuthListener)
+        }
     }
 
-    override fun onStop() {
+    /*override fun onStop() {
         super.onStop()
         mAuth.removeAuthStateListener(firebaseAuthListener)
-    }
+    }*/
 
     private fun onRegisterSuccess() {
         SaveSharedPreference.setLoggedIn(applicationContext, emailTextInputEdit.text.toString())
         SaveSharedPreference.setUserType(applicationContext, driverSwitch.isChecked)
+        SaveSharedPreference.setUserInfo(applicationContext, userInfo)
 
         val direction: NavDirections =
                 if (driverSwitch.isChecked) RegisterFragmentDirections.actionRegisterFragmentToRegisterDriverProfileFragment()
@@ -147,8 +149,7 @@ class RegisterFragment : Fragment() {
                             else {
                                 val userId = mAuth.currentUser!!.uid
 
-                                val userInfo : com.team.eddie.uber_alles.utils.firebase.UserInfo =
-                                        com.team.eddie.uber_alles.utils.firebase.UserInfo(userId,email,username,password,"","",driverSwitch.isChecked.toString(),null)
+                                userInfo = com.team.eddie.uber_alles.utils.firebase.UserInfo(userId,email,username,password,"","",driverSwitch.isChecked.toString(),null)
 
                                 val registerCall = sessionServices.register(userInfo)
                                 registerCall.enqueue(object : Callback<Void> {
@@ -156,7 +157,7 @@ class RegisterFragment : Fragment() {
                                         Toast.makeText(applicationContext, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
                                     }
 
-                                    override fun onResponse(call: Call<Void>, response: Response<Void>) {}
+                                    override fun onResponse(call: Call<Void>, response: Response<Void>) { onRegisterSuccess() }
                                 })
                             }
                         }

@@ -20,8 +20,13 @@ import com.google.firebase.database.DatabaseReference
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentDriverCarSingleBinding
 import com.team.eddie.uber_alles.ui.driver.DriverActivity
+import com.team.eddie.uber_alles.utils.RetrofitClient
+import com.team.eddie.uber_alles.utils.SessionServices
 import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.ByteArrayOutputStream
 
 class RegisterDriverCarFragment : Fragment() {
@@ -80,43 +85,56 @@ class RegisterDriverCarFragment : Fragment() {
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
 
-        carId = FirebaseHelper.createCarForDriver(userId)
-        carDatabase = FirebaseHelper.getCarKey(carId!!)
 
         val currentCar = Car(carId, mBrand, mModel, mPlate, mYear)
-        carDatabase.setValue(currentCar)
 
-        if (resultUri != null) {
+        val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
+        val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-            val filePath = FirebaseHelper.getCarImages(carId!!)
-            val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
+        val registerCall = sessionServices.saveCarInfo(userId,currentCar)
+        registerCall.enqueue(object : Callback<Car> {
+            override fun onFailure(call: Call<Car>, t: Throwable) {
+                Toast.makeText(activity?.applicationContext!!, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
+            }
 
-            val baos = ByteArrayOutputStream()
-            bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, baos)
-            val data = baos.toByteArray()
-            val uploadTask = filePath.putBytes(data)
+            override fun onResponse(call: Call<Car>, response: Response<Car>) {
+                if (resultUri != null) {
+                    carId = response.body()?.carId
+                    carDatabase = FirebaseHelper.getCarKey(carId!!)
 
-            uploadTask.addOnFailureListener(OnFailureListener {
-                Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
-                return@OnFailureListener
-            })
-            uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
-                val downloadUrlTask = taskSnapshot.storage.downloadUrl
-                downloadUrlTask.addOnFailureListener {
-                    OnFailureListener {
+                    val filePath = FirebaseHelper.getCarImages(carId!!)
+                    val bitmap = MediaStore.Images.Media.getBitmap(activity?.application?.contentResolver, resultUri)
+
+                    val baos = ByteArrayOutputStream()
+                    bitmap!!.compress(Bitmap.CompressFormat.JPEG, 20, baos)
+                    val data = baos.toByteArray()
+                    val uploadTask = filePath.putBytes(data)
+
+                    uploadTask.addOnFailureListener(OnFailureListener {
                         Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
                         return@OnFailureListener
-                    }
-                }
-                downloadUrlTask.addOnSuccessListener { downloadUrl ->
-                    val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
-                    carDatabase.updateChildren(newImage)
+                    })
+                    uploadTask.addOnSuccessListener(OnSuccessListener { taskSnapshot ->
+                        val downloadUrlTask = taskSnapshot.storage.downloadUrl
+                        downloadUrlTask.addOnFailureListener {
+                            OnFailureListener {
+                                Toast.makeText(activity!!, getString(R.string.problem_saving_photo), Toast.LENGTH_SHORT).show()
+                                return@OnFailureListener
+                            }
+                        }
+                        downloadUrlTask.addOnSuccessListener { downloadUrl ->
+                            val newImage: HashMap<String, *> = hashMapOf(FirebaseHelper.IMG_URL to downloadUrl.toString())
+                            carDatabase.updateChildren(newImage)
 
-                    startActivity(DriverActivity.getLaunchIntent(activity!!))
-                }
-                return@OnSuccessListener
-            })
-        } else startActivity(DriverActivity.getLaunchIntent(activity!!))
+                            startActivity(DriverActivity.getLaunchIntent(activity!!))
+                        }
+                        return@OnSuccessListener
+                    })
+                } else startActivity(DriverActivity.getLaunchIntent(activity!!))
+            }
+
+        })
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

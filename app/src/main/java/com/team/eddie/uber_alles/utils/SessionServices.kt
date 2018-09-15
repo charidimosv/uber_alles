@@ -1,5 +1,6 @@
 package com.team.eddie.uber_alles.utils
 
+import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import retrofit2.Call
 import retrofit2.http.Body
@@ -24,5 +25,12 @@ interface SessionServices {
 
     @POST("register")
     fun register(@Body userInfo: UserInfo): Call<Void>
+
+    @POST("register/user/info")
+    fun saveUserInfo(@Body userInfo: UserInfo): Call<Void>
+
+    @POST("register/car/info")
+    fun saveCarInfo(@Query("driverId") driverId: String, @Body car: Car): Call<Car>
+
 
 }

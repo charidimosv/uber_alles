@@ -17,16 +17,19 @@ import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerProfileBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.customer.CustomerActivity
+import com.team.eddie.uber_alles.utils.RetrofitClient
+import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.SessionServices
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.ByteArrayOutputStream
 
 class RegisterCustomerProfileFragment : Fragment() {
@@ -82,21 +85,12 @@ class RegisterCustomerProfileFragment : Fragment() {
     }
 
     private fun getUserInfo() {
-        userDatabase.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    userInfo = dataSnapshot.getValue(UserInfo::class.java)
-
-                    userInfo?.email?.let { mEmail.setText(it) }
-                    userInfo?.username?.let { mUsername.setText(it) }
-                    userInfo?.name?.let { mNameField.setText(it) }
-                    userInfo?.phone.let { mPhoneField.setText(it.toString()) }
-                    userInfo?.imageUrl?.let { ActivityHelper.bindImageFromUrl(mProfileImage, it) }
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
+        userInfo = SaveSharedPreference.getUserInfo(activity?.applicationContext!!)
+        userInfo?.email?.let { mEmail.setText(it) }
+        userInfo?.username?.let { mUsername.setText(it) }
+        userInfo?.name?.let { mNameField.setText(it) }
+        userInfo?.phone.let { mPhoneField.setText(it.toString()) }
+        userInfo?.imageUrl?.let { ActivityHelper.bindImageFromUrl(mProfileImage, it) }
     }
 
     private fun saveUserInformation() {
@@ -105,9 +99,18 @@ class RegisterCustomerProfileFragment : Fragment() {
 
         userInfo?.name = mName
         userInfo?.phone = mPhone
-        userInfo?.let {
-            userDatabase.setValue(it).addOnCompleteListener {
 
+        val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
+        val sessionServices = retrofit!!.create(SessionServices::class.java)
+
+        val registerCall = sessionServices.saveUserInfo(userInfo!!)
+        registerCall.enqueue(object : Callback<Void> {
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Toast.makeText(activity?.applicationContext!!, "Couldn't Save Info", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                SaveSharedPreference.setUserInfo(activity?.applicationContext!!, userInfo!!)
                 if (resultUri != null) {
 
                     val filePath = FirebaseHelper.getProfileImages(userID!!)
@@ -142,7 +145,8 @@ class RegisterCustomerProfileFragment : Fragment() {
 
                 } else startActivity(CustomerActivity.getLaunchIntent(activity!!))
             }
-        }
+        })
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
