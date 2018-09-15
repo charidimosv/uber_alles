@@ -1,6 +1,5 @@
 <resources>
-    <string name="app_name">uber_alles</string>
-    <string name="app_real_name">uber alles</string>
+    <string name="app_name">Uber Alles</string>
 
     <string name="prompt_username">"   "Username</string>
     <string name="prompt_email">"   "Email</string>
