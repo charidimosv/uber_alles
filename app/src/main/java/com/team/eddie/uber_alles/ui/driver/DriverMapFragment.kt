@@ -85,9 +85,6 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private var rideDistance: Float = 0.toFloat()
 
-    private var assignedCustomerPickupLocationRef: DatabaseReference? = null
-    private var assignedCustomerPickupLocationRefListener: ValueEventListener? = null
-
     private var mCustomerMarker: Marker? = null
     private var customerLocationRef: DatabaseReference? = null
     private var customerLocationListener: ValueEventListener? = null
@@ -138,7 +135,6 @@ open class DriverMapFragment : GenericMapFragment() {
                 showRideUI()
             else if (status == UserStatus.ToDestination) {
                 if (currentRequest != null) {
-                    FirebaseHelper.completeRequest(currentRequest!!)
                     recordRide()
                     endRideRequest()
                 }
@@ -181,10 +177,8 @@ open class DriverMapFragment : GenericMapFragment() {
                 if (dataSnapshot.exists()) {
                     getRequestInfo(dataSnapshot.value.toString())
                 } else {
-                    if (currentRequest != null) {
-                        completedRide = true
+                    if (currentRequest != null)
                         endRideRequest()
-                    }
 
                     findNextCustomer()
                 }
@@ -203,12 +197,6 @@ open class DriverMapFragment : GenericMapFragment() {
                     currentRequest ?: return
 
                     customerFoundId = currentRequest?.customerId
-                    getAssignedCustomerInfo()
-                    getAssignedCustomerLocation()
-
-                    for (reqLocation in currentRequest!!.destinationList!!)
-                        destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
-
                     status = currentRequest?.status!!
 
                     if (status == UserStatus.Pending)
@@ -224,8 +212,22 @@ open class DriverMapFragment : GenericMapFragment() {
         })
     }
 
+    private fun getAssignedCustomerMessage() {
+        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
+        SaveSharedPreference.setChatReceiver(applicationContext, customerFoundId!!)
+
+        newIncomeMessageRef = FirebaseHelper.getMessageUsers(currentUserId + "_to_" + customerFoundId!!)
+        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) binding.chatCustomer.text = getString(R.string.message_excl)
+            }
+
+        })
+    }
+
     private fun getAssignedCustomerInfo() {
-        // TODO uncomment later
         mCustomerInfo.visibility = View.VISIBLE
 
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerFoundId!!)
@@ -265,22 +267,6 @@ open class DriverMapFragment : GenericMapFragment() {
                 }
                 mRatingAvg.text = "Average Rating: " + df.format(ratingsAvg).toString() + "/5"
 
-            }
-
-        })
-
-        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
-        SaveSharedPreference.setChatReceiver(applicationContext, customerFoundId!!)
-        newIncomeMessageRef = FirebaseHelper.getMessageUsers(currentUserId + "_to_" + customerFoundId!!)
-
-        binding.callCustomer.visibility = View.VISIBLE
-        binding.chatCustomer.visibility = View.VISIBLE
-
-        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
-            override fun onCancelled(p0: DatabaseError) {}
-
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) binding.chatCustomer.text = getString(R.string.message_excl)
             }
 
         })
@@ -343,6 +329,9 @@ open class DriverMapFragment : GenericMapFragment() {
 
     // TODO - kapoi prepei na mpei auto
     private fun acceptCustomerRequest() {
+        currentRequest ?: return
+
+        currentRequest?.driverId = currentUserId
         FirebaseHelper.acceptRequest(currentRequest!!)
         showDriverToCustomerUI()
     }
@@ -353,14 +342,14 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun endRideRequest() {
         binding.rideStatus.text = getString(R.string.picked_customer)
 
-        FirebaseHelper.removeRequest(currentRequest!!)
+        if (status == UserStatus.ToDestination) {
+            FirebaseHelper.completeRequest(currentRequest!!)
+            showRatingUI()
+        } else {
+            FirebaseHelper.removeRequest(currentRequest!!)
+            startFresh()
+        }
         currentRequest = null
-
-        assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
-        newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
-
-        if (status == UserStatus.ToDestination) showRatingUI()
-        else startFresh()
     }
 
     private fun recordRide() {
@@ -416,19 +405,31 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private fun startFresh() {
         showFreshUI()
-
-        searchCustomersAround = true
         findNextCustomer()
     }
 
     override fun showFreshUI() {
+        status = UserStatus.Free
+
+        searchCustomersAround = true
+        completedRide = false
+
+        binding.callCustomer.visibility = View.GONE
+        binding.callCustomer.visibility = View.GONE
+
+        binding.rideStatus.visibility = View.GONE
+        binding.rideStatus.isClickable = false
+        binding.rideStatus.text = getString(R.string.accept_customer)
+
         pickupMarker?.remove()
         mCustomerMarker?.remove()
 
+        erasePolylines()
         clearDestinationInfo()
         clearCustomersInfo()
 
-        erasePolylines()
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
     override fun showPendingUI() {
@@ -454,6 +455,9 @@ open class DriverMapFragment : GenericMapFragment() {
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+
+        getAssignedCustomerInfo()
+        getAssignedCustomerLocation()
     }
 
     override fun showDriverToCustomerUI() {
@@ -482,6 +486,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
         getAssignedCustomerInfo()
         getAssignedCustomerLocation()
+        getAssignedCustomerMessage()
     }
 
     override fun showRideUI() {
@@ -518,6 +523,9 @@ open class DriverMapFragment : GenericMapFragment() {
         mRatingAvg.visibility = View.GONE
         mRatingButton.visibility = View.VISIBLE
         ratingTextLayout.visibility = View.VISIBLE
+
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
 }
