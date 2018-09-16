@@ -41,6 +41,7 @@ class DriverCarSingleFragment : Fragment() {
 
     private lateinit var mBrandField: EditText
     private lateinit var mModelField: EditText
+    private lateinit var mColorField: EditText
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
 
@@ -61,6 +62,7 @@ class DriverCarSingleFragment : Fragment() {
         mCarImage = binding.carImage
         mBrandField = binding.brand
         mModelField = binding.model
+        mColorField = binding.color
         mPlateField = binding.plate
         mYearField = binding.year
 
@@ -105,6 +107,7 @@ class DriverCarSingleFragment : Fragment() {
 
                     car.brand?.let { mBrandField.setText(it) }
                     car.model?.let { mModelField.setText(it) }
+                    car.color?.let { mColorField.setText(it) }
                     car.plate?.let { mPlateField.setText(it) }
                     car.year?.let { mYearField.setText(it) }
                     car.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCarImage, it) }
@@ -119,6 +122,7 @@ class DriverCarSingleFragment : Fragment() {
 
         val mBrand = mBrandField.text.toString()
         val mModel = mModelField.text.toString()
+        val mColor = mColorField.text.toString()
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
 
@@ -127,7 +131,7 @@ class DriverCarSingleFragment : Fragment() {
             syncCarInfo()
         }
 
-        val currentCar = Car(carId, mBrand, mModel, mPlate, mYear)
+        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear)
         carDatabase.setValue(currentCar)
 
         if (resultUri != null) {

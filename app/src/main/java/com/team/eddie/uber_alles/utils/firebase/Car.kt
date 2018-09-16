@@ -5,6 +5,7 @@ class Car(
 
         var brand: String? = null,
         var model: String? = null,
+        var color: String? = null,
         var plate: String? = null,
         var year: String? = null,
 

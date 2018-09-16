@@ -200,6 +200,24 @@ HELPERS
         pendingRequestRef.child(requestId).setValue(true)
     }
 
+    fun removeRequest(request: Request) {
+        if (request.customerId != "") {
+            val customerARRef = getUserActiveRequest(request.customerId)
+            customerARRef.setValue(null)
+        }
+
+        if (request.driverId != "") {
+            val driverARRef = getUserActiveRequest(request.driverId)
+            driverARRef.setValue(null)
+        }
+
+        val pendingRequestRef = getPendingRequestKey(request.requestId)
+        pendingRequestRef.setValue(null)
+
+        val requestRef = getRequestKey(request.requestId)
+        requestRef.setValue(null)
+    }
+
     fun acceptRequest(request: Request) {
         val requestId = request.requestId
 

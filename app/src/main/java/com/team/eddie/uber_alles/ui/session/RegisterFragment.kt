@@ -126,7 +126,7 @@ class RegisterFragment : Fragment() {
             val retrofit = RetrofitClient.getClient(applicationContext)
             val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-            val params: HashMap<String, String> = hashMapOf("email" to email, "password" to password)
+            val params: HashMap<String, String> = hashMapOf("email" to email, "username" to username)
             val call = sessionServices.registerCheck(params)
             call.enqueue(object : Callback<Boolean> {
                 override fun onFailure(call: Call<Boolean>?, t: Throwable?) {
@@ -144,7 +144,7 @@ class RegisterFragment : Fragment() {
                             else {
                                 val userId = mAuth.currentUser!!.uid
 
-                                userInfo = com.team.eddie.uber_alles.utils.firebase.UserInfo(userId, email, username, password, "", "", driverSwitch.isChecked.toString(), null)
+                                userInfo = com.team.eddie.uber_alles.utils.firebase.UserInfo(userId, email, username, password, "", "", "", driverSwitch.isChecked.toString(), null)
 
                                 val registerCall = sessionServices.register(userInfo)
                                 registerCall.enqueue(object : Callback<Void> {

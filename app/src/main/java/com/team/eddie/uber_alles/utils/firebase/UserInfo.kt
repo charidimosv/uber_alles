@@ -1,5 +1,7 @@
 package com.team.eddie.uber_alles.utils.firebase
 
+import java.net.Inet4Address
+
 class UserInfo(
         var userId: String = "",
 
@@ -9,6 +11,7 @@ class UserInfo(
 
         var name: String = "",
         var phone: String = "",
+        var address: String = "",
 
         var driver: String = "false",
 

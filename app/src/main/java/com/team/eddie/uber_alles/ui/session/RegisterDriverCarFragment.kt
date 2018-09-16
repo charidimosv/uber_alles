@@ -43,6 +43,7 @@ class RegisterDriverCarFragment : Fragment() {
 
     private lateinit var mBrandField: EditText
     private lateinit var mModelField: EditText
+    private lateinit var mColorField: EditText
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
 
@@ -59,6 +60,7 @@ class RegisterDriverCarFragment : Fragment() {
         mCarImage = binding.carImage
         mBrandField = binding.brand
         mModelField = binding.model
+        mColorField = binding.color
         mPlateField = binding.plate
         mYearField = binding.year
 
@@ -82,11 +84,12 @@ class RegisterDriverCarFragment : Fragment() {
 
         val mBrand = mBrandField.text.toString()
         val mModel = mModelField.text.toString()
+        val mColor = mColorField.text.toString()
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
 
 
-        val currentCar = Car(carId, mBrand, mModel, mPlate, mYear)
+        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear)
 
         val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
         val sessionServices = retrofit!!.create(SessionServices::class.java)

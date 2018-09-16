@@ -406,6 +406,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     private fun endRideRequest() {
+        //TODO BUGGY
         FirebaseHelper.removeRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, false)

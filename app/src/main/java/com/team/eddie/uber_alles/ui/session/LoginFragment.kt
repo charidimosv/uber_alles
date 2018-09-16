@@ -100,7 +100,7 @@ class LoginFragment : Fragment() {
             val retrofit = RetrofitClient.getClient(applicationContext)
             val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-            val userInfo = UserInfo("", email, "", password, "", "", "", null)
+            val userInfo = UserInfo("", email, "", password, "", "", "", "", null)
             val call = sessionServices.login(userInfo)
             call.enqueue(object : Callback<UserInfo> {
                 override fun onFailure(call: Call<UserInfo>?, t: Throwable?) {

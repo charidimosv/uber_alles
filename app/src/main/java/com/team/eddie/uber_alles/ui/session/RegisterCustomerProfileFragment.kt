@@ -46,6 +46,7 @@ class RegisterCustomerProfileFragment : Fragment() {
     private lateinit var mUsername: EditText
     private lateinit var mNameField: EditText
     private lateinit var mPhoneField: EditText
+    private lateinit var mAddressField: EditText
 
     private lateinit var mConfirm: MaterialButton
 
@@ -62,6 +63,7 @@ class RegisterCustomerProfileFragment : Fragment() {
         mUsername = binding.username
         mNameField = binding.name
         mPhoneField = binding.phone
+        mAddressField = binding.address
 
         mProfileImage = binding.profileImage
 
@@ -89,6 +91,7 @@ class RegisterCustomerProfileFragment : Fragment() {
         userInfo?.email?.let { mEmail.setText(it) }
         userInfo?.username?.let { mUsername.setText(it) }
         userInfo?.name?.let { mNameField.setText(it) }
+        userInfo?.address?.let { mAddressField.setText(it) }
         userInfo?.phone.let { mPhoneField.setText(it.toString()) }
         userInfo?.imageUrl?.let { ActivityHelper.bindImageFromUrl(mProfileImage, it) }
     }
@@ -96,9 +99,11 @@ class RegisterCustomerProfileFragment : Fragment() {
     private fun saveUserInformation() {
         val mName = mNameField.text.toString()
         val mPhone = mPhoneField.text.toString()
+        val mAddress = mAddressField.text.toString()
 
         userInfo?.name = mName
         userInfo?.phone = mPhone
+        userInfo?.address = mAddress
 
         val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
         val sessionServices = retrofit!!.create(SessionServices::class.java)
