@@ -119,6 +119,9 @@
     <string name="message">Message</string>
     <string name="call">Call</string>
     <string name="ride_date">Ride Date</string>
-
+    <string name="destination">Destination: --</string>
+    <string name="rate_your_customer">Rate your customer</string>
+    <string name="picked_customer">Picked Customer</string>
+    <string name="message_excl">Message (!)</string>
 
 </resources>

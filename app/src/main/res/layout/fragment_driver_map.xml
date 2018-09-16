@@ -33,6 +33,7 @@
                     android:id="@+id/customerProfileImage"
                     android:layout_width="100sp"
                     android:layout_height="100sp"
+                    android:contentDescription="@string/profile_image"
                     android:padding="20sp"
                     android:src="@mipmap/ic_default_user" />
 
@@ -40,14 +41,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingLeft="40sp">
+                    android:paddingStart="40sp"
+                    android:paddingEnd="40sp">
 
                     <TextView
                         android:id="@+id/customerDestination"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:paddingBottom="10sp"
-                        android:text="Destination: --" />
+                        android:text="@string/destination" />
 
                     <TextView
                         android:id="@+id/customerName"
@@ -103,7 +105,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_gravity="bottom"
-                        android:text="Rate your customer"
+                        android:text="@string/rate_your_customer"
                         android:visibility="gone" />
 
                     <LinearLayout
@@ -116,15 +118,15 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            android:text="Call" />
+                            android:text="@string/call" />
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/chatCustomer"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="bottom"
-                            android:layout_marginLeft="20dp"
-                            android:text="Message" />
+                            android:layout_marginStart="20dp"
+                            android:text="@string/message" />
                     </LinearLayout>
                 </LinearLayout>
 
@@ -134,7 +136,7 @@
                 android:id="@+id/rideStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Picked Customer" />
+                android:text="@string/picked_customer" />
         </LinearLayout>
 
         <ImageView

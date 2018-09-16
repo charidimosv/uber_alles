@@ -22,16 +22,17 @@ class Request(
                 locationList: List<Location>)
             : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate) {
 
-        this.pickupLocation = RequestLocation(pickupLocation.latitude, pickupLocation.longitude)
+        this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
 
         if (!locationList.isEmpty()) destinationList = ArrayList()
         for (location in locationList)
-            destinationList?.add(RequestLocation(location.latitude, location.longitude))
+            destinationList?.add(RequestLocation("", location.latitude, location.longitude))
     }
 
 }
 
 class RequestLocation(
+        var locName: String = "",
         var lat: Double = 0.0,
         var lng: Double = 0.0
 )

@@ -58,10 +58,11 @@ class CustomerPaymentFragment : Fragment() {
 
         getPaymentInfo()
 
-        mSave.setOnClickListener { if(checkFields()) savePaymentInformation() }
+        mSave.setOnClickListener { if (checkFields()) savePaymentInformation() }
         mDelete.setOnClickListener { deletePaymentInformation() }
-        mSwitch.setOnClickListener{ changeEditing(mSwitch.isChecked)
-            if(!mSwitch.isChecked && checkFields())
+        mSwitch.setOnClickListener {
+            changeEditing(mSwitch.isChecked)
+            if (!mSwitch.isChecked && checkFields())
                 savePaymentInformation()
         }
 
@@ -88,7 +89,7 @@ class CustomerPaymentFragment : Fragment() {
         })
     }
 
-    private fun changeEditing(value: Boolean){
+    private fun changeEditing(value: Boolean) {
         mNumber.isEnabled = value
         mOwner.isEnabled = value
         mCode.isEnabled = value
@@ -108,7 +109,7 @@ class CustomerPaymentFragment : Fragment() {
     }
 
     private fun deletePaymentInformation() {
-        if(!paymentInfo.cardNumber.isEmpty()) paymentDatabase.setValue(null)
+        if (!paymentInfo.cardNumber.isEmpty()) paymentDatabase.setValue(null)
         activity!!.supportFragmentManager.popBackStack()
     }
 
@@ -118,11 +119,11 @@ class CustomerPaymentFragment : Fragment() {
             mCode.error = getString(R.string.error_field_required)
             validationOk = false
         }
-        if(TextUtils.isEmpty(mNumber.text.toString())) {
+        if (TextUtils.isEmpty(mNumber.text.toString())) {
             mNumber.error = getString(R.string.error_field_required)
             validationOk = false
         }
-        if(TextUtils.isEmpty(mOwner.text.toString())){
+        if (TextUtils.isEmpty(mOwner.text.toString())) {
             mOwner.error = getString(R.string.error_field_required)
             validationOk = false
         }

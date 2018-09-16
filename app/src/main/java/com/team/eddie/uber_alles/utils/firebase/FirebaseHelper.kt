@@ -196,8 +196,9 @@ HELPERS
         request.requestId = requestId
         requestRef.child(requestId).setValue(request)
 
-        val pendingRequestRef = getPendingRequest()
-        pendingRequestRef.child(requestId).setValue(true)
+        val pickupLocation = GeoLocation(request.pickupLocation?.lat!!, request.pickupLocation?.lng!!)
+        val geoPendingRequest = GeoFire(getPendingRequest())
+        geoPendingRequest.setLocation(requestId, pickupLocation)
     }
 
     fun removeRequest(request: Request) {

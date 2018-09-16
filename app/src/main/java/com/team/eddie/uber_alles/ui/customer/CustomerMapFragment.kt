@@ -47,22 +47,21 @@ import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
+private const val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
+private const val DEFAULT_SEARCH_LOC_DIF: Float = 1F
 
 class CustomerMapFragment : GenericMapFragment(),
         PlaceSelectionListener,
         GoogleMap.OnMarkerClickListener {
 
+    /*
+    ----------------------------------
+    UI
+    ----------------------------------
+    */
+
     private lateinit var binding: FragmentCustomerMapBinding
-
-    private var pickupLocation: LatLng? = null
-    private var pickupMarker: Marker? = null
-
-    private var radius = 1
-    private var driverFound: Boolean = false
-    private var driverFoundID: String? = null
 
     private lateinit var autocompleteFragment: SupportPlaceAutocompleteFragment
 
@@ -82,20 +81,21 @@ class CustomerMapFragment : GenericMapFragment(),
     private lateinit var mRatingButton: MaterialButton
     private var mRatingAvg: TextView? = null
 
+    /*
+    ----------------------------------
+    OTHER
+    ----------------------------------
+    */
+
+    private var driverFoundID: String? = null
+
     private var dateOfRide: String? = null
     private val destinationMap: HashMap<Marker, Place> = HashMap()
     private val destinationList: ArrayList<Place> = ArrayList()
 
-    private var currentRequest: Request? = null
-
-    private var completedRide: Boolean = false
     private var isPickedUp: Boolean = false
-
-    private var activeRequestRef: DatabaseReference? = null
-    private var activeRequestListener: ValueEventListener? = null
-
-    private var requestRef: DatabaseReference? = null
-    private var requestListener: ValueEventListener? = null
+    private var pickupLatLng: LatLng? = null
+    private var pickupMarker: Marker? = null
 
     private var mDriverMarker: Marker? = null
     private var driverLocationRef: DatabaseReference? = null
@@ -104,12 +104,12 @@ class CustomerMapFragment : GenericMapFragment(),
     private var customerPickedUpRef: DatabaseReference? = null
     private var customerPickedUpListener: ValueEventListener? = null
 
-    private var newIncomeMessageRef: DatabaseReference? = null
-    private var newIncomeMessageListener: ValueEventListener? = null
 
-    // drivers around vars
-    private val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
-    private val DEFAULT_SEARCH_LOC_DIF: Float = 1F
+    /*
+    ----------------------------------
+    DRIVERS AROUND
+    ----------------------------------
+    */
 
     private var showDriversAround: Boolean = true
     private var driversAroundLatestLoc: Location? = null
@@ -224,13 +224,13 @@ class CustomerMapFragment : GenericMapFragment(),
         handleDriversAround()
     }
 
-    private fun getActiveRequest() {
+    override fun getActiveRequest() {
         activeRequestRef = FirebaseHelper.getUserActiveRequest(currentUserId)
         activeRequestListener = activeRequestRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     getRequestInfo(dataSnapshot.value.toString())
-                } else {
+                } else if (currentRequest != null) {
                     completedRide = true
                     endRideRequest()
                 }
@@ -238,10 +238,9 @@ class CustomerMapFragment : GenericMapFragment(),
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
-
     }
 
-    private fun getRequestInfo(requestId: String) {
+    override fun getRequestInfo(requestId: String) {
         requestRef = FirebaseHelper.getRequestKey(requestId)
         requestListener = requestRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -251,11 +250,10 @@ class CustomerMapFragment : GenericMapFragment(),
 
                     startRideUI()
 
-                    driverFound = true
                     driverFoundID = currentRequest?.driverId
 
-// TODO uncomment later
-//                    getHasCustomerPickedUp()
+                    // TODO uncomment later
+                    // getHasCustomerPickedUp()
                     getAssignedDriverInfo()
                     getAssignedDriverLocation()
 
@@ -265,47 +263,11 @@ class CustomerMapFragment : GenericMapFragment(),
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
-
-    }
-
-    private fun getAssignedDriverLocation() {
-        driverLocationRef = FirebaseHelper.getUserLocation(driverFoundID!!)
-        driverLocationListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(applicationContext)) {
-                    val map = dataSnapshot.value as List<Any?>
-
-                    val locationLat: Double = map[0]?.toString()?.toDouble() ?: 0.0
-                    val locationLng: Double = map[1]?.toString()?.toDouble() ?: 0.0
-
-                    val driverLatLng = LatLng(locationLat, locationLng)
-
-                    val loc1 = Location("")
-                    loc1.latitude = pickupLocation!!.latitude
-                    loc1.longitude = pickupLocation!!.longitude
-
-                    val loc2 = Location("")
-                    loc2.latitude = driverLatLng.latitude
-                    loc2.longitude = driverLatLng.longitude
-
-                    val distance: Float = loc1.distanceTo(loc2)
-
-                    mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.driver_found).plus(distance.toString())
-
-                    mDriverMarker?.remove()
-                    mDriverMarker = mMap.addMarker(MarkerOptions().position(driverLatLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
-                }
-
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {}
-        })
-
     }
 
     private fun getAssignedDriverInfo() {
         // TODO uncomment later
-//        mDriverInfo.visibility = View.VISIBLE
+        // mDriverInfo.visibility = View.VISIBLE
 
         val mDriverDatabase = FirebaseHelper.getUserInfo(driverFoundID!!)
         mDriverDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -345,6 +307,40 @@ class CustomerMapFragment : GenericMapFragment(),
                 mRatingAvg?.text = "Average Rating: " + df.format(ratingsAvg).toString() + "/5"
             }
 
+        })
+    }
+
+
+    private fun getAssignedDriverLocation() {
+        driverLocationRef = FirebaseHelper.getUserLocation(driverFoundID!!)
+        driverLocationListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists() && SaveSharedPreference.getActiveRequest(applicationContext)) {
+                    val map = dataSnapshot.value as List<Any?>
+
+                    val locationLat: Double = map[0]?.toString()?.toDouble() ?: 0.0
+                    val locationLng: Double = map[1]?.toString()?.toDouble() ?: 0.0
+
+                    val latLng = LatLng(locationLat, locationLng)
+
+                    val loc1 = Location("")
+                    loc1.latitude = pickupLatLng!!.latitude
+                    loc1.longitude = pickupLatLng!!.longitude
+
+                    val loc2 = Location("")
+                    loc2.latitude = latLng.latitude
+                    loc2.longitude = latLng.longitude
+
+                    val distance: Float = loc1.distanceTo(loc2)
+
+                    mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.driver_found).plus(distance.toString())
+
+                    mDriverMarker?.remove()
+                    mDriverMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
@@ -390,14 +386,14 @@ class CustomerMapFragment : GenericMapFragment(),
         })
     }
 
-    private fun startRideRequest() {
+    override fun startRideRequest() {
         currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
 
-        pickupLocation = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupLatLng = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         //Draw route for all destinations... TODO test
         getRouteToMarker(mLastLocation!!, getLatLngList())
@@ -405,12 +401,10 @@ class CustomerMapFragment : GenericMapFragment(),
         startRideUI()
     }
 
-    private fun endRideRequest() {
-        //TODO BUGGY
+    override fun endRideRequest() {
         FirebaseHelper.removeRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, false)
-        radius = 1
 
         driverLocationRef?.removeEventListener(driverLocationListener!!)
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
@@ -433,12 +427,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     private fun clearDriversInfo() {
-        driverFoundID?.let {
-            val driverRef = FirebaseHelper.getDriverCustomerReq(it)
-            driverRef.removeValue()
-            driverFoundID = null
-            driverFound = false
-        }
+        driverFoundID = null
 
         mDriverInfo.visibility = View.GONE
         mDriverName.text = ""
@@ -562,7 +551,7 @@ class CustomerMapFragment : GenericMapFragment(),
         return true
     }
 
-    private fun startFreshUI() {
+    override fun startFreshUI() {
         pickupMarker?.remove()
         mDriverMarker?.remove()
         clearDestinationInfo()
@@ -575,7 +564,7 @@ class CustomerMapFragment : GenericMapFragment(),
         mRequest.visibility = View.GONE
     }
 
-    private fun startRideUI() {
+    override fun startRideUI() {
         showDriversAround = false
 
         binding.searchRequest.visibility = View.GONE

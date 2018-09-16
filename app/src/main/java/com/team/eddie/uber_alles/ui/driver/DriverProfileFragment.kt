@@ -3,7 +3,6 @@ package com.team.eddie.uber_alles.ui.driver
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.LinkAddress
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore

@@ -73,7 +73,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingStart="40sp">
+                    android:paddingStart="40sp"
+                    android:paddingEnd="40sp">
 
                     <TextView
                         android:id="@+id/driverName"

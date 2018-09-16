@@ -21,12 +21,16 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.Request
 import java.util.*
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1
+private const val DEFAULT_ZOOM: Float = 15F
 
 abstract class GenericMapFragment :
         Fragment(),
@@ -51,7 +55,19 @@ abstract class GenericMapFragment :
     private var requestingLocationUpdates: Boolean = false
     private var mLocationPermissionGranted: Boolean = false
 
-    private val DEFAULT_ZOOM: Float = 15F
+    protected var activeRequestRef: DatabaseReference? = null
+    protected var activeRequestListener: ValueEventListener? = null
+
+    protected var newIncomeMessageRef: DatabaseReference? = null
+    protected var newIncomeMessageListener: ValueEventListener? = null
+
+    protected var requestRef: DatabaseReference? = null
+    protected var requestListener: ValueEventListener? = null
+
+    protected var currentRequest: Request? = null
+
+    protected var completedRide: Boolean = false
+
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -225,4 +241,16 @@ abstract class GenericMapFragment :
     protected fun getCurrentTimestamp(): Long {
         return System.currentTimeMillis() / 1000
     }
+
+    protected abstract fun getActiveRequest()
+
+    protected abstract fun getRequestInfo(requestId: String)
+
+    protected abstract fun startRideRequest()
+
+    protected abstract fun endRideRequest()
+
+    protected abstract fun startFreshUI()
+
+    protected abstract fun startRideUI()
 }
