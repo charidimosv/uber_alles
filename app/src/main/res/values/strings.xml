@@ -124,5 +124,7 @@
     <string name="picked_customer">Picked Customer</string>
     <string name="message_excl">Message (!)</string>
     <string name="accept_customer">Accept Customer</string>
+    <string name="drive_completed">Drive completed</string>
+    <string name="driver_coming">Driver is coming</string>
 
 </resources>

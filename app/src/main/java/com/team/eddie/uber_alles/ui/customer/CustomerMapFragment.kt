@@ -556,7 +556,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
         mRequest.visibility = View.VISIBLE
         mRequest.isClickable = true
-//        mRequest.text = getString(R.string.ride_started)
+        mRequest.text = getString(R.string.driver_coming)
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
@@ -564,7 +564,6 @@ class CustomerMapFragment : GenericMapFragment(),
 
         erasePolylines()
 //        getRouteToMarker(mLastLocation!!, getLatLngList())
-
 //        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
 
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }

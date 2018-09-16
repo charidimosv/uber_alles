@@ -132,30 +132,11 @@ open class DriverMapFragment : GenericMapFragment() {
 
 
         binding.rideStatus.setOnClickListener {
-            if (status == UserStatus.Free) {
-                currentRequest?.run { acceptCustomerRequest(this) }
-            } else if (status == UserStatus.DriverToCustomer) {
-                status = UserStatus.ToDestination
-
-                erasePolylines()
-
-                if (!destinationLatLngList.isEmpty()) {
-                    for (latLng in destinationLatLngList) {
-                        val destinationMarker = mMap.addMarker(MarkerOptions()
-                                .position(latLng)
-                                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-                        destinationMarkerList.add(destinationMarker)
-                    }
-                    getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), destinationLatLngList)
-                }
-
-                binding.rideStatus.text = "Drive completed"
-                pickupTime = getCurrentTimestamp()
-
-                binding.callCustomer.visibility = View.GONE
-                binding.chatCustomer.visibility = View.GONE
-
-            } else if (status == UserStatus.ToDestination) {
+            if (status == UserStatus.Pending) {
+                currentRequest?.run { acceptCustomerRequest() }
+            } else if (status == UserStatus.DriverToCustomer)
+                showRideUI()
+            else if (status == UserStatus.ToDestination) {
                 if (currentRequest != null) {
                     FirebaseHelper.completeRequest(currentRequest!!)
                     recordRide()
@@ -245,7 +226,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private fun getAssignedCustomerInfo() {
         // TODO uncomment later
-         mCustomerInfo.visibility = View.VISIBLE
+        mCustomerInfo.visibility = View.VISIBLE
 
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerFoundId!!)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -361,20 +342,9 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     // TODO - kapoi prepei na mpei auto
-    private fun acceptCustomerRequest(request: Request) {
-        status = UserStatus.DriverToCustomer
-
-        pickupLatLng = LatLng(request.pickupLocation?.lat!!, request.pickupLocation?.lng!!)
-        pickupMarker = mMap.addMarker(MarkerOptions()
-                .position(pickupLatLng!!)
-                .title("Pickup Location")
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-        getRouteToMarker(pickupLatLng)
-
-        for (reqLocation in request.destinationList!!)
-            destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
-
-        FirebaseHelper.acceptRequest(request)
+    private fun acceptCustomerRequest() {
+        FirebaseHelper.acceptRequest(currentRequest!!)
+        showDriverToCustomerUI()
     }
 
     override fun startRideRequest() {
@@ -399,6 +369,21 @@ open class DriverMapFragment : GenericMapFragment() {
         val lastRequestLocation = currentRequest?.destinationList?.get(listSize - 1)
         FirebaseHelper.addHistoryForDriverCustomer(currentUserId, customerFoundId!!, pickupTime, getCurrentTimestamp(), lastRequestLocation?.locName, rideDistance,
                 pickupLatLng?.latitude, pickupLatLng?.longitude, lastRequestLocation?.lat, lastRequestLocation?.lng)
+    }
+
+    private fun syncRequestDestination() {
+        for (reqLocation in currentRequest!!.destinationList!!)
+            destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
+
+        if (!destinationLatLngList.isEmpty()) {
+            for (latLng in destinationLatLngList) {
+                val destinationMarker = mMap.addMarker(MarkerOptions()
+                        .position(latLng)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+                destinationMarkerList.add(destinationMarker)
+            }
+            getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), destinationLatLngList)
+        }
     }
 
     private fun clearDestinationInfo() {
@@ -450,7 +435,6 @@ open class DriverMapFragment : GenericMapFragment() {
         status = UserStatus.Pending
 
         searchCustomersAround = false
-
         completedRide = false
 
         binding.callCustomer.visibility = View.GONE
@@ -465,16 +449,66 @@ open class DriverMapFragment : GenericMapFragment() {
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         erasePolylines()
-        getRouteToMarker(pickupLatLng!!, destinationLatLngList)
+        clearDestinationInfo()
+        syncRequestDestination()
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
-    override fun showDriverToCustomerUI() {}
+    override fun showDriverToCustomerUI() {
+        status = UserStatus.DriverToCustomer
+
+        searchCustomersAround = false
+        completedRide = false
+
+        binding.callCustomer.visibility = View.VISIBLE
+        binding.callCustomer.visibility = View.VISIBLE
+
+        binding.rideStatus.visibility = View.VISIBLE
+        binding.rideStatus.isClickable = true
+        binding.rideStatus.text = getString(R.string.picked_customer)
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+        clearDestinationInfo()
+        getRouteToMarker(pickupLatLng)
+
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+
+        getAssignedCustomerInfo()
+        getAssignedCustomerLocation()
+    }
 
     override fun showRideUI() {
+        status = UserStatus.ToDestination
 
+        searchCustomersAround = false
+        completedRide = false
+
+        binding.callCustomer.visibility = View.GONE
+        binding.callCustomer.visibility = View.GONE
+
+        binding.rideStatus.visibility = View.VISIBLE
+        binding.rideStatus.isClickable = true
+        binding.rideStatus.text = getString(R.string.drive_completed)
+
+        pickupTime = getCurrentTimestamp()
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+        clearDestinationInfo()
+        syncRequestDestination()
+
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
     override fun showRatingUI() {
