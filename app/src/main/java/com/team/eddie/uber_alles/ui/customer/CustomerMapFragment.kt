@@ -359,6 +359,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
     override fun endRideRequest() {
         FirebaseHelper.removeRequest(currentRequest!!)
+        currentRequest = null
 
         SaveSharedPreference.setActiveRequest(applicationContext, false)
 

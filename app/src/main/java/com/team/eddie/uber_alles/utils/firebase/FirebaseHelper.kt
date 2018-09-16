@@ -202,7 +202,7 @@ HELPERS
     }
 
     fun updateRequest(request: Request) {
-        val requestRef = getRequest()
+        val requestRef = getRequestKey(request.requestId)
         requestRef.setValue(request)
     }
 

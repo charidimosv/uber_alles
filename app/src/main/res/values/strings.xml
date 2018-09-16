@@ -123,5 +123,6 @@
     <string name="rate_your_customer">Rate your customer</string>
     <string name="picked_customer">Picked Customer</string>
     <string name="message_excl">Message (!)</string>
+    <string name="accept_customer">Accept Customer</string>
 
 </resources>

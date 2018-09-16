@@ -200,8 +200,10 @@ open class DriverMapFragment : GenericMapFragment() {
                 if (dataSnapshot.exists()) {
                     getRequestInfo(dataSnapshot.value.toString())
                 } else {
-                    completedRide = true
-                    endRideRequest()
+                    if (currentRequest != null) {
+                        completedRide = true
+                        endRideRequest()
+                    }
 
                     findNextCustomer()
                 }
@@ -219,12 +221,21 @@ open class DriverMapFragment : GenericMapFragment() {
                     currentRequest = dataSnapshot.getValue(Request::class.java)
                     currentRequest ?: return
 
-                    showRideUI()
-
                     customerFoundId = currentRequest?.customerId
-
                     getAssignedCustomerInfo()
                     getAssignedCustomerLocation()
+
+                    for (reqLocation in currentRequest!!.destinationList!!)
+                        destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
+
+                    status = currentRequest?.status!!
+
+                    if (status == UserStatus.Pending)
+                        showPendingUI()
+                    else if (status == UserStatus.DriverToCustomer)
+                        showDriverToCustomerUI()
+                    else
+                        showRideUI()
                 }
             }
 
@@ -234,7 +245,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private fun getAssignedCustomerInfo() {
         // TODO uncomment later
-        // mCustomerInfo.visibility = View.VISIBLE
+         mCustomerInfo.visibility = View.VISIBLE
 
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerFoundId!!)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -307,7 +318,7 @@ open class DriverMapFragment : GenericMapFragment() {
                     val latLng = LatLng(locationLat, locationLng)
 
                     mCustomerMarker?.remove()
-                    mCustomerMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
+                    mCustomerMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user)))
                 }
             }
 
@@ -373,6 +384,7 @@ open class DriverMapFragment : GenericMapFragment() {
         binding.rideStatus.text = getString(R.string.picked_customer)
 
         FirebaseHelper.removeRequest(currentRequest!!)
+        currentRequest = null
 
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
@@ -434,11 +446,36 @@ open class DriverMapFragment : GenericMapFragment() {
         erasePolylines()
     }
 
-    override fun showPendingUI() {}
+    override fun showPendingUI() {
+        status = UserStatus.Pending
+
+        searchCustomersAround = false
+
+        completedRide = false
+
+        binding.callCustomer.visibility = View.GONE
+        binding.callCustomer.visibility = View.GONE
+
+        binding.rideStatus.visibility = View.VISIBLE
+        binding.rideStatus.isClickable = true
+        binding.rideStatus.text = getString(R.string.accept_customer)
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+        getRouteToMarker(pickupLatLng!!, destinationLatLngList)
+
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+    }
 
     override fun showDriverToCustomerUI() {}
 
-    override fun showRideUI() {}
+    override fun showRideUI() {
+
+    }
 
     override fun showRatingUI() {
         mRatingBar.rating = 0.toFloat()
