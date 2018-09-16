@@ -197,9 +197,18 @@ class CustomerMapFragment : GenericMapFragment(),
         }
 
         mRequest.setOnClickListener {
-            if (currentRequest == null && status == UserStatus.Free) startRideRequest()
-            else if (status == UserStatus.UserMet) showRideUI()
-            else endRideRequest()
+            if (currentRequest == null && status == UserStatus.Free)
+                startRideRequest()
+            else if (status == UserStatus.UserMet
+                    || status == UserStatus.DriverToCustomer) {
+
+                status = UserStatus.ToDestination
+                currentRequest?.status = status
+                FirebaseHelper.updateRequest(currentRequest!!)
+
+                showRideUI()
+            } else if (status == UserStatus.Pending)
+                endRideRequest()
         }
 
         getActiveRequest()
@@ -263,7 +272,7 @@ class CustomerMapFragment : GenericMapFragment(),
         })
     }
 
-    private fun getAssignedDriverMessage(){
+    private fun getAssignedDriverMessage() {
         SaveSharedPreference.setChatSender(applicationContext, currentUserId)
         SaveSharedPreference.setChatReceiver(applicationContext, driverFoundID!!)
 
@@ -347,7 +356,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
                     val distance: Float = loc1.distanceTo(loc2)
 
-                    mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.driver_found).plus(distance.toString())
+                    mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.distance).plus(distance.toString())
 
                     if (distance < 100) status = UserStatus.UserMet
 
@@ -361,7 +370,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun startRideRequest() {
-        currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!)
+        currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!, status = UserStatus.Pending)
         FirebaseHelper.createRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
@@ -373,10 +382,10 @@ class CustomerMapFragment : GenericMapFragment(),
         SaveSharedPreference.setActiveRequest(applicationContext, false)
 
         if (completedRide) {
-            FirebaseHelper.completeRequest(currentRequest!!)
+            currentRequest?.let { FirebaseHelper.completeRequest(it) }
             showRatingUI()
         } else {
-            FirebaseHelper.removeRequest(currentRequest!!)
+            currentRequest?.let { FirebaseHelper.removeRequest(it) }
             showFreshUI()
         }
         currentRequest = null
@@ -529,8 +538,6 @@ class CustomerMapFragment : GenericMapFragment(),
 
     override fun showPendingUI() {
         status = UserStatus.Pending
-        currentRequest?.status = status
-        FirebaseHelper.updateRequest(currentRequest!!)
 
         showDriversAround = true
 
@@ -555,14 +562,12 @@ class CustomerMapFragment : GenericMapFragment(),
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
 
-        getAssignedDriverInfo()
-        getAssignedDriverLocation()
+//        getAssignedDriverInfo()
+//        getAssignedDriverLocation()
     }
 
     override fun showDriverToCustomerUI() {
         status = UserStatus.DriverToCustomer
-        currentRequest?.status = status
-        FirebaseHelper.updateRequest(currentRequest!!)
 
         binding.callDriver.visibility = View.VISIBLE
         binding.chatDriver.visibility = View.VISIBLE
@@ -589,8 +594,6 @@ class CustomerMapFragment : GenericMapFragment(),
 
     override fun showRideUI() {
         status = UserStatus.ToDestination
-        currentRequest?.status = status
-        FirebaseHelper.updateRequest(currentRequest!!)
 
         showDriversAround = false
 

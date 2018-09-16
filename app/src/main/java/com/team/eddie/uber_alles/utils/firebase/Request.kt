@@ -13,7 +13,7 @@ class Request(
         var pickupTime: Long = 0,
         var requestDate: String = "",
 
-        var status: UserStatus = UserStatus.DriverToCustomer
+        var status: UserStatus = UserStatus.Pending
 ) {
     var destinationList: ArrayList<RequestLocation>? = null
 
@@ -22,8 +22,9 @@ class Request(
                 pickupLocation: Location,
                 pickupTime: Long = 0,
                 requestDate: String = "",
-                locationList: List<Location>)
-            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate, status = UserStatus.DriverToCustomer) {
+                locationList: List<Location>,
+                status: UserStatus)
+            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate, status = status) {
 
         this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
 

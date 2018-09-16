@@ -94,6 +94,7 @@
     <string name="call_uber">Call Uber</string>
     <string name="driver_here">Driver\'s Here</string>
     <string name="driver_found">Driver Found:</string>
+    <string name="distance">Distance:</string>
     <string name="your_driver">your driver</string>
     <string name="looking_driver_loc">Looking for Driver Location....</string>
     <string name="end_ride_before_logout">Ride must be ended before you can logout</string>
@@ -110,7 +111,6 @@
     <string name="profile_image">profile_image</string>
     <string name="username">Username</string>
     <string name="from_to">From - To</string>
-    <string name="distance">distance</string>
     <string name="date">date</string>
     <string name="phone">Phone</string>
     <string name="name">Name</string>

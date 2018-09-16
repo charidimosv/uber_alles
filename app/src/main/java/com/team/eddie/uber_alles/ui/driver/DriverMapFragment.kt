@@ -129,10 +129,16 @@ open class DriverMapFragment : GenericMapFragment() {
 
 
         binding.rideStatus.setOnClickListener {
-            if (status == UserStatus.Pending) {
+            if (status == UserStatus.Pending)
                 currentRequest?.run { acceptCustomerRequest() }
-            } else if (status == UserStatus.DriverToCustomer)
+            else if (status == UserStatus.DriverToCustomer){
+
+                status = UserStatus.ToDestination
+                currentRequest?.status = status
+                FirebaseHelper.updateRequest(currentRequest!!)
+
                 showRideUI()
+            }
             else if (status == UserStatus.ToDestination) {
                 if (currentRequest != null) {
                     recordRide()
@@ -164,7 +170,7 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun onLocationChanged(location: Location?) {
         super.onLocationChanged(location)
 
-        if (customerFoundId != null && location != null)
+        if (customerFoundId == null && location != null)
             FirebaseHelper.addDriverAvailable(currentUserId, GeoLocation(location.latitude, location.longitude))
         else
             FirebaseHelper.removeDriverAvailable(currentUserId)
@@ -284,6 +290,19 @@ open class DriverMapFragment : GenericMapFragment() {
 
                     val latLng = LatLng(locationLat, locationLng)
 
+                    val loc1 = Location("")
+                    loc1.latitude = pickupLatLng!!.latitude
+                    loc1.longitude = pickupLatLng!!.longitude
+
+                    val loc2 = Location("")
+                    loc2.latitude = latLng.latitude
+                    loc2.longitude = latLng.longitude
+
+                    val distance: Float = loc1.distanceTo(loc2)
+
+                    binding.rideStatus.text = if (distance < 100) getString(R.string.picked_customer) else getString(R.string.distance).plus(distance.toString())
+                    if (distance < 100) status = UserStatus.UserMet
+
                     mCustomerMarker?.remove()
                     mCustomerMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user)))
                 }
@@ -327,12 +346,14 @@ open class DriverMapFragment : GenericMapFragment() {
         })
     }
 
-    // TODO - kapoi prepei na mpei auto
     private fun acceptCustomerRequest() {
         currentRequest ?: return
 
+        status = UserStatus.DriverToCustomer
+        currentRequest?.status = status
         currentRequest?.driverId = currentUserId
         FirebaseHelper.acceptRequest(currentRequest!!)
+
         showDriverToCustomerUI()
     }
 
@@ -343,10 +364,10 @@ open class DriverMapFragment : GenericMapFragment() {
         binding.rideStatus.text = getString(R.string.picked_customer)
 
         if (status == UserStatus.ToDestination) {
-            FirebaseHelper.completeRequest(currentRequest!!)
+            currentRequest?.let { FirebaseHelper.completeRequest(it) }
             showRatingUI()
         } else {
-            FirebaseHelper.removeRequest(currentRequest!!)
+            currentRequest?.let { FirebaseHelper.removeRequest(it) }
             startFresh()
         }
         currentRequest = null
