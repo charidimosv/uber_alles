@@ -1,34 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/nav_drawer_header_height"
-    android:background="@color/colorPrimaryDark"
-    android:gravity="bottom"
-    android:orientation="vertical"
-    android:padding="@dimen/nav_drawer_header_padding"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <ImageView
-        android:id="@+id/imageViewDrawer"
-        android:layout_width="@dimen/nav_drawer_img_size"
-        android:layout_height="@dimen/nav_drawer_img_size"
-        android:layout_gravity="center|start"
-        android:layout_marginBottom="@dimen/nav_drawer_img_margin"
-        android:contentDescription="@string/navigation_drawer_header_content_description"
-        android:src="@mipmap/ic_default_user" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/nameDrawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/nav_drawer_name_size"
-        android:textStyle="bold" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/nav_drawer_header_height"
+            android:background="@color/colorPrimaryDark"
+            android:gravity="bottom"
+            android:orientation="vertical"
+            android:padding="@dimen/nav_drawer_header_padding"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
-    <TextView
-        android:id="@+id/emailDrawer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/nav_drawer_email_size" />
+            <ImageView
+                android:id="@+id/imageViewDrawer"
+                android:layout_width="@dimen/nav_drawer_img_size"
+                android:layout_height="@dimen/nav_drawer_img_size"
+                android:layout_gravity="center|start"
+                android:layout_marginBottom="@dimen/nav_drawer_img_margin"
+                android:contentDescription="@string/navigation_drawer_header_content_description"
+                android:src="@mipmap/ic_default_user" />
 
-</LinearLayout>
+            <TextView
+                android:id="@+id/nameDrawer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/nav_drawer_name_size"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/emailDrawer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/nav_drawer_email_size" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_gravity="top|end"
+            android:contentDescription="@string/app_name"
+            app:srcCompat="@mipmap/ic_launcher_foreground" />
+
+    </FrameLayout>
+</layout>

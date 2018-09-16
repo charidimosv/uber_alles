@@ -9,7 +9,9 @@ import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import com.directions.route.*
+import com.directions.route.Route
+import com.directions.route.RouteException
+import com.directions.route.RoutingListener
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
@@ -20,6 +22,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import java.util.*
 
@@ -208,25 +211,8 @@ abstract class GenericMapFragment :
     }
 
     protected fun getRouteToMarker(pickupLatLng: LatLng?) {
-        if (pickupLatLng != null && mLastLocation != null) {
-            val routing = Routing.Builder()
-                    .travelMode(AbstractRouting.TravelMode.DRIVING)
-                    .withListener(this)
-                    .alternativeRoutes(false)
-                    .waypoints(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), pickupLatLng)
-                    .build()
-            routing.execute()
-        }
-    }
-
-    protected fun getRouteToMarker(wayPoints: List<LatLng>) {
-            val routing = Routing.Builder()
-                    .travelMode(AbstractRouting.TravelMode.DRIVING)
-                    .withListener(this)
-                    .alternativeRoutes(false)
-                    .waypoints(wayPoints)
-                    .build()
-            routing.execute()
+        if (pickupLatLng != null && mLastLocation != null)
+            ActivityHelper.getRouteToMarker(arrayListOf(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), pickupLatLng), this)
     }
 
     protected fun getCurrentTimestamp(): Long {

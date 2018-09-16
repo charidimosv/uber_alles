@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.preference.PreferenceManager
 import android.text.TextUtils
-import com.google.firebase.auth.UserInfo
 import com.google.gson.Gson
 import com.team.eddie.uber_alles.utils.PreferencesUtility.ACTIVE_REQUEST_PREF
 import com.team.eddie.uber_alles.utils.PreferencesUtility.LOGGED_IN_EMAIL_PREF
@@ -83,6 +82,6 @@ object SaveSharedPreference {
 
     fun getUserInfo(context: Context): com.team.eddie.uber_alles.utils.firebase.UserInfo? {
         val jsonInfo = getPreferences(context).getString(USER_INFO, "")
-        return Gson().fromJson(jsonInfo,com.team.eddie.uber_alles.utils.firebase.UserInfo::class.java)
+        return Gson().fromJson(jsonInfo, com.team.eddie.uber_alles.utils.firebase.UserInfo::class.java)
     }
 }

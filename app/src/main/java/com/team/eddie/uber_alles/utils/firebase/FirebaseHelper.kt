@@ -1,6 +1,5 @@
 package com.team.eddie.uber_alles.utils.firebase
 
-import android.location.Location
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.google.firebase.auth.FirebaseAuth

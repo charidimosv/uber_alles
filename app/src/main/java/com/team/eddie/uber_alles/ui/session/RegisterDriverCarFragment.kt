@@ -91,7 +91,7 @@ class RegisterDriverCarFragment : Fragment() {
         val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
         val sessionServices = retrofit!!.create(SessionServices::class.java)
 
-        val registerCall = sessionServices.saveCarInfo(userId,currentCar)
+        val registerCall = sessionServices.saveCarInfo(userId, currentCar)
         registerCall.enqueue(object : Callback<Car> {
             override fun onFailure(call: Call<Car>, t: Throwable) {
                 Toast.makeText(activity?.applicationContext!!, "Couldn't Save Info", Toast.LENGTH_SHORT).show()

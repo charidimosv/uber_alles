@@ -334,9 +334,9 @@ class DriverMapFragment : GenericMapFragment() {
         super.onLocationChanged(location)
 
         if (customerId.isBlank() && location != null)
-            FirebaseHelper.addDriverAvailable(customerId, GeoLocation(location.latitude, location.longitude))
+            FirebaseHelper.addDriverAvailable(currentUserId, GeoLocation(location.latitude, location.longitude))
         else
-            FirebaseHelper.removeDriverAvailable(customerId)
+            FirebaseHelper.removeDriverAvailable(currentUserId)
     }
 
 }

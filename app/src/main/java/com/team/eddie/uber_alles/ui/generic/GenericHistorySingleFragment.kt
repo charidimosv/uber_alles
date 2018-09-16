@@ -1,7 +1,6 @@
 package com.team.eddie.uber_alles.ui.generic
 
 import android.os.Bundle
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,9 @@ import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import com.directions.route.*
+import com.directions.route.Route
+import com.directions.route.RouteException
+import com.directions.route.RoutingListener
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -111,7 +112,7 @@ class GenericHistorySingleFragment :
                             }
                         }
 
-                        rideDate.text = getDate(it.arrivingTime)
+                        rideDate.text = ActivityHelper.getDate(it.arrivingTime)
 
                         distance = it.distance?.toString()
                         if (distance != null) {
@@ -161,20 +162,9 @@ class GenericHistorySingleFragment :
         })
     }
 
-    private fun getDate(time: Long?): String {
-        val cal = Calendar.getInstance(Locale.getDefault())
-        cal.timeInMillis = time!! * 1000
-        return DateFormat.format("MM-dd-yyyy hh:mm", cal).toString()
-    }
-
     private fun getRouteToMarker() {
-        val routing = Routing.Builder()
-                .travelMode(AbstractRouting.TravelMode.DRIVING)
-                .withListener(this)
-                .alternativeRoutes(false)
-                .waypoints(pickupLatLng, destinationLatLng)
-                .build()
-        routing.execute()
+        if (pickupLatLng != null && destinationLatLng != null)
+            ActivityHelper.getRouteToMarker(arrayListOf(pickupLatLng!!, destinationLatLng!!), this)
     }
 
     override fun onRoutingFailure(e: RouteException?) {

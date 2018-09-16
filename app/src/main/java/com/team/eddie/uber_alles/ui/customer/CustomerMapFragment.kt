@@ -83,7 +83,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mRatingButton: MaterialButton
     private var mRatingAvg: TextView? = null
 
-    private var dateOfRide : String? = null
+    private var dateOfRide: String? = null
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
     private var destinationMarker: Marker? = null
@@ -106,7 +106,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private var newIncomeMessageListener: ValueEventListener? = null
 
     // drivers around vars
-    private val DEFAULT_SEARCH_RADIUS: Double = 5000.0
+    private val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
     private val DEFAULT_SEARCH_LOC_DIF: Float = 1F
 
     private var showDriversAround: Boolean = true
@@ -167,14 +167,14 @@ class CustomerMapFragment : GenericMapFragment() {
 
                 moveCamera(place.latLng)
                 followMeFlag = false
-                if(dateOfRide != null)
+                if (dateOfRide != null)
                     mRequest.visibility = View.VISIBLE
             }
 
             override fun onError(status: Status) {}
         })
 
-        binding.rideDate.setOnClickListener{
+        binding.rideDate.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
@@ -185,16 +185,16 @@ class CustomerMapFragment : GenericMapFragment() {
                 val month = datePicker.month
                 val year = datePicker.year
 
-               val newCalendar = Calendar.getInstance()
-               newCalendar.set(year, month, day)
-               dateOfRide = SimpleDateFormat("dd/MM/yyy").format(newCalendar.time)
-               binding.rideDateText.text = dateOfRide
+                val newCalendar = Calendar.getInstance()
+                newCalendar.set(year, month, day)
+                dateOfRide = SimpleDateFormat("dd/MM/yyy").format(newCalendar.time)
+                binding.rideDate.text = dateOfRide
 
-               if(destination != null)
+                if (destination != null)
                     mRequest.visibility = View.VISIBLE
 
             }
-            var datePickerDialog = DatePickerDialog(activity, datePickerListener,  year,  month, day)
+            val datePickerDialog = DatePickerDialog(activity!!, datePickerListener, year, month, day)
             datePickerDialog.datePicker.minDate = System.currentTimeMillis()
             datePickerDialog.show()
         }
@@ -443,10 +443,10 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         //Draw route for all destinations... TODO test
-        val waypoints = arrayListOf<LatLng>(LatLng(mLastLocation!!.latitude,mLastLocation!!.longitude))
-        for(destination in destinationList)
-            waypoints.add(LatLng(destination.latitude,destination.longitude))
-        getRouteToMarker(waypoints)
+        val waypoints = arrayListOf<LatLng>(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude))
+        for (destination in destinationList)
+            waypoints.add(LatLng(destination.latitude, destination.longitude))
+        ActivityHelper.getRouteToMarker(waypoints, this)
 
         autocompleteFragment.view?.visibility = View.GONE
         mRequest.text = getString(R.string.getting_driver)
