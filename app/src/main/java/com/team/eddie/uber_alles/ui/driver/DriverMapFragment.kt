@@ -173,13 +173,13 @@ open class DriverMapFragment : GenericMapFragment() {
         }
 
         mRatingButton.setOnClickListener {
-            val ratingRef = FirebaseHelper.getUserRating(customerFoundId!!!!)
+            val ratingRef = FirebaseHelper.getUserRating(customerFoundId!!)
             val ratingRefId = ratingRef.push().key
 
             val map = hashMapOf<String, Any?>("value" to mRatingBar.rating/*,"comment" to mRatingText*/)
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
-            clearCustomersInfo()
+            startFresh()
         }
 
         binding.chatCustomer.setOnClickListener {
@@ -227,7 +227,7 @@ open class DriverMapFragment : GenericMapFragment() {
                     currentRequest = dataSnapshot.getValue(Request::class.java)
                     currentRequest ?: return
 
-                    startRideUI()
+                    showRideUI()
 
                     customerFoundId = currentRequest?.customerId
 
@@ -333,13 +333,13 @@ open class DriverMapFragment : GenericMapFragment() {
                 if (customerFoundId == null
                         && !rejectedCustomersSet.contains(key)
                         && searchCustomersAround) {
-                    pendingRequestQuery?.removeAllListeners()
+                    searchCustomersAround = false
                     getRequestInfo(key)
                 }
             }
 
             override fun onKeyExited(key: String) {
-
+                startFresh()
             }
 
             override fun onKeyMoved(key: String, location: GeoLocation) {
@@ -385,17 +385,22 @@ open class DriverMapFragment : GenericMapFragment() {
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
 
-        startFreshUI()
+        if (status == DriverStatus.ToDestination) showRatingUI()
+        else startFresh()
+    }
 
-        if (status == DriverStatus.ToDestination) {
-            mRatingBar.rating = 0.toFloat()
-            mRatingBar.setIsIndicator(false)
-            mRatingBar.numStars = 5
-            mRatingAvg.visibility = View.GONE
-            mRatingButton.visibility = View.VISIBLE
-            ratingTextLayout.visibility = View.VISIBLE
-        } else
-            clearCustomersInfo()
+    private fun recordRide() {
+        // TODO - hackie-hackie-hackie
+        val listSize = currentRequest?.destinationList?.size ?: 0
+        val lastRequestLocation = currentRequest?.destinationList?.get(listSize - 1)
+        FirebaseHelper.addHistoryForDriverCustomer(currentUserId, customerFoundId!!, pickupTime, getCurrentTimestamp(), lastRequestLocation?.locName, rideDistance,
+                pickupLatLng?.latitude, pickupLatLng?.longitude, lastRequestLocation?.lat, lastRequestLocation?.lng)
+    }
+
+    private fun clearDestinationInfo() {
+        for (marker in destinationMarkerList) marker.remove()
+        destinationMarkerList.clear()
+        destinationLatLngList.clear()
     }
 
     private fun clearCustomersInfo() {
@@ -418,31 +423,35 @@ open class DriverMapFragment : GenericMapFragment() {
         mCustomerPhone.text = ""
         mCustomerDestination.text = "Destination: --"
         mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user)
-
     }
 
-    private fun recordRide() {
-        // TODO - hackie-hackie-hackie
-        val listSize = currentRequest?.destinationList?.size ?: 0
-        val lastRequestLocation = currentRequest?.destinationList?.get(listSize - 1)
-        FirebaseHelper.addHistoryForDriverCustomer(currentUserId, customerFoundId!!, pickupTime, getCurrentTimestamp(), lastRequestLocation?.locName, rideDistance,
-                pickupLatLng?.latitude, pickupLatLng?.longitude, lastRequestLocation?.lat, lastRequestLocation?.lng)
+    private fun startFresh() {
+        showFreshUI()
+
+        searchCustomersAround = true
+        findNextCustomer()
     }
 
-    private fun clearDestinationInfo() {
-        for (marker in destinationMarkerList) marker.remove()
-        destinationMarkerList.clear()
-        destinationLatLngList.clear()
-    }
-
-    override fun startFreshUI() {
+    override fun showFreshUI() {
         pickupMarker?.remove()
+        mCustomerMarker?.remove()
+
         clearDestinationInfo()
+        clearCustomersInfo()
 
         erasePolylines()
     }
 
-    override fun startRideUI() {
+    override fun showRatingUI() {
+        mRatingBar.rating = 0.toFloat()
+        mRatingBar.setIsIndicator(false)
+        mRatingBar.numStars = 5
+        mRatingAvg.visibility = View.GONE
+        mRatingButton.visibility = View.VISIBLE
+        ratingTextLayout.visibility = View.VISIBLE
+    }
+
+    override fun showRideUI() {
     }
 
 }

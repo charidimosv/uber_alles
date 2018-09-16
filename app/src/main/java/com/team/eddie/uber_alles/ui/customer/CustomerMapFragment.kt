@@ -200,7 +200,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
-            clearDriversInfo()
+            showFreshUI()
         }
 
         getActiveRequest()
@@ -248,7 +248,7 @@ class CustomerMapFragment : GenericMapFragment(),
                     currentRequest = dataSnapshot.getValue(Request::class.java)
                     currentRequest ?: return
 
-                    startRideUI()
+                    showRideUI()
 
                     driverFoundID = currentRequest?.driverId
 
@@ -398,7 +398,7 @@ class CustomerMapFragment : GenericMapFragment(),
         //Draw route for all destinations... TODO test
         getRouteToMarker(mLastLocation!!, getLatLngList())
 
-        startRideUI()
+        showRideUI()
     }
 
     override fun endRideRequest() {
@@ -410,43 +410,8 @@ class CustomerMapFragment : GenericMapFragment(),
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
         customerPickedUpRef?.removeEventListener(customerPickedUpListener!!)
 
-        startFreshUI()
-
-        if (completedRide) {
-            completedRide = false
-            isPickedUp = false
-            mRatingBar.rating = 0.toFloat()
-            mRatingBar.setIsIndicator(false)
-            mRatingBar.numStars = 5
-            mRatingAvg?.visibility = View.GONE
-            mRatingButton.visibility = View.VISIBLE
-            ratingTextLayout.visibility = View.VISIBLE
-            mRequest.text = getString(R.string.ride_ended)
-        } else
-            clearDriversInfo()
-    }
-
-    private fun clearDriversInfo() {
-        driverFoundID = null
-
-        mDriverInfo.visibility = View.GONE
-        mDriverName.text = ""
-        mDriverPhone.text = ""
-        mDriverCar.text = ""
-        mDriverProfileImage.setImageResource(R.mipmap.ic_default_user)
-
-        mRatingButton.visibility = View.GONE
-        ratingTextLayout.visibility = View.GONE
-        mRatingBar.rating = 0.toFloat()
-        mRatingBar.setIsIndicator(false)
-        mRatingBar.numStars = 1
-        mRatingAvg?.text = ""
-        mRatingAvg?.visibility = View.VISIBLE
-        mRatingText.setText("", TextView.BufferType.EDITABLE)
-
-        mRequest.isClickable = true
-        mRequest.visibility = View.GONE
-        mRequest.text = getString(R.string.call_uber)
+        if (completedRide) showRatingUI()
+        else showFreshUI()
     }
 
     private fun handleDriversAround() {
@@ -519,12 +484,6 @@ class CustomerMapFragment : GenericMapFragment(),
         return locationList
     }
 
-    private fun clearDestinationInfo() {
-        for (marker in destinationMap.keys) marker.remove()
-        destinationMap.clear()
-        destinationList.clear()
-    }
-
     override fun onPlaceSelected(place: Place) {
         val destination = place.name.toString()
         val destinationMarker = mMap.addMarker(MarkerOptions()
@@ -551,10 +510,40 @@ class CustomerMapFragment : GenericMapFragment(),
         return true
     }
 
-    override fun startFreshUI() {
+    private fun clearDestinationInfo() {
+        for (marker in destinationMap.keys) marker.remove()
+        destinationMap.clear()
+        destinationList.clear()
+    }
+
+    private fun clearDriversInfo() {
+        driverFoundID = null
+
+        mDriverInfo.visibility = View.GONE
+        mDriverName.text = ""
+        mDriverPhone.text = ""
+        mDriverCar.text = ""
+        mDriverProfileImage.setImageResource(R.mipmap.ic_default_user)
+
+        mRatingButton.visibility = View.GONE
+        ratingTextLayout.visibility = View.GONE
+        mRatingBar.rating = 0.toFloat()
+        mRatingBar.setIsIndicator(false)
+        mRatingBar.numStars = 1
+        mRatingAvg?.text = ""
+        mRatingAvg?.visibility = View.VISIBLE
+        mRatingText.setText("", TextView.BufferType.EDITABLE)
+
+        mRequest.isClickable = true
+        mRequest.visibility = View.GONE
+        mRequest.text = getString(R.string.call_uber)
+    }
+
+    override fun showFreshUI() {
         pickupMarker?.remove()
         mDriverMarker?.remove()
         clearDestinationInfo()
+        clearDriversInfo()
 
         erasePolylines()
 
@@ -562,13 +551,25 @@ class CustomerMapFragment : GenericMapFragment(),
 
         binding.searchRequest.visibility = View.VISIBLE
         mRequest.visibility = View.GONE
+        mRequest.text = getString(R.string.call_uber)
     }
 
-    override fun startRideUI() {
+    override fun showRatingUI() {
+        completedRide = false
+        isPickedUp = false
+        mRatingBar.rating = 0.toFloat()
+        mRatingBar.setIsIndicator(false)
+        mRatingBar.numStars = 5
+        mRatingAvg?.visibility = View.GONE
+        mRatingButton.visibility = View.VISIBLE
+        ratingTextLayout.visibility = View.VISIBLE
+        mRequest.text = getString(R.string.ride_ended)
+    }
+
+    override fun showRideUI() {
         showDriversAround = false
 
         binding.searchRequest.visibility = View.GONE
-
         mRequest.visibility = View.VISIBLE
         mRequest.text = getString(R.string.getting_driver)
     }

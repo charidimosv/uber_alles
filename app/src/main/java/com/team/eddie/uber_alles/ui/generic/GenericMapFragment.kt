@@ -250,7 +250,9 @@ abstract class GenericMapFragment :
 
     protected abstract fun endRideRequest()
 
-    protected abstract fun startFreshUI()
+    protected abstract fun showFreshUI()
 
-    protected abstract fun startRideUI()
+    protected abstract fun showRatingUI()
+
+    protected abstract fun showRideUI()
 }
