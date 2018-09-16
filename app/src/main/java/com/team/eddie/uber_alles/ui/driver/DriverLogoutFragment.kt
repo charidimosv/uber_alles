@@ -56,9 +56,9 @@ class DriverLogoutFragment : Fragment() {
         val refAvailable = FirebaseHelper.getDriversAvailable()
         val refWorking = FirebaseHelper.getDriversWorking()
         val geoFireAvailable = GeoFire(refAvailable)
-        val geoFireWorking = GeoFire(refWorking)
 
         geoFireAvailable.removeLocation(userId)
+        FirebaseHelper.removeDriverAvailable(userId)
     }
 
     override fun onStop() {

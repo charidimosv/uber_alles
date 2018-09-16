@@ -88,6 +88,7 @@ class CustomerMapFragment : GenericMapFragment(),
     */
 
     private var driverFoundID: String? = null
+    private var driverFoundUsername: String? = null
 
     private var dateOfRide: String? = null
     private val destinationMap: HashMap<Marker, Place> = HashMap()
@@ -270,10 +271,11 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     private fun getAssignedDriverMessage() {
-        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
-        SaveSharedPreference.setChatReceiver(applicationContext, driverFoundID!!)
+        val curentUser = SaveSharedPreference.getUserInfo(applicationContext)
+        SaveSharedPreference.setChatSender(applicationContext, curentUser!!.username)
+        SaveSharedPreference.setChatReceiver(applicationContext, driverFoundUsername!!)
 
-        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + driverFoundID).child("newMessagePushed")
+        newIncomeMessageRef = FirebaseHelper.getMessage().child(curentUser!!.username + "_to_" + driverFoundUsername).child("newMessagePushed")
         newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
@@ -295,6 +297,7 @@ class CustomerMapFragment : GenericMapFragment(),
                     userInfo ?: return
 
                     userInfo.name.let { mDriverName.text = it }
+                    userInfo.username.let { driverFoundUsername = it }
                     userInfo.phone.let { mDriverPhone.text = it }
                     userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(mDriverProfileImage, it) }
                 }
@@ -491,6 +494,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
     private fun clearDriversInfo() {
         driverFoundID = null
+        driverFoundUsername =  null
 
         mDriverInfo.visibility = View.GONE
         mDriverName.text = ""
@@ -577,7 +581,7 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        erasePolylines()
+        //erasePolylines()
 //        getRouteToMarker(mLastLocation!!, getLatLngList())
 //        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
 
@@ -608,8 +612,8 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        erasePolylines()
-        getRouteToMarker(mLastLocation!!, getLatLngList())
+        //erasePolylines()
+        //getRouteToMarker(mLastLocation!!, getLatLngList())
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }

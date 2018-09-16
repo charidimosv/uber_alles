@@ -75,6 +75,7 @@ open class DriverMapFragment : GenericMapFragment() {
     */
 
     private var customerFoundId: String? = null
+    private var customerFoundUsername: String? = null
 
     private val destinationMarkerList: ArrayList<Marker> = ArrayList()
     private val destinationLatLngList: ArrayList<LatLng> = ArrayList()
@@ -216,10 +217,11 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun getAssignedCustomerMessage() {
-        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
-        SaveSharedPreference.setChatReceiver(applicationContext, customerFoundId!!)
+        val curentUser = SaveSharedPreference.getUserInfo(applicationContext)
+        SaveSharedPreference.setChatSender(applicationContext, curentUser!!.username)
+        SaveSharedPreference.setChatReceiver(applicationContext, customerFoundUsername!!)
 
-        newIncomeMessageRef = FirebaseHelper.getMessageUsers(currentUserId + "_to_" + customerFoundId!!)
+        newIncomeMessageRef = FirebaseHelper.getMessageUsers(curentUser!!.username + "_to_" + customerFoundUsername!!)
         newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
@@ -241,6 +243,7 @@ open class DriverMapFragment : GenericMapFragment() {
                     userInfo ?: return
 
                     userInfo.name.let { mCustomerName.text = it }
+                    userInfo.username.let { customerFoundUsername }
                     userInfo.phone.let { mCustomerPhone.text = it }
                     userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCustomerProfileImage, it) }
                 }
@@ -399,6 +402,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private fun clearCustomersInfo() {
         customerFoundId = null
+        customerFoundUsername = null
 
         status = Status.Free
         mRatingBar.rating = 0.toFloat()
