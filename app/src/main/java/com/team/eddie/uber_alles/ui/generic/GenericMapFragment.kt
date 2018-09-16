@@ -25,7 +25,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.ActivityHelper
-import com.team.eddie.uber_alles.utils.UserStatus
+import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import java.util.*
@@ -68,7 +68,7 @@ abstract class GenericMapFragment :
 
     protected val currentUserId: String = FirebaseHelper.getUserId()
 
-    protected var status: UserStatus = UserStatus.Free
+    protected var status: Status = Status.Free
 
     protected var activeRequestRef: DatabaseReference? = null
     protected var activeRequestListener: ValueEventListener? = null
@@ -257,7 +257,7 @@ abstract class GenericMapFragment :
         return System.currentTimeMillis() / 1000
     }
 
-    protected fun setStatusSynced(status: UserStatus) {
+    protected fun setStatusSynced(status: Status) {
         this.status = status
         currentRequest?.status = status
         FirebaseHelper.updateRequest(currentRequest!!)

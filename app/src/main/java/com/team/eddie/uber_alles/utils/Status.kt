@@ -1,10 +1,11 @@
 package com.team.eddie.uber_alles.utils
 
-enum class UserStatus {
+enum class Status {
     Free,
     Pending,
     DriverToCustomer,
     UserMet,
     ToDestination,
-    Rating
+    Rating,
+    Done
 }

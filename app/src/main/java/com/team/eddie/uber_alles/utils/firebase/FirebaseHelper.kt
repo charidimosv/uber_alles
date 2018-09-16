@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.team.eddie.uber_alles.utils.Status
 import java.util.concurrent.CountDownLatch
 
 
@@ -246,6 +247,10 @@ HELPERS
 
         val driverARRef = getUserActiveRequest(request.driverId)
         driverARRef.setValue(null)
+
+        val requestRef = getRequestKey(request.requestId)
+        request.status = Status.Done
+        requestRef.setValue(request)
     }
 
     /*

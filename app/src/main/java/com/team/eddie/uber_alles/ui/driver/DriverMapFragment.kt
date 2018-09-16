@@ -35,7 +35,7 @@ import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import com.team.eddie.uber_alles.utils.UserStatus
+import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
@@ -130,17 +130,17 @@ open class DriverMapFragment : GenericMapFragment() {
 
         binding.rideStatus.setOnClickListener {
             when (status) {
-                UserStatus.Pending -> acceptCustomerRequest()
-                UserStatus.DriverToCustomer -> {
-                    setStatusSynced(UserStatus.ToDestination)
+                Status.Pending -> acceptCustomerRequest()
+                Status.DriverToCustomer -> {
+                    setStatusSynced(Status.ToDestination)
                     showRideUI()
                 }
-                UserStatus.ToDestination -> {
+                Status.ToDestination -> {
                     if (currentRequest != null)
                         recordRide()
                     endRideRequest()
                 }
-                UserStatus.Rating -> endRideRequest()
+                Status.Rating -> endRideRequest()
                 else -> {
                 }
             }
@@ -203,8 +203,8 @@ open class DriverMapFragment : GenericMapFragment() {
                     status = currentRequest?.status!!
 
                     when (status) {
-                        UserStatus.Pending -> showPendingUI()
-                        UserStatus.DriverToCustomer -> showDriverToCustomerUI()
+                        Status.Pending -> showPendingUI()
+                        Status.DriverToCustomer -> showDriverToCustomerUI()
                         else -> showRideUI()
                     }
                 } else
@@ -298,7 +298,7 @@ open class DriverMapFragment : GenericMapFragment() {
                     val distance: Float = loc1.distanceTo(loc2)
 
                     binding.rideStatus.text = if (distance < 100) getString(R.string.picked_customer) else getString(R.string.distance).plus(distance.toString())
-                    if (distance < 100) status = UserStatus.UserMet
+                    if (distance < 100) status = Status.UserMet
 
                     mCustomerMarker?.remove()
                     mCustomerMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user)))
@@ -346,7 +346,7 @@ open class DriverMapFragment : GenericMapFragment() {
     private fun acceptCustomerRequest() {
         currentRequest ?: return
 
-        status = UserStatus.DriverToCustomer
+        status = Status.DriverToCustomer
         currentRequest?.status = status
         currentRequest?.driverId = currentUserId
         FirebaseHelper.acceptRequest(currentRequest!!)
@@ -358,7 +358,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun endRideRequest() {
-        if (status == UserStatus.ToDestination && currentRequest != null) {
+        if (status == Status.ToDestination && currentRequest != null) {
             currentRequest?.let { FirebaseHelper.completeRequest(it) }
             showRatingUI()
         } else {
@@ -400,7 +400,7 @@ open class DriverMapFragment : GenericMapFragment() {
     private fun clearCustomersInfo() {
         customerFoundId = null
 
-        status = UserStatus.Free
+        status = Status.Free
         mRatingBar.rating = 0.toFloat()
         mRatingAvg.text = ""
         //mRatingText = null
@@ -425,7 +425,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun showFreshUI() {
-        status = UserStatus.Free
+        status = Status.Free
 
         searchCustomersAround = true
         completedRide = false
@@ -449,7 +449,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun showPendingUI() {
-        status = UserStatus.Pending
+        status = Status.Pending
 
         searchCustomersAround = false
         completedRide = false
@@ -477,7 +477,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun showDriverToCustomerUI() {
-        status = UserStatus.DriverToCustomer
+        status = Status.DriverToCustomer
 
         searchCustomersAround = false
         completedRide = false
@@ -506,7 +506,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun showRideUI() {
-        status = UserStatus.ToDestination
+        status = Status.ToDestination
 
         searchCustomersAround = false
         completedRide = false
@@ -533,7 +533,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun showRatingUI() {
-        status = UserStatus.Rating
+        status = Status.Rating
 
         mRatingBar.rating = 0.toFloat()
         mRatingBar.setIsIndicator(false)

@@ -15,7 +15,6 @@ import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
 import com.firebase.geofire.GeoQueryEventListener
-import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
@@ -40,7 +39,7 @@ import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import com.team.eddie.uber_alles.utils.UserStatus
+import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
@@ -197,15 +196,15 @@ class CustomerMapFragment : GenericMapFragment(),
         }
 
         mRequest.setOnClickListener {
-            if (status == UserStatus.Free)
+            if (status == Status.Free)
                 startRideRequest()
-            else if (status == UserStatus.Pending)
+            else if (status == Status.Pending)
                 endRideRequest()
-            else if (status == UserStatus.UserMet
-                    || status == UserStatus.DriverToCustomer) {
-                setStatusSynced(UserStatus.ToDestination)
+            else if (status == Status.UserMet
+                    || status == Status.DriverToCustomer) {
+                setStatusSynced(Status.ToDestination)
                 showRideUI()
-            } else if (status == UserStatus.Rating)
+            } else if (status == Status.Rating)
                 endRideRequest()
         }
 
@@ -258,8 +257,8 @@ class CustomerMapFragment : GenericMapFragment(),
                     status = currentRequest?.status!!
 
                     when (status) {
-                        UserStatus.Pending -> showPendingUI()
-                        UserStatus.DriverToCustomer -> showDriverToCustomerUI()
+                        Status.Pending -> showPendingUI()
+                        Status.DriverToCustomer -> showDriverToCustomerUI()
                         else -> showRideUI()
                     }
                 } else
@@ -355,7 +354,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
                     mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.distance).plus(distance.toString())
 
-                    if (distance < 100) status = UserStatus.UserMet
+                    if (distance < 100) status = Status.UserMet
 
                     mDriverMarker?.remove()
                     mDriverMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
@@ -367,7 +366,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun startRideRequest() {
-        currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!, status = UserStatus.Pending)
+        currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!, status = Status.Pending)
         FirebaseHelper.createRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
@@ -473,7 +472,7 @@ class CustomerMapFragment : GenericMapFragment(),
         if (dateOfRide != null) mRequest.visibility = View.VISIBLE
     }
 
-    override fun onError(status: Status) {}
+    override fun onError(p0: com.google.android.gms.common.api.Status?) {}
 
     override fun onMarkerClick(marker: Marker): Boolean {
         if (destinationMap.contains(marker)) {
@@ -514,7 +513,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showFreshUI() {
-        status = UserStatus.Free
+        status = Status.Free
 
         pickupMarker?.remove()
         mDriverMarker?.remove()
@@ -534,7 +533,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showPendingUI() {
-        status = UserStatus.Pending
+        status = Status.Pending
 
         showDriversAround = true
 
@@ -564,7 +563,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showDriverToCustomerUI() {
-        status = UserStatus.DriverToCustomer
+        status = Status.DriverToCustomer
 
         binding.callDriver.visibility = View.VISIBLE
         binding.chatDriver.visibility = View.VISIBLE
@@ -590,7 +589,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showRideUI() {
-        status = UserStatus.ToDestination
+        status = Status.ToDestination
 
         showDriversAround = false
 
@@ -617,7 +616,7 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showRatingUI() {
-        status = UserStatus.Rating
+        status = Status.Rating
 
         completedRide = false
         isPickedUp = false
