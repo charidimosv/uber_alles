@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.ActivityHelper
+import com.team.eddie.uber_alles.utils.UserStatus
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import java.util.*
@@ -38,7 +39,11 @@ abstract class GenericMapFragment :
         LocationListener,
         RoutingListener {
 
-    protected val currentUserId: String = FirebaseHelper.getUserId()
+    /*
+    ----------------------------------
+    MAP
+    ----------------------------------
+    */
 
     protected lateinit var applicationContext: Context
 
@@ -54,6 +59,16 @@ abstract class GenericMapFragment :
 
     private var requestingLocationUpdates: Boolean = false
     private var mLocationPermissionGranted: Boolean = false
+
+    /*
+    ----------------------------------
+    USER
+    ----------------------------------
+    */
+
+    protected val currentUserId: String = FirebaseHelper.getUserId()
+
+    protected var status: UserStatus = UserStatus.Free
 
     protected var activeRequestRef: DatabaseReference? = null
     protected var activeRequestListener: ValueEventListener? = null
@@ -253,6 +268,10 @@ abstract class GenericMapFragment :
     protected abstract fun showFreshUI()
 
     protected abstract fun showRatingUI()
+
+    protected abstract fun showPendingUI()
+
+    protected abstract fun showDriverToCustomerUI()
 
     protected abstract fun showRideUI()
 }

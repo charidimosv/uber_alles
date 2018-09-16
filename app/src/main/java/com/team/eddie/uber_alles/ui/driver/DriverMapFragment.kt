@@ -35,6 +35,7 @@ import com.team.eddie.uber_alles.databinding.FragmentDriverMapBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.UserStatus
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
@@ -43,12 +44,6 @@ import java.text.DecimalFormat
 import java.util.*
 
 private const val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
-
-enum class DriverStatus {
-    Free,
-    ToCustomer,
-    ToDestination
-}
 
 open class DriverMapFragment : GenericMapFragment() {
 
@@ -59,8 +54,6 @@ open class DriverMapFragment : GenericMapFragment() {
     */
 
     private lateinit var binding: FragmentDriverMapBinding
-
-    private var status: DriverStatus = DriverStatus.Free
 
     private lateinit var mCustomerInfo: LinearLayout
 
@@ -139,10 +132,10 @@ open class DriverMapFragment : GenericMapFragment() {
 
 
         binding.rideStatus.setOnClickListener {
-            if (status == DriverStatus.Free) {
+            if (status == UserStatus.Free) {
                 currentRequest?.run { acceptCustomerRequest(this) }
-            } else if (status == DriverStatus.ToCustomer) {
-                status = DriverStatus.ToDestination
+            } else if (status == UserStatus.DriverToCustomer) {
+                status = UserStatus.ToDestination
 
                 erasePolylines()
 
@@ -162,13 +155,12 @@ open class DriverMapFragment : GenericMapFragment() {
                 binding.callCustomer.visibility = View.GONE
                 binding.chatCustomer.visibility = View.GONE
 
-            } else if (status == DriverStatus.ToDestination) {
+            } else if (status == UserStatus.ToDestination) {
                 if (currentRequest != null) {
                     FirebaseHelper.completeRequest(currentRequest!!)
                     recordRide()
+                    endRideRequest()
                 }
-
-                endRideRequest()
             }
         }
 
@@ -195,7 +187,7 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun onLocationChanged(location: Location?) {
         super.onLocationChanged(location)
 
-        if (customerFoundId!!.isBlank() && location != null)
+        if (customerFoundId != null && location != null)
             FirebaseHelper.addDriverAvailable(currentUserId, GeoLocation(location.latitude, location.longitude))
         else
             FirebaseHelper.removeDriverAvailable(currentUserId)
@@ -359,7 +351,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
     // TODO - kapoi prepei na mpei auto
     private fun acceptCustomerRequest(request: Request) {
-        status = DriverStatus.ToCustomer
+        status = UserStatus.DriverToCustomer
 
         pickupLatLng = LatLng(request.pickupLocation?.lat!!, request.pickupLocation?.lng!!)
         pickupMarker = mMap.addMarker(MarkerOptions()
@@ -385,7 +377,7 @@ open class DriverMapFragment : GenericMapFragment() {
         assignedCustomerPickupLocationRef?.removeEventListener(assignedCustomerPickupLocationRefListener!!)
         newIncomeMessageRef?.removeEventListener(newIncomeMessageListener!!)
 
-        if (status == DriverStatus.ToDestination) showRatingUI()
+        if (status == UserStatus.ToDestination) showRatingUI()
         else startFresh()
     }
 
@@ -406,7 +398,7 @@ open class DriverMapFragment : GenericMapFragment() {
     private fun clearCustomersInfo() {
         customerFoundId = null
 
-        status = DriverStatus.Free
+        status = UserStatus.Free
         mRatingBar.rating = 0.toFloat()
         mRatingAvg.text = ""
         //mRatingText = null
@@ -442,6 +434,12 @@ open class DriverMapFragment : GenericMapFragment() {
         erasePolylines()
     }
 
+    override fun showPendingUI() {}
+
+    override fun showDriverToCustomerUI() {}
+
+    override fun showRideUI() {}
+
     override fun showRatingUI() {
         mRatingBar.rating = 0.toFloat()
         mRatingBar.setIsIndicator(false)
@@ -449,9 +447,6 @@ open class DriverMapFragment : GenericMapFragment() {
         mRatingAvg.visibility = View.GONE
         mRatingButton.visibility = View.VISIBLE
         ratingTextLayout.visibility = View.VISIBLE
-    }
-
-    override fun showRideUI() {
     }
 
 }

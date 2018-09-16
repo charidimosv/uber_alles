@@ -201,6 +201,11 @@ HELPERS
         geoPendingRequest.setLocation(requestId, pickupLocation)
     }
 
+    fun updateRequest(request: Request) {
+        val requestRef = getRequest()
+        requestRef.setValue(request)
+    }
+
     fun removeRequest(request: Request) {
         if (request.customerId != "") {
             val customerARRef = getUserActiveRequest(request.customerId)

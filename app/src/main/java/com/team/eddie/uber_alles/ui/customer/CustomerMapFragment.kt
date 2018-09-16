@@ -40,6 +40,7 @@ import com.team.eddie.uber_alles.databinding.FragmentCustomerMapBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
+import com.team.eddie.uber_alles.utils.UserStatus
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
@@ -181,11 +182,6 @@ class CustomerMapFragment : GenericMapFragment(),
             datePickerDialog.show()
         }
 
-        mRequest.setOnClickListener {
-            if (currentRequest == null) startRideRequest()
-            else endRideRequest()
-        }
-
         binding.chatDriver.setOnClickListener {
             val direction = CustomerMapFragmentDirections.actionCustomerMapFragmentToChatFragment()
             it.findNavController().navigate(direction)
@@ -201,6 +197,12 @@ class CustomerMapFragment : GenericMapFragment(),
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
             showFreshUI()
+        }
+
+        mRequest.setOnClickListener {
+            if (currentRequest == null && status == UserStatus.Free) startRideRequest()
+            else if (status == UserStatus.UserMet) showRideUI()
+            else endRideRequest()
         }
 
         getActiveRequest()
@@ -229,6 +231,7 @@ class CustomerMapFragment : GenericMapFragment(),
         activeRequestListener = activeRequestRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
+                    status = UserStatus.DriverToCustomer
                     getRequestInfo(dataSnapshot.value.toString())
                 } else if (currentRequest != null) {
                     completedRide = true
@@ -248,16 +251,14 @@ class CustomerMapFragment : GenericMapFragment(),
                     currentRequest = dataSnapshot.getValue(Request::class.java)
                     currentRequest ?: return
 
-                    showRideUI()
-
                     driverFoundID = currentRequest?.driverId
-
-                    // TODO uncomment later
-                    // getHasCustomerPickedUp()
                     getAssignedDriverInfo()
                     getAssignedDriverLocation()
 
-                    mRequest.text = getString(R.string.looking_driver_loc)
+                    status = currentRequest?.status!!
+
+                    if (status == UserStatus.DriverToCustomer) showDriverToCustomerUI()
+                    else showRideUI()
                 }
             }
 
@@ -310,8 +311,9 @@ class CustomerMapFragment : GenericMapFragment(),
         })
     }
 
-
     private fun getAssignedDriverLocation() {
+        mRequest.text = getString(R.string.looking_driver_loc)
+
         driverLocationRef = FirebaseHelper.getUserLocation(driverFoundID!!)
         driverLocationListener = driverLocationRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -335,6 +337,8 @@ class CustomerMapFragment : GenericMapFragment(),
 
                     mRequest.text = if (distance < 100) getString(R.string.driver_here) else getString(R.string.driver_found).plus(distance.toString())
 
+                    if (distance < 100) status = UserStatus.UserMet
+
                     mDriverMarker?.remove()
                     mDriverMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_car)))
                 }
@@ -344,61 +348,13 @@ class CustomerMapFragment : GenericMapFragment(),
         })
     }
 
-    private fun getHasCustomerPickedUp() {
-        customerPickedUpRef = FirebaseHelper.getDriverCustomerReqPickup(driverFoundID!!)
-        customerPickedUpListener = customerPickedUpRef!!.addValueEventListener(object : ValueEventListener {
-
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (!dataSnapshot.exists() && !isPickedUp) {
-                    getAssignedDriverLocation()
-
-                    SaveSharedPreference.setChatSender(applicationContext, currentUserId)
-                    SaveSharedPreference.setChatReceiver(applicationContext, driverFoundID!!)
-                    newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + driverFoundID).child("newMessagePushed")
-
-                    binding.callDriver.visibility = View.VISIBLE
-                    binding.chatDriver.visibility = View.VISIBLE
-
-                    newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
-                        override fun onCancelled(p0: DatabaseError) {}
-
-                        override fun onDataChange(dataSnapshot: DataSnapshot) {
-                            if (dataSnapshot.exists()) binding.chatDriver.text = "Message (!)"
-                        }
-
-                    })
-                } else {
-
-                    isPickedUp = true
-                    binding.callDriver.visibility = View.GONE
-                    binding.chatDriver.visibility = View.GONE
-
-                    mRequest.text = getString(R.string.ride_started)
-                    mRequest.isClickable = false
-                    getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), getLatLngList())
-
-                    driverLocationRef?.removeEventListener(driverLocationListener!!)
-                }
-            }
-
-            override fun onCancelled(p0: DatabaseError) {}
-
-        })
-    }
-
     override fun startRideRequest() {
         currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
 
-        pickupLatLng = LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude)
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-
-        //Draw route for all destinations... TODO test
-        getRouteToMarker(mLastLocation!!, getLatLngList())
-
-        showRideUI()
+        showPendingUI()
     }
 
     override fun endRideRequest() {
@@ -540,6 +496,8 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showFreshUI() {
+        status = UserStatus.Free
+
         pickupMarker?.remove()
         mDriverMarker?.remove()
         clearDestinationInfo()
@@ -554,6 +512,100 @@ class CustomerMapFragment : GenericMapFragment(),
         mRequest.text = getString(R.string.call_uber)
     }
 
+    override fun showPendingUI() {
+        status = UserStatus.Pending
+        currentRequest?.status = status
+        FirebaseHelper.updateRequest(currentRequest!!)
+
+        showDriversAround = true
+
+        isPickedUp = false
+        completedRide = false
+
+        binding.callDriver.visibility = View.GONE
+        binding.chatDriver.visibility = View.GONE
+        binding.searchRequest.visibility = View.GONE
+
+        mRequest.visibility = View.VISIBLE
+        mRequest.isClickable = true
+        mRequest.text = getString(R.string.getting_driver)
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+        getRouteToMarker(pickupLatLng!!, getLatLngList())
+
+        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+    }
+
+    override fun showDriverToCustomerUI() {
+        status = UserStatus.DriverToCustomer
+        currentRequest?.status = status
+        FirebaseHelper.updateRequest(currentRequest!!)
+
+        SaveSharedPreference.setChatSender(applicationContext, currentUserId)
+        SaveSharedPreference.setChatReceiver(applicationContext, driverFoundID!!)
+
+        binding.callDriver.visibility = View.VISIBLE
+        binding.chatDriver.visibility = View.VISIBLE
+        binding.searchRequest.visibility = View.GONE
+
+        mRequest.visibility = View.VISIBLE
+        mRequest.isClickable = true
+//        mRequest.text = getString(R.string.ride_started)
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+//        getRouteToMarker(mLastLocation!!, getLatLngList())
+
+//        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
+
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUserId + "_to_" + driverFoundID).child("newMessagePushed")
+        newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) binding.chatDriver.text = "Message (!)"
+            }
+        })
+    }
+
+    override fun showRideUI() {
+        status = UserStatus.ToDestination
+        currentRequest?.status = status
+        FirebaseHelper.updateRequest(currentRequest!!)
+
+        showDriversAround = false
+
+        isPickedUp = true
+        completedRide = false
+
+        binding.callDriver.visibility = View.GONE
+        binding.chatDriver.visibility = View.GONE
+        binding.searchRequest.visibility = View.GONE
+
+        mRequest.visibility = View.VISIBLE
+        mRequest.isClickable = false
+        mRequest.text = getString(R.string.ride_started)
+
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupMarker?.remove()
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+
+        erasePolylines()
+        getRouteToMarker(mLastLocation!!, getLatLngList())
+
+        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+    }
+
     override fun showRatingUI() {
         completedRide = false
         isPickedUp = false
@@ -564,13 +616,5 @@ class CustomerMapFragment : GenericMapFragment(),
         mRatingButton.visibility = View.VISIBLE
         ratingTextLayout.visibility = View.VISIBLE
         mRequest.text = getString(R.string.ride_ended)
-    }
-
-    override fun showRideUI() {
-        showDriversAround = false
-
-        binding.searchRequest.visibility = View.GONE
-        mRequest.visibility = View.VISIBLE
-        mRequest.text = getString(R.string.getting_driver)
     }
 }

@@ -1,6 +1,7 @@
 package com.team.eddie.uber_alles.utils.firebase
 
 import android.location.Location
+import com.team.eddie.uber_alles.utils.UserStatus
 
 class Request(
         var requestId: String = "",
@@ -10,7 +11,9 @@ class Request(
 
         var pickupLocation: RequestLocation? = null,
         var pickupTime: Long = 0,
-        var requestDate: String = ""
+        var requestDate: String = "",
+
+        var status: UserStatus = UserStatus.DriverToCustomer
 ) {
     var destinationList: ArrayList<RequestLocation>? = null
 
@@ -20,7 +23,7 @@ class Request(
                 pickupTime: Long = 0,
                 requestDate: String = "",
                 locationList: List<Location>)
-            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate) {
+            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate, status = UserStatus.DriverToCustomer) {
 
         this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
 
