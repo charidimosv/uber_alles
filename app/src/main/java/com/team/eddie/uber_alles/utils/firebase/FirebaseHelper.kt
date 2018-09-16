@@ -142,7 +142,7 @@ HELPERS
     }
 
     fun getUserActiveRequest(userId: String): DatabaseReference {
-        return getUser(userId).child(PENDING_REQUEST)
+        return getUser(userId).child(ACTIVE_REQUEST)
     }
 
     fun getUserIsDriver(userId: String): DatabaseReference {
@@ -156,6 +156,10 @@ HELPERS
     fun setUserLocation(userId: String, location: GeoLocation) {
         val geoFireAvailable = GeoFire(getUser(userId))
         geoFireAvailable.setLocation(LOCATION, location)
+    }
+
+    fun getUserLocation(userId: String): DatabaseReference {
+        return getUser(userId).child(LOCATION).child("l")
     }
 
     /*
@@ -191,6 +195,24 @@ HELPERS
         pendingRequestRef.child(requestId).setValue(true)
     }
 
+    fun removeRequest(request: Request) {
+        if (request.customerId != "") {
+            val customerARRef = getUserActiveRequest(request.customerId)
+            customerARRef.setValue(null)
+        }
+
+        if (request.driverId != "") {
+            val driverARRef = getUserActiveRequest(request.driverId)
+            driverARRef.setValue(null)
+        }
+
+        val pendingRequestRef = getPendingRequestKey(request.requestId)
+        pendingRequestRef.setValue(null)
+
+        val requestRef = getRequestKey(request.requestId)
+        requestRef.setValue(null)
+    }
+
     fun acceptRequest(request: Request) {
         val requestId = request.requestId
 
@@ -202,16 +224,17 @@ HELPERS
 
         val pendingRequestRef = getPendingRequestKey(requestId)
         pendingRequestRef.setValue(null)
+
+        val requestRef = getRequestKey(request.requestId)
+        requestRef.setValue(request)
     }
 
-    fun cleanRequest(request: Request) {
-        cleanUserRequest(request.customerId)
-        cleanUserRequest(request.driverId)
-    }
+    fun completeRequest(request: Request) {
+        val customerARRef = getUserActiveRequest(request.customerId)
+        customerARRef.setValue(null)
 
-    fun cleanUserRequest(userId: String) {
-        val userARRef = getUserActiveRequest(userId)
-        userARRef.setValue(null)
+        val driverARRef = getUserActiveRequest(request.driverId)
+        driverARRef.setValue(null)
     }
 
     /*

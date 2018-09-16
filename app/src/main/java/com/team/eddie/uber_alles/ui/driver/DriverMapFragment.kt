@@ -33,6 +33,7 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import java.math.RoundingMode
 import java.text.DecimalFormat
 
@@ -216,15 +217,17 @@ class DriverMapFragment : GenericMapFragment() {
 
     private fun getAssignedCustomerInfo() {
         mCustomerInfo.visibility = View.VISIBLE
+
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerId)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val map = dataSnapshot.value as Map<String, Any>
+                    val userInfo = dataSnapshot.getValue(UserInfo::class.java)
+                    userInfo ?: return
 
-                    map["name"]?.let { mCustomerName.text = it.toString() }
-                    map["phone"]?.let { mCustomerPhone.text = it.toString() }
-                    map["profileImageUrl"]?.let { ActivityHelper.bindImageFromUrl(mCustomerProfileImage, it) }
+                    userInfo.name.let { mCustomerName.text = it }
+                    userInfo.phone.let { mCustomerPhone.text = it }
+                    userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCustomerProfileImage, it) }
                 }
             }
 
