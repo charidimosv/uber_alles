@@ -257,6 +257,12 @@ abstract class GenericMapFragment :
         return System.currentTimeMillis() / 1000
     }
 
+    protected fun setStatusSynced(status: UserStatus) {
+        this.status = status
+        currentRequest?.status = status
+        FirebaseHelper.updateRequest(currentRequest!!)
+    }
+
     protected abstract fun getActiveRequest()
 
     protected abstract fun getRequestInfo(requestId: String)

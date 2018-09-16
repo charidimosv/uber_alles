@@ -5,5 +5,6 @@ enum class UserStatus {
     Pending,
     DriverToCustomer,
     UserMet,
-    ToDestination
+    ToDestination,
+    Rating
 }

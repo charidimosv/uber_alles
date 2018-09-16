@@ -197,17 +197,15 @@ class CustomerMapFragment : GenericMapFragment(),
         }
 
         mRequest.setOnClickListener {
-            if (currentRequest == null && status == UserStatus.Free)
+            if (status == UserStatus.Free)
                 startRideRequest()
+            else if (status == UserStatus.Pending)
+                endRideRequest()
             else if (status == UserStatus.UserMet
                     || status == UserStatus.DriverToCustomer) {
-
-                status = UserStatus.ToDestination
-                currentRequest?.status = status
-                FirebaseHelper.updateRequest(currentRequest!!)
-
+                setStatusSynced(UserStatus.ToDestination)
                 showRideUI()
-            } else if (status == UserStatus.Pending)
+            } else if (status == UserStatus.Rating)
                 endRideRequest()
         }
 
@@ -238,7 +236,7 @@ class CustomerMapFragment : GenericMapFragment(),
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     getRequestInfo(dataSnapshot.value.toString())
-                } else if (currentRequest != null) {
+                } else {
                     completedRide = true
                     endRideRequest()
                 }
@@ -259,13 +257,13 @@ class CustomerMapFragment : GenericMapFragment(),
                     driverFoundID = currentRequest?.driverId
                     status = currentRequest?.status!!
 
-                    if (status == UserStatus.Pending)
-                        showPendingUI()
-                    else if (status == UserStatus.DriverToCustomer)
-                        showDriverToCustomerUI()
-                    else
-                        showRideUI()
-                }
+                    when (status) {
+                        UserStatus.Pending -> showPendingUI()
+                        UserStatus.DriverToCustomer -> showDriverToCustomerUI()
+                        else -> showRideUI()
+                    }
+                } else
+                    endRideRequest()
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -288,8 +286,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
 
     private fun getAssignedDriverInfo() {
-        // TODO uncomment later
-        // mDriverInfo.visibility = View.VISIBLE
+        mDriverInfo.visibility = View.VISIBLE
 
         val mDriverDatabase = FirebaseHelper.getUserInfo(driverFoundID!!)
         mDriverDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -381,7 +378,7 @@ class CustomerMapFragment : GenericMapFragment(),
     override fun endRideRequest() {
         SaveSharedPreference.setActiveRequest(applicationContext, false)
 
-        if (completedRide) {
+        if (completedRide && currentRequest != null) {
             currentRequest?.let { FirebaseHelper.completeRequest(it) }
             showRatingUI()
         } else {
@@ -620,6 +617,8 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun showRatingUI() {
+        status = UserStatus.Rating
+
         completedRide = false
         isPickedUp = false
         mRatingBar.rating = 0.toFloat()
@@ -628,7 +627,10 @@ class CustomerMapFragment : GenericMapFragment(),
         mRatingAvg?.visibility = View.GONE
         mRatingButton.visibility = View.VISIBLE
         ratingTextLayout.visibility = View.VISIBLE
-        mRequest.text = getString(R.string.ride_ended)
+
+        mRequest.visibility = View.VISIBLE
+        mRequest.isClickable = true
+        mRequest.text = getString(R.string.cancel)
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
