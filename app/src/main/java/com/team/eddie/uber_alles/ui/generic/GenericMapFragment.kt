@@ -41,17 +41,17 @@ abstract class GenericMapFragment :
     protected lateinit var mMap: GoogleMap
 
     protected var mLastLocation: Location? = null
-    protected var mLocationRequest: LocationRequest? = null
+    private var mLocationRequest: LocationRequest? = null
 
     protected var followMeFlag: Boolean = true
 
     protected lateinit var fusedLocationClient: FusedLocationProviderClient
     protected lateinit var locationCallback: LocationCallback
 
-    protected var requestingLocationUpdates: Boolean = false
-    protected var mLocationPermissionGranted: Boolean = false
+    private var requestingLocationUpdates: Boolean = false
+    private var mLocationPermissionGranted: Boolean = false
 
-    protected val DEFAULT_ZOOM: Float = 15F
+    private val DEFAULT_ZOOM: Float = 15F
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
@@ -63,7 +63,7 @@ abstract class GenericMapFragment :
         getDeviceLocation()
     }
 
-    protected fun createLocationRequest() {
+    private fun createLocationRequest() {
         mLocationRequest = LocationRequest().apply {
             interval = 4000
             fastestInterval = 2000
@@ -85,7 +85,7 @@ abstract class GenericMapFragment :
                 }
     }
 
-    protected fun getLocationPermission() {
+    private fun getLocationPermission() {
         if (ActivityCompat.checkSelfPermission(activity!!, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
             ActivityCompat.requestPermissions(activity!!,
                     arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
@@ -118,7 +118,7 @@ abstract class GenericMapFragment :
         }
     }
 
-    protected fun updateMapUI() {
+    private fun updateMapUI() {
         setLocationMapUIValues(mLocationPermissionGranted)
         mMap.isTrafficEnabled = true
     }
@@ -166,18 +166,15 @@ abstract class GenericMapFragment :
         fusedLocationClient.requestLocationUpdates(mLocationRequest, locationCallback, null)
     }
 
-    protected fun stopLocationUpdates() {
+    private fun stopLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     private var polylines = arrayListOf<Polyline>()
     private val COLORS = intArrayOf(R.color.primary_dark_material_light)
-    override fun onRoutingCancelled() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun onRoutingCancelled() {}
 
-    override fun onRoutingStart() {
-    }
+    override fun onRoutingStart() {}
 
     override fun onRoutingFailure(p0: RouteException?) {
         if (p0 != null)
@@ -208,6 +205,16 @@ abstract class GenericMapFragment :
     protected fun erasePolylines() {
         for (line in polylines)
             line.remove()
+    }
+
+    protected fun getRouteToMarker(fromLocation: Location, toLatLng: List<LatLng>) {
+        getRouteToMarker(LatLng(fromLocation.latitude, fromLocation.longitude), toLatLng)
+    }
+
+    protected fun getRouteToMarker(fromLatLng: LatLng, toLatLng: List<LatLng>) {
+        val routeList = arrayListOf(fromLatLng)
+        routeList.addAll(toLatLng)
+        ActivityHelper.getRouteToMarker(routeList, this)
     }
 
     protected fun getRouteToMarker(pickupLatLng: LatLng?) {

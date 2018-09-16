@@ -41,19 +41,18 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.CUSTOMER_RIDE_ID
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LAT
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LOT
 import com.team.eddie.uber_alles.utils.firebase.Request
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
-class CustomerMapFragment : GenericMapFragment() {
+class CustomerMapFragment : GenericMapFragment(),
+        PlaceSelectionListener,
+        GoogleMap.OnMarkerClickListener {
 
     private lateinit var binding: FragmentCustomerMapBinding
 
@@ -84,10 +83,8 @@ class CustomerMapFragment : GenericMapFragment() {
     private var mRatingAvg: TextView? = null
 
     private var dateOfRide: String? = null
-    private var destination: String? = null
-    private var destinationLatLng: LatLng? = null
-    private var destinationMarker: Marker? = null
-    private var destinationList: ArrayList<Location> = ArrayList()
+    private val destinationMap: HashMap<Marker, Place> = HashMap()
+    private val destinationList: ArrayList<Place> = ArrayList()
 
     private var completedRide: Boolean = false
     private var isPickedUp: Boolean = false
@@ -152,27 +149,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
 
         autocompleteFragment = childFragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as SupportPlaceAutocompleteFragment
-        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onPlaceSelected(place: Place) {
-                destination = place.name.toString()
-                destinationLatLng = place.latLng
-
-                val newDestination = Location("")
-                newDestination.latitude = destinationLatLng!!.latitude
-                newDestination.longitude = destinationLatLng!!.longitude
-                destinationList.add(newDestination)
-
-                destinationMarker?.remove()
-                destinationMarker = mMap.addMarker(MarkerOptions().position(place.latLng).title(getString(R.string.destination_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-
-                moveCamera(place.latLng)
-                followMeFlag = false
-                if (dateOfRide != null)
-                    mRequest.visibility = View.VISIBLE
-            }
-
-            override fun onError(status: Status) {}
-        })
+        autocompleteFragment.setOnPlaceSelectedListener(this)
 
         binding.rideDate.setOnClickListener {
             val calendar = Calendar.getInstance()
@@ -190,7 +167,7 @@ class CustomerMapFragment : GenericMapFragment() {
                 dateOfRide = SimpleDateFormat("dd/MM/yyy").format(newCalendar.time)
                 binding.rideDate.text = dateOfRide
 
-                if (destination != null)
+                if (!destinationList.isEmpty())
                     mRequest.visibility = View.VISIBLE
 
             }
@@ -229,6 +206,7 @@ class CustomerMapFragment : GenericMapFragment() {
     override fun onMapReady(googleMap: GoogleMap) {
         super.onMapReady(googleMap)
 
+        mMap.setOnMarkerClickListener(this)
         mMap.setOnMyLocationButtonClickListener {
             followMeFlag = true
             mLastLocation?.let { moveCamera(it) }
@@ -257,12 +235,12 @@ class CustomerMapFragment : GenericMapFragment() {
 
                     val driverCustReqRef = FirebaseHelper.getDriverCustomerReq(driverFoundID!!)
 
-                    val map: HashMap<String, Any?> = hashMapOf(
-                            CUSTOMER_RIDE_ID to currentUserId,
-                            DESTINATION to destination,
-                            DESTINATION_LAT to (destinationLatLng?.latitude),
-                            DESTINATION_LOT to (destinationLatLng?.longitude))
-                    driverCustReqRef.updateChildren(map)
+//                    val map: HashMap<String, Any?> = hashMapOf(
+//                            CUSTOMER_RIDE_ID to currentUserId,
+//                            DESTINATION to destination,
+//                            DESTINATION_LAT to (destinationLatLng?.latitude),
+//                            DESTINATION_LOT to (destinationLatLng?.longitude))
+//                    driverCustReqRef.updateChildren(map)
 
                     getHasCustomerPickedUp()
                     getUserInfo()
@@ -403,7 +381,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
                     mRequest.text = getString(R.string.ride_started)
                     mRequest.isClickable = false
-                    getRouteToMarker(destinationLatLng)
+                    getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), getLatLngList())
 
                     driverLocationRef?.removeEventListener(driverLocationListener!!)
                 }
@@ -431,7 +409,7 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun startRideRequest() {
-        val request = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = destinationList, requestDate = dateOfRide!!)
+        val request = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(request)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
@@ -443,10 +421,7 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLocation!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
         //Draw route for all destinations... TODO test
-        val waypoints = arrayListOf<LatLng>(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude))
-        for (destination in destinationList)
-            waypoints.add(LatLng(destination.latitude, destination.longitude))
-        ActivityHelper.getRouteToMarker(waypoints, this)
+        getRouteToMarker(mLastLocation!!, getLatLngList())
 
         autocompleteFragment.view?.visibility = View.GONE
         mRequest.text = getString(R.string.getting_driver)
@@ -470,8 +445,8 @@ class CustomerMapFragment : GenericMapFragment() {
         geoFire.removeLocation(currentUserId)
 
         pickupMarker?.remove()
-        destinationMarker?.remove()
         mDriverMarker?.remove()
+        clearDestinationInfo()
 
         erasePolylines()
 
@@ -557,5 +532,54 @@ class CustomerMapFragment : GenericMapFragment() {
 
             override fun onGeoQueryError(error: DatabaseError) {}
         })
+    }
+
+    private fun getLatLngList(): ArrayList<LatLng> {
+        val latLngList = ArrayList<LatLng>()
+        for (place in destinationList) latLngList.add(place.latLng)
+        return latLngList
+    }
+
+    private fun getLocationList(): ArrayList<Location> {
+        val locationList = ArrayList<Location>()
+        for (place in destinationList) {
+            val location = Location("")
+            location.latitude = place.latLng.latitude
+            location.longitude = place.latLng.longitude
+            locationList.add(location)
+        }
+        return locationList
+    }
+
+    private fun clearDestinationInfo() {
+        for (marker in destinationMap.keys) marker.remove()
+        destinationMap.clear()
+        destinationList.clear()
+    }
+
+    override fun onPlaceSelected(place: Place) {
+        val destination = place.name.toString()
+        val destinationMarker = mMap.addMarker(MarkerOptions()
+                .position(place.latLng)
+                .title(destination)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        destinationMap[destinationMarker] = place
+        destinationList.add(place)
+
+        followMeFlag = false
+        moveCamera(place.latLng)
+
+        if (dateOfRide != null) mRequest.visibility = View.VISIBLE
+    }
+
+    override fun onError(status: Status) {}
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+        if (destinationMap.contains(marker)) {
+            marker.remove()
+            destinationList.remove(destinationMap[marker])
+            destinationMap.remove(marker)
+        }
+        return true
     }
 }
