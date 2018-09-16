@@ -186,7 +186,7 @@ HELPERS
         return getReference().child(PENDING_REQUEST)
     }
 
-    fun getPendingRequestKey(requestId: String): DatabaseReference {
+    private fun getPendingRequestKey(requestId: String): DatabaseReference {
         return getPendingRequest().child(requestId)
     }
 

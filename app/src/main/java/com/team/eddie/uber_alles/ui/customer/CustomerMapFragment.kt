@@ -271,11 +271,11 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     private fun getAssignedDriverMessage() {
-        val curentUser = SaveSharedPreference.getUserInfo(applicationContext)
-        SaveSharedPreference.setChatSender(applicationContext, curentUser!!.username)
+        val currentUser = SaveSharedPreference.getUserInfo(applicationContext)
+        SaveSharedPreference.setChatSender(applicationContext, currentUser!!.username)
         SaveSharedPreference.setChatReceiver(applicationContext, driverFoundUsername!!)
 
-        newIncomeMessageRef = FirebaseHelper.getMessage().child(curentUser!!.username + "_to_" + driverFoundUsername).child("newMessagePushed")
+        newIncomeMessageRef = FirebaseHelper.getMessage().child(currentUser.username + "_to_" + driverFoundUsername).child("newMessagePushed")
         newIncomeMessageListener = newIncomeMessageRef?.addValueEventListener(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
@@ -284,7 +284,6 @@ class CustomerMapFragment : GenericMapFragment(),
             }
         })
     }
-
 
     private fun getAssignedDriverInfo() {
         mDriverInfo.visibility = View.VISIBLE
@@ -300,6 +299,8 @@ class CustomerMapFragment : GenericMapFragment(),
                     userInfo.username.let { driverFoundUsername = it }
                     userInfo.phone.let { mDriverPhone.text = it }
                     userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(mDriverProfileImage, it) }
+
+                    if (showMessages) getAssignedDriverMessage()
                 }
             }
 
@@ -369,7 +370,10 @@ class CustomerMapFragment : GenericMapFragment(),
     }
 
     override fun startRideRequest() {
-        currentRequest = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = getLocationList(), requestDate = dateOfRide!!, status = Status.Pending)
+        currentRequest = Request(customerId = currentUserId,
+                pickupLocation = mLastLocation!!,
+                locationList = getLocationList(),
+                requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(currentRequest!!)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)
@@ -494,7 +498,8 @@ class CustomerMapFragment : GenericMapFragment(),
 
     private fun clearDriversInfo() {
         driverFoundID = null
-        driverFoundUsername =  null
+        driverFoundUsername = null
+        showMessages = false
 
         mDriverInfo.visibility = View.GONE
         mDriverName.text = ""
@@ -527,6 +532,7 @@ class CustomerMapFragment : GenericMapFragment(),
         erasePolylines()
 
         showDriversAround = true
+        showMessages = false
 
         binding.searchRequest.visibility = View.VISIBLE
         mRequest.visibility = View.GONE
@@ -569,6 +575,8 @@ class CustomerMapFragment : GenericMapFragment(),
     override fun showDriverToCustomerUI() {
         status = Status.DriverToCustomer
 
+        showMessages = true
+
         binding.callDriver.visibility = View.VISIBLE
         binding.chatDriver.visibility = View.VISIBLE
         binding.searchRequest.visibility = View.GONE
@@ -589,7 +597,6 @@ class CustomerMapFragment : GenericMapFragment(),
 
         getAssignedDriverInfo()
         getAssignedDriverLocation()
-        getAssignedDriverMessage()
     }
 
     override fun showRideUI() {
@@ -599,6 +606,7 @@ class CustomerMapFragment : GenericMapFragment(),
 
         isPickedUp = true
         completedRide = false
+        showMessages = false
 
         binding.callDriver.visibility = View.GONE
         binding.chatDriver.visibility = View.GONE
@@ -630,6 +638,7 @@ class CustomerMapFragment : GenericMapFragment(),
         mRatingAvg?.visibility = View.GONE
         mRatingButton.visibility = View.VISIBLE
         ratingTextLayout.visibility = View.VISIBLE
+        showMessages = false
 
         mRequest.visibility = View.VISIBLE
         mRequest.isClickable = true

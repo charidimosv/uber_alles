@@ -13,18 +13,21 @@ class Request(
         var pickupTime: Long = 0,
         var requestDate: String = "",
 
+        var arrivingTime: Long? = 0,
+        var distance: Float = 0F,
+
         var status: Status = Status.Pending
 ) {
     var destinationList: ArrayList<RequestLocation>? = null
 
     constructor(customerId: String = "",
-                driverId: String = "",
                 pickupLocation: Location,
-                pickupTime: Long = 0,
-                requestDate: String = "",
                 locationList: List<Location>,
-                status: Status)
-            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate, status = status) {
+                requestDate: String = "")
+            : this(customerId = customerId,
+            driverId = "",
+            requestDate = requestDate,
+            status = Status.Pending) {
 
         this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
 

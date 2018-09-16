@@ -82,6 +82,7 @@ abstract class GenericMapFragment :
     protected var currentRequest: Request? = null
 
     protected var completedRide: Boolean = false
+    protected var showMessages: Boolean = false
 
 
     override fun onMapReady(googleMap: GoogleMap) {
