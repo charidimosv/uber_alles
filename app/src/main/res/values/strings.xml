@@ -6,6 +6,8 @@
     <string name="prompt_password">"   "Password</string>
     <string name="prompt_repeat_password">"   "Repeat Password</string>
     <string name="prompt_driver">I \'m a driver</string>
+    <string name="prompt_payment">I \Electronic payment</string>
+
 
     <string name="action_sign_in">Sign in</string>
     <string name="action_log_in">Log in</string>

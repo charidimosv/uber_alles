@@ -33,6 +33,16 @@
     </group>
 
     <group
+        android:id="@+id/payment"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/customer_payment_fragment"
+            android:title="Payment Info" />
+
+    </group>
+
+    <group
         android:id="@+id/logout"
         android:checkableBehavior="single">
 

@@ -57,6 +57,13 @@
         tools:layout="@layout/fragment_customer_profile" />
 
     <fragment
+        android:id="@+id/customer_payment_fragment"
+        android:name="com.team.eddie.uber_alles.ui.customer.CustomerPaymentFragment"
+        android:label="Payment Info"
+        tools:layout="@layout/fragment_customer_payment" />
+
+
+    <fragment
         android:id="@+id/customer_logout_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerLogoutFragment"
         android:label="Sign Out"

@@ -57,6 +57,7 @@ HELPERS
 
     private const val USER: String = "User"
     private const val USER_INFO: String = "UserInfo"
+    private const val PAYMENT_INFO: String = "PaymentInfo"
     private const val CAR_LIST: String = "CarList"
     private const val HISTORY_LIST: String = "HistoryList"
     private const val RATING_LIST: String = "RatingList"
@@ -162,6 +163,10 @@ HELPERS
         return getUser(userId).child(LOCATION).child("l")
     }
 
+    fun getUserPaymentInfo(userId: String): DatabaseReference {
+        return getUser(userId).child(PAYMENT_INFO)
+    }
+
     /*
     ----------------------------------
     REQUEST
@@ -193,24 +198,6 @@ HELPERS
 
         val pendingRequestRef = getPendingRequest()
         pendingRequestRef.child(requestId).setValue(true)
-    }
-
-    fun removeRequest(request: Request) {
-        if (request.customerId != "") {
-            val customerARRef = getUserActiveRequest(request.customerId)
-            customerARRef.setValue(null)
-        }
-
-        if (request.driverId != "") {
-            val driverARRef = getUserActiveRequest(request.driverId)
-            driverARRef.setValue(null)
-        }
-
-        val pendingRequestRef = getPendingRequestKey(request.requestId)
-        pendingRequestRef.setValue(null)
-
-        val requestRef = getRequestKey(request.requestId)
-        requestRef.setValue(null)
     }
 
     fun acceptRequest(request: Request) {
