@@ -1,5 +1,6 @@
 package com.team.eddie.uber_alles.ui.customer
 
+import android.app.DatePickerDialog
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -47,6 +48,7 @@ import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.DESTINATION_LOT
 import com.team.eddie.uber_alles.utils.firebase.Request
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -81,6 +83,7 @@ class CustomerMapFragment : GenericMapFragment() {
     private lateinit var mRatingButton: MaterialButton
     private var mRatingAvg: TextView? = null
 
+    private var dateOfRide : String? = null
     private var destination: String? = null
     private var destinationLatLng: LatLng? = null
     private var destinationMarker: Marker? = null
@@ -164,12 +167,37 @@ class CustomerMapFragment : GenericMapFragment() {
 
                 moveCamera(place.latLng)
                 followMeFlag = false
-
-                mRequest.visibility = View.VISIBLE
+                if(dateOfRide != null)
+                    mRequest.visibility = View.VISIBLE
             }
 
             override fun onError(status: Status) {}
         })
+
+        binding.rideDate.setOnClickListener{
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerListener = DatePickerDialog.OnDateSetListener { datePicker, i, j, k ->
+                val day = datePicker.dayOfMonth
+                val month = datePicker.month
+                val year = datePicker.year
+
+               val newCalendar = Calendar.getInstance()
+               newCalendar.set(year, month, day)
+               dateOfRide = SimpleDateFormat("dd/MM/yyy").format(newCalendar.time)
+               binding.rideDateText.text = dateOfRide
+
+               if(destination != null)
+                    mRequest.visibility = View.VISIBLE
+
+            }
+            var datePickerDialog = DatePickerDialog(activity, datePickerListener,  year,  month, day)
+            datePickerDialog.datePicker.minDate = System.currentTimeMillis()
+            datePickerDialog.show()
+        }
 
         mRequest.setOnClickListener {
             //            if (SaveSharedPreference.getActiveRequest(applicationContext))
@@ -403,7 +431,7 @@ class CustomerMapFragment : GenericMapFragment() {
     }
 
     private fun startRideRequest() {
-        val request = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = destinationList)
+        val request = Request(customerId = currentUserId, pickupLocation = mLastLocation!!, locationList = destinationList, requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(request)
 
         SaveSharedPreference.setActiveRequest(applicationContext, true)

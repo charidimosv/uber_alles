@@ -9,7 +9,8 @@ class Request(
         var driverId: String = "",
 
         var pickupLocation: RequestLocation? = null,
-        var pickupTime: Long = 0
+        var pickupTime: Long = 0,
+        var requestDate: String = ""
 ) {
     var destinationList: ArrayList<RequestLocation>? = null
 
@@ -17,8 +18,9 @@ class Request(
                 driverId: String = "",
                 pickupLocation: Location,
                 pickupTime: Long = 0,
+                requestDate: String = "",
                 locationList: List<Location>)
-            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime) {
+            : this(customerId = customerId, driverId = driverId, pickupTime = pickupTime, requestDate = requestDate) {
 
         this.pickupLocation = RequestLocation(pickupLocation.latitude, pickupLocation.longitude)
 
