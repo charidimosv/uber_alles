@@ -321,5 +321,9 @@ abstract class GenericMapFragment :
 
     protected abstract fun showRideUI()
 
+    protected abstract fun showStatusUI()
+
+    protected abstract fun switchState()
+
 //    protected abstract fun showCardUI()
 }

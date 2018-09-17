@@ -5,6 +5,7 @@ enum class Status {
     Pending,
     DriverToCustomer,
     ToDestination,
+    Payment,
     Rating,
     Done
 }

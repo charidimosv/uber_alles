@@ -137,25 +137,7 @@ open class DriverMapFragment : GenericMapFragment() {
             startFresh()
         }
 
-        rideStatus.setOnClickListener {
-            when (status) {
-                Status.Pending -> acceptCustomerRequest()
-                Status.DriverToCustomer -> {
-                    setStatusSynced(Status.ToDestination)
-                    showRideUI()
-                }
-                Status.ToDestination -> {
-                    if (currentRequest != null) {
-                        completedRide = true
-                        recordRide()
-                        showRatingUI()
-                    }
-                }
-                Status.Rating -> endRideRequest()
-                else -> {
-                }
-            }
-        }
+        rideStatus.setOnClickListener { switchState() }
 
         getActiveRequest()
 
@@ -201,14 +183,7 @@ open class DriverMapFragment : GenericMapFragment() {
                         destinationAll = loc.locName + " "
                     destination.text = destinationAll
 
-                    when (status) {
-                        Status.Pending -> showPendingUI()
-                        Status.DriverToCustomer -> showDriverToCustomerUI()
-                        Status.ToDestination -> showRideUI()
-                        Status.Rating -> showRatingUI()
-                        else -> {
-                        }
-                    }
+                    showStatusUI()
                 } else
                     endRideRequest()
             }
@@ -332,15 +307,11 @@ open class DriverMapFragment : GenericMapFragment() {
                 if (!hasAccepted) startFresh()
             }
 
-            override fun onKeyMoved(key: String, location: GeoLocation) {
-
-            }
+            override fun onKeyMoved(key: String, location: GeoLocation) {}
 
             override fun onGeoQueryReady() {}
 
-            override fun onGeoQueryError(error: DatabaseError) {
-
-            }
+            override fun onGeoQueryError(error: DatabaseError) {}
         })
     }
 
@@ -685,6 +656,49 @@ open class DriverMapFragment : GenericMapFragment() {
         requestListener?.let { requestRef?.removeEventListener(it) }
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+    }
+
+    override fun showStatusUI() {
+        when (status) {
+            Status.Free -> {
+            }
+            Status.Pending -> showPendingUI()
+            Status.DriverToCustomer -> showDriverToCustomerUI()
+            Status.ToDestination -> showRideUI()
+            Status.Payment -> {
+            }
+            Status.Rating -> showRatingUI()
+            Status.Done -> {
+            }
+        }
+    }
+
+    override fun switchState() {
+        when (status) {
+            Status.Free -> {
+            }
+            Status.Pending -> {
+                acceptCustomerRequest()
+            }
+            Status.DriverToCustomer -> {
+                setStatusSynced(Status.ToDestination)
+                showRideUI()
+            }
+            Status.ToDestination -> {
+                if (currentRequest != null) {
+                    completedRide = true
+                    recordRide()
+                    showRatingUI()
+                }
+            }
+            Status.Payment -> {
+            }
+            Status.Rating -> {
+                endRideRequest()
+            }
+            Status.Done -> {
+            }
+        }
     }
 
 }

@@ -188,19 +188,7 @@ class CustomerMapFragment : GenericMapFragment(),
             showFreshUI()
         }
 
-        rideStatus.setOnClickListener {
-            when (status) {
-                Status.Free -> startRideRequest()
-                Status.Pending -> endRideRequest()
-                Status.DriverToCustomer -> {
-                    setStatusSynced(Status.ToDestination)
-                    showRideUI()
-                }
-                Status.Rating -> endRideRequest()
-                else -> {
-                }
-            }
-        }
+        rideStatus.setOnClickListener { switchState() }
 
         getActiveRequest()
 
@@ -250,14 +238,7 @@ class CustomerMapFragment : GenericMapFragment(),
                     driverFoundID = currentRequest?.driverId
                     status = currentRequest?.status!!
 
-                    when (status) {
-                        Status.Pending -> showPendingUI()
-                        Status.DriverToCustomer -> showDriverToCustomerUI()
-                        Status.ToDestination -> showRideUI()
-                        Status.Rating -> showRatingUI()
-                        else -> {
-                        }
-                    }
+                    showStatusUI()
                 } else
                     endRideRequest()
             }
@@ -770,4 +751,44 @@ class CustomerMapFragment : GenericMapFragment(),
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
+
+    override fun showStatusUI() {
+        when (status) {
+            Status.Free -> {
+            }
+            Status.Pending -> showPendingUI()
+            Status.DriverToCustomer -> showDriverToCustomerUI()
+            Status.ToDestination -> showRideUI()
+            Status.Payment -> {
+            }
+            Status.Rating -> showRatingUI()
+            Status.Done -> {
+            }
+        }
+    }
+
+    override fun switchState() {
+        when (status) {
+            Status.Free -> {
+                startRideRequest()
+            }
+            Status.Pending -> {
+                endRideRequest()
+            }
+            Status.DriverToCustomer -> {
+                setStatusSynced(Status.ToDestination)
+                showRideUI()
+            }
+            Status.ToDestination -> {
+            }
+            Status.Payment -> {
+            }
+            Status.Rating -> {
+                endRideRequest()
+            }
+            Status.Done -> {
+            }
+        }
+    }
+
 }
