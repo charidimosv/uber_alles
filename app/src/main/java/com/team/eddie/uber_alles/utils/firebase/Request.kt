@@ -1,6 +1,7 @@
 package com.team.eddie.uber_alles.utils.firebase
 
 import android.location.Location
+import com.google.android.gms.location.places.Place
 import com.team.eddie.uber_alles.utils.Status
 
 class Request(
@@ -16,13 +17,16 @@ class Request(
         var arrivingTime: Long? = 0,
         var distance: Float = 0F,
 
+        var amount: Double = 0.0,
+        var payByCard: Boolean = false,
+
         var status: Status = Status.Pending
 ) {
     var destinationList: ArrayList<RequestLocation>? = null
 
     constructor(customerId: String = "",
                 pickupLocation: Location,
-                locationList: List<Location>,
+                locationList: ArrayList<Place>,
                 requestDate: String = "")
             : this(customerId = customerId,
             driverId = "",
@@ -32,10 +36,9 @@ class Request(
         this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
 
         if (!locationList.isEmpty()) destinationList = ArrayList()
-        for (location in locationList)
-            destinationList?.add(RequestLocation("", location.latitude, location.longitude))
+        for (place in locationList)
+            destinationList?.add(RequestLocation(place.name.toString(), place.latLng.latitude, place.latLng.longitude))
     }
-
 }
 
 class RequestLocation(

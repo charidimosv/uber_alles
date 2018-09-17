@@ -129,5 +129,9 @@
     <string name="drive_completed">Drive completed</string>
     <string name="driver_coming">Driver is coming</string>
     <string name="write_a_message">Write a message...</string>
+    <string name="pay_with_card">Pay with card</string>
+    <string name="complete_payment">Complete Payment</string>
+    <string name="pay_with_cash">Pay with cash</string>
+    <string name="waiting_payment">Waiting for payment</string>
 
 </resources>

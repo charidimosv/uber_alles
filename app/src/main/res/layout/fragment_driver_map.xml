@@ -41,7 +41,8 @@
                     android:id="@+id/userAllInfo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
                     <LinearLayout
                         android:id="@+id/userInfo"
@@ -139,7 +140,6 @@
                     android:id="@+id/communicateUser"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentBottom="true"
                     android:orientation="horizontal"
                     android:visibility="gone">
 
@@ -160,6 +160,34 @@
                         android:layout_weight="1"
                         android:text="@string/message" />
                 </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/paymentInfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cardPayment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_weight="1"
+                    android:text="@string/pay_with_card" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/cashPayment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="20dp"
+                    android:layout_weight="1"
+                    android:text="@string/pay_with_cash" />
             </LinearLayout>
 
             <com.google.android.material.button.MaterialButton

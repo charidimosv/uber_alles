@@ -5,17 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import com.firebase.geofire.GeoFire
 import com.google.firebase.auth.FirebaseAuth
-import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.FragmentCustomerLogoutBinding
 import com.team.eddie.uber_alles.ui.session.IntroActivity
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
 class CustomerLogoutFragment : Fragment() {
-
-    private var isLoggingOut: Boolean = false;
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -24,28 +19,10 @@ class CustomerLogoutFragment : Fragment() {
     ): View? {
         val binding = FragmentCustomerLogoutBinding.inflate(inflater, container, false)
 
-        if (!SaveSharedPreference.getActiveRequest(activity!!.applicationContext)) {
-            isLoggingOut = true
-            disconnectCustomer()
-
-            SaveSharedPreference.cleanAll(activity!!.applicationContext)
-            FirebaseAuth.getInstance().signOut()
-            startActivity(IntroActivity.getLaunchIntent(activity!!))
-        } else
-            binding.customerLogout.text = getString(R.string.end_ride_before_logout)
+        SaveSharedPreference.cleanAll(activity!!.applicationContext)
+        FirebaseAuth.getInstance().signOut()
+        startActivity(IntroActivity.getLaunchIntent(activity!!))
 
         return binding.root
-    }
-
-    private fun disconnectCustomer() {
-        val userId = FirebaseAuth.getInstance().currentUser!!.uid
-        val custRequest = FirebaseHelper.getCustomerRequest()
-        val geoFire = GeoFire(custRequest)
-        geoFire.removeLocation(userId)
-    }
-
-    override fun onStop() {
-        super.onStop()
-        if (!isLoggingOut) disconnectCustomer()
     }
 }

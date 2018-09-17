@@ -5,28 +5,29 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
-import android.widget.*
+import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RatingBar
+import android.widget.TextView
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
-import com.directions.route.Route
-import com.directions.route.RouteException
-import com.directions.route.RoutingListener
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Polyline
-import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.ui.ActivityHelper
+import com.team.eddie.uber_alles.utils.map.MapRouteHelper
 import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
@@ -38,14 +39,15 @@ private const val DEFAULT_ZOOM: Float = 15F
 abstract class GenericMapFragment :
         Fragment(),
         OnMapReadyCallback,
-        LocationListener,
-        RoutingListener {
+        LocationListener {
 
     /*
     ----------------------------------
     MAP
     ----------------------------------
     */
+
+    private val mapHelper: MapRouteHelper = MapRouteHelper()
 
     protected lateinit var applicationContext: Context
 
@@ -88,7 +90,6 @@ abstract class GenericMapFragment :
     protected lateinit var newRatingButton: MaterialButton
 
     protected lateinit var communicateUser: LinearLayout
-
     protected lateinit var callUser: MaterialButton
     protected lateinit var chatUser: MaterialButton
 
@@ -115,12 +116,16 @@ abstract class GenericMapFragment :
 
     protected var currentRequest: Request? = null
 
-    protected var completedRide: Boolean = false
+    protected var successfulRide: Boolean = false
     protected var showMessages: Boolean = false
+
+    protected val destinationMarkerList: ArrayList<Marker> = ArrayList()
+    protected val destinationLatLngList: ArrayList<LatLng> = ArrayList()
 
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mapHelper.setMap(mMap)
 
         getLocationPermission()
 
@@ -186,7 +191,7 @@ abstract class GenericMapFragment :
 
     private fun updateMapUI() {
         setLocationMapUIValues(mLocationPermissionGranted)
-        mMap.isTrafficEnabled = true
+        mMap.isTrafficEnabled = false
     }
 
     @SuppressLint("MissingPermission")
@@ -236,70 +241,52 @@ abstract class GenericMapFragment :
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    private var polylines = arrayListOf<Polyline>()
-    private val COLORS = intArrayOf(R.color.primary_dark_material_light)
-    override fun onRoutingCancelled() {}
+    protected fun syncRequestDestination() {
+        for (reqLocation in currentRequest!!.destinationList!!)
+            destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
 
-    override fun onRoutingStart() {}
-
-    override fun onRoutingFailure(p0: RouteException?) {
-        if (p0 != null)
-            Toast.makeText(activity!!, "Error: " + p0.message, Toast.LENGTH_LONG).show()
-        else
-            Toast.makeText(activity!!, "Something went wrong, Try again", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onRoutingSuccess(route: ArrayList<Route>?, p1: Int) {
-        erasePolylines()
-        //add route(s) to the map.
-        for (i in 0 until route?.size!!) {
-
-            //In case of more than 5 alternative routes
-            val colorIndex = i % COLORS.size
-
-            val polyOptions = PolylineOptions()
-            polyOptions.color(resources.getColor(COLORS[colorIndex], resources.newTheme()))
-            polyOptions.width((10 + i * 3).toFloat())
-            polyOptions.addAll(route[i].points)
-            val polyline = mMap.addPolyline(polyOptions)
-            polylines.add(polyline)
-
-            Toast.makeText(activity!!, "Route " + (i + 1) + ": distance - " + route.get(i).distanceValue + ": duration - " + route.get(i).durationValue, Toast.LENGTH_SHORT).show()
+        if (!destinationLatLngList.isEmpty()) {
+            for (latLng in destinationLatLngList) {
+                val destinationMarker = mMap.addMarker(MarkerOptions()
+                        .position(latLng)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+                destinationMarkerList.add(destinationMarker)
+            }
         }
     }
 
-    protected fun erasePolylines() {
-        for (line in polylines)
-            line.remove()
-    }
-
-    protected fun getRouteToMarker(fromLocation: Location, toLatLng: List<LatLng>) {
-        getRouteToMarker(LatLng(fromLocation.latitude, fromLocation.longitude), toLatLng)
-    }
-
-    protected fun getRouteToMarker(fromLatLng: LatLng, toLatLng: List<LatLng>) {
-        val routeList = arrayListOf(fromLatLng)
-        routeList.addAll(toLatLng)
-        ActivityHelper.getRouteToMarker(routeList, this)
-    }
-
-    protected fun getRouteToMarker(pickupLatLng: LatLng?) {
-        if (pickupLatLng != null && mLastLocation != null)
-            ActivityHelper.getRouteToMarker(arrayListOf(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), pickupLatLng), this)
+    protected open fun clearDestinationInfo() {
+        for (marker in destinationMarkerList) marker.remove()
+        destinationMarkerList.clear()
+        destinationLatLngList.clear()
     }
 
     protected fun getRouteToMarker(latLngList: List<LatLng>) {
-        if (!latLngList.isEmpty()) ActivityHelper.getRouteToMarker(latLngList, this)
+        if (latLngList.size < 2) return
+        for (i in 0 until latLngList.size - 1)
+            mapHelper.drawRoute(latLngList.get(i), latLngList.get(i + 1))
+    }
+
+    protected fun cleanMap() {
+        mapHelper.cleanRoute()
     }
 
     protected fun getCurrentTimestamp(): Long {
         return System.currentTimeMillis() / 1000
     }
 
-    protected fun setStatusSynced(status: Status) {
+    protected fun setStatusSynced(status: Status, shouldUpdate: Boolean) {
         this.status = status
         currentRequest?.status = status
-        FirebaseHelper.updateRequest(currentRequest!!)
+
+        if (shouldUpdate) FirebaseHelper.updateRequest(currentRequest!!)
+    }
+
+    protected fun getDestinationAsString(): String {
+        var destinationAll: String = ""
+        for (loc in currentRequest?.destinationList!!)
+            destinationAll = loc.locName + " "
+        return destinationAll
     }
 
     protected abstract fun getActiveRequest()
@@ -308,22 +295,32 @@ abstract class GenericMapFragment :
 
     protected abstract fun startRideRequest()
 
-    protected abstract fun endRideRequest()
+    protected abstract fun killRideRequest()
+
+    protected abstract fun completeRideRequest()
 
 
     protected abstract fun showFreshUI()
-
-    protected abstract fun showRatingUI()
 
     protected abstract fun showPendingUI()
 
     protected abstract fun showDriverToCustomerUI()
 
-    protected abstract fun showRideUI()
+    protected abstract fun showToDestinationUI()
+
+    protected abstract fun showPaymentUI()
+
+    protected abstract fun showRatingUI()
+
 
     protected abstract fun showStatusUI()
 
     protected abstract fun switchState()
 
-//    protected abstract fun showCardUI()
+
+    /////////////////////////////////////////
+    // playground
+    /////////////////////////////////////////
+
+
 }
