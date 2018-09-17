@@ -113,7 +113,7 @@ class LoginFragment : Fragment() {
                         isDriver = result.driver.toBoolean()
                         mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener { task ->
                             if (!task.isSuccessful) Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
-                            else SaveSharedPreference.setUserInfo(applicationContext, userInfo)
+                            else SaveSharedPreference.setUserInfo(applicationContext, result)
                         }
                     } else
                         Toast.makeText(applicationContext, "Couldn't Authenticate", Toast.LENGTH_SHORT).show()
