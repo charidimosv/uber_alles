@@ -61,11 +61,10 @@ HELPERS
     private const val PAYMENT_INFO: String = "PaymentInfo"
     private const val CAR_LIST: String = "CarList"
     private const val DEFAULT_CAR: String = "DefaultCar"
-    private const val HISTORY_LIST: String = "HistoryList"
+    private const val REQUEST_LIST: String = "RequestList"
     private const val RATING_LIST: String = "RatingList"
 
     private const val CAR: String = "Car"
-    private const val HISTORY: String = "History"
     private const val RATING: String = "Rating"
     private const val MESSAGE: String = "Message"
     private const val REQUEST: String = "Request"
@@ -140,8 +139,8 @@ HELPERS
         return getUserCar(userId).child(carId)
     }
 
-    fun getUserHistory(userId: String): DatabaseReference {
-        return getUser(userId).child(HISTORY_LIST)
+    fun getUserRequestList(userId: String): DatabaseReference {
+        return getUser(userId).child(REQUEST_LIST)
     }
 
     fun getUserRating(userId: String): DatabaseReference {
@@ -256,6 +255,12 @@ HELPERS
         val requestRef = getRequestKey(request.requestId)
         request.status = Status.Done
         requestRef.setValue(request)
+
+        val driverRequestRef = getUserRequestList(request.driverId)
+        driverRequestRef.child(request.requestId).setValue(true)
+
+        val customerRequestRef = getUserRequestList(request.customerId)
+        customerRequestRef.child(request.requestId).setValue(true)
     }
 
     /*
@@ -310,54 +315,6 @@ HELPERS
 
     fun getCustomerRequestLocation(customerId: String): DatabaseReference {
         return getCustomerRequest().child(customerId).child("l")
-    }
-
-    /*
-    ----------------------------------
-    HISTORY
-    ----------------------------------
-    */
-
-    fun getHistory(): DatabaseReference {
-        return getReference().child(HISTORY)
-    }
-
-    fun getHistoryKey(key: String): DatabaseReference {
-        return getHistory().child(key)
-    }
-
-    fun addHistoryForDriverCustomer(
-            driverID: String,
-            customerID: String,
-            pickupTime: Long?,
-            arrivingTime: Long,
-            destination: String?,
-            rideDistance: Float,
-            locFromLat: Double?,
-            locFromLng: Double?,
-            locToLat: Double?,
-            locToLng: Double?
-    ) {
-        val driverHistoryRef = getUserHistory(driverID)
-        val customerHistoryRef = getUserHistory(customerID)
-
-        val historyRef = getHistory()
-
-        val requestId = historyRef.push().key
-        driverHistoryRef.child(requestId!!).setValue(true)
-        customerHistoryRef.child(requestId).setValue(true)
-
-        val historyItem = HistoryItem(
-                requestId,
-                customerID,
-                driverID,
-                pickupTime,
-                arrivingTime,
-                destination,
-                rideDistance,
-                locFromLat, locFromLng,
-                locToLat, locToLng)
-        historyRef.child(requestId).setValue(historyItem)
     }
 
     /*

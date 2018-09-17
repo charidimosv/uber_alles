@@ -366,12 +366,6 @@ class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun recordRide() {
-        // TODO - hackie-hackie-hackie
-        val listSize = currentRequest?.destinationList?.size ?: 0
-        val lastRequestLocation = currentRequest?.destinationList?.get(listSize - 1)
-        FirebaseHelper.addHistoryForDriverCustomer(currentUserId, customerFoundId!!, 0, getCurrentTimestamp(), lastRequestLocation?.locName, rideDistance,
-                pickupLatLng?.latitude, pickupLatLng?.longitude, lastRequestLocation?.lat, lastRequestLocation?.lng)
-
         currentRequest ?: return
 
         currentRequest?.arrivingTime = getCurrentTimestamp()

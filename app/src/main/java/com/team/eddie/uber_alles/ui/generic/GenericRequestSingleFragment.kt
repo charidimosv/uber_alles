@@ -22,29 +22,29 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.databinding.FragmentGenericHistorySingleBinding
+import com.team.eddie.uber_alles.databinding.FragmentGenericRequestSingleBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper.RATING_LEG
-import com.team.eddie.uber_alles.utils.firebase.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
 import java.util.*
 
-class GenericHistorySingleFragment :
+class GenericRequestSingleFragment :
         Fragment(),
         OnMapReadyCallback,
         RoutingListener {
 
-    private lateinit var binding: FragmentGenericHistorySingleBinding
+    private lateinit var binding: FragmentGenericRequestSingleBinding
 
     private lateinit var mMap: GoogleMap
     private lateinit var mapFragment: SupportMapFragment
 
     private val currentUserId: String = FirebaseHelper.getUserId()
 
-    private var rideId: String? = null
+    private var requestId: String? = null
 
-    private lateinit var historyRideInfoDb: DatabaseReference
+    private lateinit var requestInfoDb: DatabaseReference
 
     private lateinit var rideLocation: TextView
     private lateinit var rideDistance: TextView
@@ -67,8 +67,8 @@ class GenericHistorySingleFragment :
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentGenericHistorySingleBinding.inflate(inflater, container, false)
-        rideId = GenericHistorySingleFragmentArgs.fromBundle(arguments).rideId
+        binding = FragmentGenericRequestSingleBinding.inflate(inflater, container, false)
+        requestId = GenericRequestSingleFragmentArgs.fromBundle(arguments).requestId
 
         mapFragment = childFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -83,7 +83,7 @@ class GenericHistorySingleFragment :
 
         mRatingBar = binding.ratingBar
 
-        historyRideInfoDb = FirebaseHelper.getHistoryKey(rideId!!)
+        requestInfoDb = FirebaseHelper.getRequestKey(requestId!!)
         getRideInformation()
 
         return binding.root
@@ -94,19 +94,19 @@ class GenericHistorySingleFragment :
     }
 
     private fun getRideInformation() {
-        historyRideInfoDb.addListenerForSingleValueEvent(object : ValueEventListener {
+        requestInfoDb.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
-                    val historyItem = dataSnapshot.getValue(HistoryItem::class.java)
+                    val request = dataSnapshot.getValue(Request::class.java)
 
-                    historyItem?.let {
-                        it.rideId = dataSnapshot.key
+                    request?.let {
+                        it.requestId = dataSnapshot.key!!
 
-                        if (currentUserId == it.driver)
-                            it.customer?.let { customerId -> getUserInformation(customerId) }
+                        if (currentUserId == it.driverId)
+                            it.customerId?.let { customerId -> getUserInformation(customerId) }
 
-                        if (currentUserId == it.customer) {
-                            it.driver?.let { driverId ->
+                        if (currentUserId == it.customerId) {
+                            it.driverId?.let { driverId ->
                                 getUserInformation(driverId)
                                 displayCustomerRelatedObjects(driverId)
                             }
@@ -120,11 +120,17 @@ class GenericHistorySingleFragment :
                             ridePrice = java.lang.Double.valueOf(distance!!) * 0.5
                         }
 
-                        rideLocation.text = it.destination
+                        var destinationAll: String = ""
+                        for (loc in it.destinationList!!)
+                            destinationAll = loc.locName + " "
+                        rideLocation.text = destinationAll
 
-                        pickupLatLng = it.location?.from?.lat?.let { it1 -> it.location?.from?.lng?.let { it2 -> LatLng(it1, it2) } }
-                        destinationLatLng = it.location?.to?.lat?.let { it1 -> it.location?.to?.lng?.let { it2 -> LatLng(it1, it2) } }
-                        if (destinationLatLng !== LatLng(0.0, 0.0)) getRouteToMarker()
+                        pickupLatLng = it.pickupLocation?.lat?.let { it1 -> it.pickupLocation?.lng?.let { it2 -> LatLng(it1, it2) } }
+                        val destListSize = it.destinationList?.size ?: 0
+                        if (destListSize > 0) {
+                            destinationLatLng = it.destinationList?.get(destListSize - 1)?.lat?.let { it1 -> it.destinationList?.get(destListSize - 1)?.lat?.let { it2 -> LatLng(it1, it2) } }
+                            if (destinationLatLng !== LatLng(0.0, 0.0)) getRouteToMarker()
+                        }
                     }
                 }
             }
@@ -137,10 +143,10 @@ class GenericHistorySingleFragment :
         mRatingBar.visibility = View.VISIBLE
         mRatingBar.onRatingBarChangeListener = RatingBar.OnRatingBarChangeListener { ratingBar, rating, fromUser ->
 
-            historyRideInfoDb.child(RATING_LEG).setValue(rating)
+            requestInfoDb.child(RATING_LEG).setValue(rating)
 
             val mDriverRatingDb = FirebaseHelper.getUserRating(driverId)
-            mDriverRatingDb.child(rideId!!).setValue(rating)
+            mDriverRatingDb.child(requestId!!).setValue(rating)
         }
     }
 
@@ -152,7 +158,7 @@ class GenericHistorySingleFragment :
                     val userInfo = dataSnapshot.getValue(UserInfo::class.java)
                     userInfo ?: return
 
-                    userInfo.name?.let { name.text = it }
+                    userInfo.name.let { name.text = it }
                     userInfo.phone.let { userPhone.text = it }
                     userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(userImage, it) }
                 }

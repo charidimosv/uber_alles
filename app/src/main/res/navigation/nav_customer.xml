@@ -21,9 +21,9 @@
 
     <fragment
         android:id="@+id/generic_history_list_fragment"
-        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistoryListFragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestListFragment"
         android:label="History"
-        tools:layout="@layout/fragment_generic_history_list">
+        tools:layout="@layout/fragment_generic_request_list">
 
         <action
             android:id="@+id/action_generic_history_fragment_to_generic_history_single_fragment"
@@ -36,11 +36,11 @@
 
     <fragment
         android:id="@+id/generic_history_single_fragment"
-        android:name="com.team.eddie.uber_alles.ui.generic.GenericHistorySingleFragment"
+        android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestSingleFragment"
         android:label="GenericHistorySingleFragment"
-        tools:layout="@layout/fragment_generic_history_single">
+        tools:layout="@layout/fragment_generic_request_single">
         <argument
-            android:name="rideId"
+            android:name="requestId"
             app:argType="string" />
     </fragment>
 

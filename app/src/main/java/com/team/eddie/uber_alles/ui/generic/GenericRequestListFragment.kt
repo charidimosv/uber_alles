@@ -10,21 +10,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.team.eddie.uber_alles.adapters.HistoryAdapter
-import com.team.eddie.uber_alles.databinding.FragmentGenericHistoryListBinding
+import com.team.eddie.uber_alles.adapters.RequestAdapter
+import com.team.eddie.uber_alles.databinding.FragmentGenericRequestListBinding
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.HistoryItem
+import com.team.eddie.uber_alles.utils.firebase.Request
 import java.util.*
 
-class GenericHistoryListFragment : Fragment() {
+class GenericRequestListFragment : Fragment() {
 
-    private lateinit var binding: FragmentGenericHistoryListBinding
+    private lateinit var binding: FragmentGenericRequestListBinding
 
-    private lateinit var mAdapter: HistoryAdapter
+    private lateinit var mAdapter: RequestAdapter
     private lateinit var recyclerView: RecyclerView
 
     private lateinit var userId: String
-    private var resultsHistoryList = ArrayList<HistoryItem>()
+    private var resultsRequestList = ArrayList<Request>()
+    private var resultsRequestIdList = ArrayList<String>()
 
     private lateinit var mBalance: TextView
     private var balance: Double = 0.0
@@ -34,15 +35,15 @@ class GenericHistoryListFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentGenericHistoryListBinding.inflate(inflater, container, false)
+        binding = FragmentGenericRequestListBinding.inflate(inflater, container, false)
         context ?: return binding.root
         setHasOptionsMenu(true)
 
-        mAdapter = HistoryAdapter()
-        mAdapter.submitList(resultsHistoryList)
+        mAdapter = RequestAdapter()
+        mAdapter.submitList(resultsRequestList)
 
         mBalance = binding.balance
-        recyclerView = binding.historyRecyclerView
+        recyclerView = binding.requestRecyclerView
         recyclerView.adapter = mAdapter
 
         userId = FirebaseHelper.getUserId()
@@ -52,35 +53,33 @@ class GenericHistoryListFragment : Fragment() {
     }
 
     private fun getUserHistoryIds() {
-        val userHistoryDatabase = FirebaseHelper.getUserHistory(userId)
+        val userHistoryDatabase = FirebaseHelper.getUserRequestList(userId)
         userHistoryDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists())
-                    for (history in dataSnapshot.children) fetchRideInformation(history.key)
-
-                if (resultsHistoryList.isEmpty()) {
-                    binding.layout.visibility = View.GONE
-                    binding.noHistory.visibility = View.VISIBLE
-                } else {
-                    binding.layout.visibility = View.VISIBLE
-                    binding.noHistory.visibility = View.GONE
-                }
+                    for (request in dataSnapshot.children) fetchRideInformation(request.key)
+//                if (resultsRequestList.isEmpty()) {
+//                    binding.layout.visibility = View.GONE
+//                    binding.noRequest.visibility = View.VISIBLE
+//                } else {
+//                    binding.layout.visibility = View.VISIBLE
+//                    binding.noRequest.visibility = View.GONE
+//                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
         })
     }
 
-    private fun fetchRideInformation(rideKey: String?) {
-        val historyDatabase = FirebaseHelper.getHistoryKey(rideKey!!)
-        historyDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
+    private fun fetchRideInformation(requestId: String?) {
+        val requestDatabase = FirebaseHelper.getRequestKey(requestId!!)
+        requestDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
-                    val historyItem = dataSnapshot.getValue(HistoryItem::class.java)
-                    historyItem?.let {
-                        it.rideId = dataSnapshot.key
-
-                        resultsHistoryList.add(it)
+                    val request = dataSnapshot.getValue(Request::class.java)
+                    if (request != null && !resultsRequestIdList.contains(request.requestId)) {
+                        resultsRequestIdList.add(request.requestId)
+                        resultsRequestList.add(request)
                         mAdapter.notifyDataSetChanged()
                     }
                 }
