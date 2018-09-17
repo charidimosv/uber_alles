@@ -39,6 +39,7 @@ import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
+import kotlinx.android.synthetic.main.fragment_driver_map.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.util.*
@@ -202,6 +203,11 @@ open class DriverMapFragment : GenericMapFragment() {
 
                     customerFoundId = currentRequest?.customerId
                     status = currentRequest?.status!!
+
+                    var destinationAll: String = ""
+                    for (loc in currentRequest?.destinationList!!)
+                        destinationAll = loc.locName + " "
+                    customerDestination.text = destinationAll
 
                     when (status) {
                         Status.Pending -> showPendingUI()
