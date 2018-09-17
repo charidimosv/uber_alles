@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Switch
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnFailureListener
@@ -46,6 +47,7 @@ class RegisterDriverCarFragment : Fragment() {
     private lateinit var mColorField: EditText
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
+    private lateinit var mDefault: Switch
 
     private lateinit var mSave: MaterialButton
     private lateinit var mDelete: MaterialButton
@@ -63,6 +65,8 @@ class RegisterDriverCarFragment : Fragment() {
         mColorField = binding.color
         mPlateField = binding.plate
         mYearField = binding.year
+        mDefault = binding.defaultSwitch
+        mDefault.isEnabled = false
 
         mSave = binding.save
         mDelete = binding.delete
@@ -89,7 +93,7 @@ class RegisterDriverCarFragment : Fragment() {
         val mYear = mYearField.text.toString()
 
 
-        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear)
+        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear, "true")
 
         val retrofit = RetrofitClient.getClient(activity?.applicationContext!!)
         val sessionServices = retrofit!!.create(SessionServices::class.java)

@@ -60,6 +60,7 @@ HELPERS
     private const val USER_INFO: String = "UserInfo"
     private const val PAYMENT_INFO: String = "PaymentInfo"
     private const val CAR_LIST: String = "CarList"
+    private const val DEFAULT_CAR: String = "DefaultCar"
     private const val HISTORY_LIST: String = "HistoryList"
     private const val RATING_LIST: String = "RatingList"
 
@@ -129,6 +130,10 @@ HELPERS
 
     fun getUserCar(userId: String): DatabaseReference {
         return getUser(userId).child(CAR_LIST)
+    }
+
+    fun getUserDefaultCar(userId: String): DatabaseReference {
+        return getUser(userId).child(DEFAULT_CAR)
     }
 
     fun getUserCarKey(userId: String, carId: String): DatabaseReference {
@@ -379,9 +384,41 @@ HELPERS
         return carId
     }
 
+    fun updateDefaultCarForDriver(driverID: String, carId: String) {
+        val driverDefaultCarRef = getUserDefaultCar(driverID)
+        var previousDefault :String? = ""
+        driverDefaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.exists()) {
+                    previousDefault = dataSnapshot.value.toString()
+                    if(previousDefault != carId) {
+                        val previousCarRef = getCar().child(previousDefault!!)
+                        val map = hashMapOf("defaultCar" to "false")
+                        previousCarRef.updateChildren(map as Map<String, Any>)
+                    }
+
+                }
+                driverDefaultCarRef.setValue(carId)
+            }
+
+        })
+    }
+
     fun deleteCar(carId: String, driverID: String) {
         val driverCarRef = getUserCarKey(driverID, carId)
         val carRef = getCarKey(carId)
+        val defaultCarRef = getUserDefaultCar(driverID)
+        defaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if(dataSnapshot.exists() && dataSnapshot.value.toString() == carId)
+                    defaultCarRef.setValue(null)
+            }
+
+        })
 
         driverCarRef.setValue(null)
         carRef.setValue(null)

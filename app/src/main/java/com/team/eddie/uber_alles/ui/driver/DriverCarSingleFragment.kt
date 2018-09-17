@@ -44,6 +44,7 @@ class DriverCarSingleFragment : Fragment() {
     private lateinit var mColorField: EditText
     private lateinit var mPlateField: EditText
     private lateinit var mYearField: EditText
+    private lateinit var mDefaultSwitch: Switch
 
     private lateinit var spOption: Spinner
 
@@ -65,6 +66,7 @@ class DriverCarSingleFragment : Fragment() {
         mColorField = binding.color
         mPlateField = binding.plate
         mYearField = binding.year
+        mDefaultSwitch = binding.defaultSwitch
 
         spOption = binding.spOption
 
@@ -110,6 +112,11 @@ class DriverCarSingleFragment : Fragment() {
                     car.color?.let { mColorField.setText(it) }
                     car.plate?.let { mPlateField.setText(it) }
                     car.year?.let { mYearField.setText(it) }
+                    car.defaultCar?.let {
+                        mDefaultSwitch.isChecked = it.toBoolean()
+                        if(mDefaultSwitch.isChecked)
+                            mDefaultSwitch.isEnabled = false
+                    }
                     car.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCarImage, it) }
                 }
             }
@@ -125,13 +132,18 @@ class DriverCarSingleFragment : Fragment() {
         val mColor = mColorField.text.toString()
         val mPlate = mPlateField.text.toString()
         val mYear = mYearField.text.toString()
+        val mDefault = mDefaultSwitch.isChecked.toString()
 
         if (carId.isBlank()) {
             carId = FirebaseHelper.createCarForDriver(userId)
             syncCarInfo()
         }
 
-        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear)
+        if(mDefaultSwitch.isChecked)
+            FirebaseHelper.updateDefaultCarForDriver(userId,carId)
+
+
+        val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear, mDefault)
         carDatabase.setValue(currentCar)
 
         if (resultUri != null) {

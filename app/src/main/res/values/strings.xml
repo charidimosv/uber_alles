@@ -7,6 +7,7 @@
     <string name="prompt_repeat_password">"   "Repeat Password</string>
     <string name="prompt_driver">I \'m a driver</string>
     <string name="prompt_payment">Electronic payment</string>
+    <string name="default_car">Is default Car</string>
 
 
     <string name="action_sign_in">Sign in</string>
@@ -89,6 +90,7 @@
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
     <!-- Accessibility -->
     <string name="ride_started">Your ride has start</string>
+    <string name="ride_payment">Payment time...</string>
     <string name="ride_ended">Your ride has end</string>
     <string name="getting_driver">Getting your Driver....</string>
     <string name="call_uber">Call Uber</string>

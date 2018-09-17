@@ -8,6 +8,12 @@ class Car(
         var color: String? = null,
         var plate: String? = null,
         var year: String? = null,
+        var defaultCar: String = "false",
 
         var imageUrl: String? = null
-)
+
+) {
+     fun defaultCarToBoolean(): Boolean {
+        return defaultCar.toBoolean()
+    }
+}

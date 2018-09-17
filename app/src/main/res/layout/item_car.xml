@@ -65,12 +65,13 @@
             android:id="@+id/plate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="12dp"
+            android:layout_marginEnd="140dp"
             android:text="@{carItem.plate}"
             android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.506"
             tools:text="Plate" />
 
         <TextView
@@ -82,6 +83,19 @@
             app:layout_constraintEnd_toEndOf="@+id/plate"
             app:layout_constraintTop_toBottomOf="@+id/plate"
             tools:text="Year" />
+
+        <CheckBox
+            android:id="@+id/checkBox"
+            android:layout_width="80dp"
+            android:layout_height="25dp"
+            android:layout_marginStart="52dp"
+            android:checked="@{carItem.defaultCarToBoolean()}"
+            android:enabled="false"
+            android:text="Default"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/plate"
+            app:layout_constraintTop_toBottomOf="@+id/plate"
+            app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
