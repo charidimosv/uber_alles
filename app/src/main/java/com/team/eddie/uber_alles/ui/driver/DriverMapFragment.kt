@@ -77,6 +77,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
     private var customerFoundId: String? = null
     private var customerFoundUsername: String? = null
+    private var hasAccepted: Boolean = false
 
     private val destinationMarkerList: ArrayList<Marker> = ArrayList()
     private val destinationLatLngList: ArrayList<LatLng> = ArrayList()
@@ -141,8 +142,8 @@ open class DriverMapFragment : GenericMapFragment() {
                     if (currentRequest != null) {
                         completedRide = true
                         recordRide()
+                        showRatingUI()
                     }
-                    endRideRequest()
                 }
                 Status.Rating -> endRideRequest()
                 else -> {
@@ -183,9 +184,9 @@ open class DriverMapFragment : GenericMapFragment() {
         activeRequestRef = FirebaseHelper.getUserActiveRequest(currentUserId)
         activeRequestListener = activeRequestRef?.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) {
+                if (dataSnapshot.exists())
                     getRequestInfo(dataSnapshot.value.toString())
-                } else
+                else
                     endRideRequest()
             }
 
@@ -212,7 +213,10 @@ open class DriverMapFragment : GenericMapFragment() {
                     when (status) {
                         Status.Pending -> showPendingUI()
                         Status.DriverToCustomer -> showDriverToCustomerUI()
-                        else -> showRideUI()
+                        Status.ToDestination -> showRideUI()
+                        Status.Rating -> showRatingUI()
+                        else -> {
+                        }
                     }
                 } else
                     endRideRequest()
@@ -337,7 +341,7 @@ open class DriverMapFragment : GenericMapFragment() {
             }
 
             override fun onKeyExited(key: String) {
-                startFresh()
+                if (!hasAccepted) startFresh()
             }
 
             override fun onKeyMoved(key: String, location: GeoLocation) {
@@ -358,6 +362,7 @@ open class DriverMapFragment : GenericMapFragment() {
     private fun acceptCustomerRequest() {
         currentRequest ?: return
 
+        hasAccepted = true
         status = Status.DriverToCustomer
         currentRequest?.status = status
         currentRequest?.driverId = currentUserId
@@ -370,14 +375,11 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun endRideRequest() {
-        if (completedRide && currentRequest != null) {
-            currentRequest?.let { FirebaseHelper.completeRequest(it) }
-            showRatingUI()
-        } else {
-            currentRequest?.let { FirebaseHelper.removeRequest(it) }
-            startFresh()
-        }
-        currentRequest = null
+        requestListener?.let { requestRef?.removeEventListener(it) }
+        if (completedRide) return
+
+        currentRequest?.let { FirebaseHelper.removeRequest(it) }
+        startFresh()
     }
 
     private fun recordRide() {
@@ -392,7 +394,9 @@ open class DriverMapFragment : GenericMapFragment() {
         currentRequest?.arrivingTime = getCurrentTimestamp()
         currentRequest?.distance = rideDistance
         currentRequest?.pickupTime = pickupTime!!
-        FirebaseHelper.updateRequest(currentRequest!!)
+
+        FirebaseHelper.completeRequest(currentRequest!!)
+        requestListener?.let { requestRef?.removeEventListener(it) }
     }
 
     private fun syncRequestDestination() {
@@ -417,6 +421,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     private fun clearCustomersInfo() {
+        currentRequest = null
         customerFoundId = null
         customerFoundUsername = null
 
@@ -450,6 +455,7 @@ open class DriverMapFragment : GenericMapFragment() {
         searchCustomersAround = true
         completedRide = false
         showMessages = false
+        hasAccepted = false
 
         binding.callCustomer.visibility = View.GONE
         binding.callCustomer.visibility = View.GONE
