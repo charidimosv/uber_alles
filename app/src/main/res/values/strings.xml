@@ -126,5 +126,6 @@
     <string name="accept_customer">Accept Customer</string>
     <string name="drive_completed">Drive completed</string>
     <string name="driver_coming">Driver is coming</string>
+    <string name="write_a_message">Write a message...</string>
 
 </resources>

@@ -138,8 +138,10 @@ open class DriverMapFragment : GenericMapFragment() {
                     showRideUI()
                 }
                 Status.ToDestination -> {
-                    if (currentRequest != null)
+                    if (currentRequest != null) {
+                        completedRide = true
                         recordRide()
+                    }
                     endRideRequest()
                 }
                 Status.Rating -> endRideRequest()
@@ -183,10 +185,8 @@ open class DriverMapFragment : GenericMapFragment() {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     getRequestInfo(dataSnapshot.value.toString())
-                } else {
+                } else
                     endRideRequest()
-                    findNextCustomer()
-                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -370,7 +370,7 @@ open class DriverMapFragment : GenericMapFragment() {
     }
 
     override fun endRideRequest() {
-        if (status == Status.ToDestination && currentRequest != null) {
+        if (completedRide && currentRequest != null) {
             currentRequest?.let { FirebaseHelper.completeRequest(it) }
             showRatingUI()
         } else {
@@ -543,9 +543,8 @@ open class DriverMapFragment : GenericMapFragment() {
 
         pickupTime = getCurrentTimestamp()
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        mCustomerMarker?.remove()
 
         erasePolylines()
         clearDestinationInfo()
