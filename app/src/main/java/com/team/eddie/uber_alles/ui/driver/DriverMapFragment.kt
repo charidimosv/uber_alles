@@ -6,10 +6,6 @@ import android.util.ArraySet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.RatingBar
-import android.widget.TextView
 import androidx.navigation.findNavController
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
@@ -23,9 +19,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
-import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -39,12 +32,10 @@ import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
-import kotlinx.android.synthetic.main.fragment_driver_map.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import java.util.*
 
-private const val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
+private const val DEFAULT_SEARCH_RADIUS: Double = 10000.0
 
 open class DriverMapFragment : GenericMapFragment() {
 
@@ -55,19 +46,6 @@ open class DriverMapFragment : GenericMapFragment() {
     */
 
     private lateinit var binding: FragmentDriverMapBinding
-
-    private lateinit var mCustomerInfo: LinearLayout
-
-    private lateinit var mCustomerProfileImage: ImageView
-
-    private lateinit var mCustomerName: TextView
-    private lateinit var mCustomerPhone: TextView
-    private lateinit var mCustomerDestination: TextView
-    private lateinit var mRatingBar: RatingBar
-    private lateinit var ratingTextLayout: TextInputLayout
-    private lateinit var mRatingText: TextInputEditText
-    private lateinit var mRatingButton: MaterialButton
-    private lateinit var mRatingAvg: TextView
 
     /*
     ----------------------------------
@@ -117,21 +95,49 @@ open class DriverMapFragment : GenericMapFragment() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.driver_map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        mCustomerInfo = binding.customerInfo
-        mCustomerProfileImage = binding.customerProfileImage
+        popup = binding.popup
 
-        mCustomerName = binding.customerName
-        mCustomerPhone = binding.customerPhone
-        mCustomerDestination = binding.customerDestination
+        destination = binding.destination
+        userAllInfo = binding.userAllInfo
 
-        mRatingBar = binding.ratingBar
-        mRatingText = binding.ratingText
-        ratingTextLayout = binding.ratingTextLayout
-        mRatingButton = binding.ratingButton
-        mRatingAvg = binding.ratingAvg
+        userInfo = binding.userInfo
+        userProfileImage = binding.userProfileImage
+        userName = binding.userName
+        userPhone = binding.userPhone
+
+        currentRating = binding.currentRating
+        currentRatingBar = binding.currentRatingBar
+        currentRatingAvg = binding.currentRatingAvg
+
+        newRating = binding.newRating
+        newRatingBar = binding.newRatingBar
+        newRatingText = binding.newRatingText
+        newRatingButton = binding.newRatingButton
+
+        communicateUser = binding.communicateUser
+
+        callUser = binding.callUser
+        chatUser = binding.chatUser
+
+        rideStatus = binding.rideStatus
 
 
-        binding.rideStatus.setOnClickListener {
+        chatUser.setOnClickListener {
+            val direction = DriverMapFragmentDirections.actionDriverMapFragmentToChatFragment()
+            it.findNavController().navigate(direction)
+        }
+
+        newRatingButton.setOnClickListener {
+            val ratingRef = FirebaseHelper.getUserRating(customerFoundId!!)
+            val ratingRefId = ratingRef.push().key
+
+            val map = hashMapOf<String, Any?>("value" to newRatingBar.rating, "comment" to newRatingText.text.toString())
+            ratingRef.child(ratingRefId!!).updateChildren(map)
+
+            startFresh()
+        }
+
+        rideStatus.setOnClickListener {
             when (status) {
                 Status.Pending -> acceptCustomerRequest()
                 Status.DriverToCustomer -> {
@@ -149,21 +155,6 @@ open class DriverMapFragment : GenericMapFragment() {
                 else -> {
                 }
             }
-        }
-
-        mRatingButton.setOnClickListener {
-            val ratingRef = FirebaseHelper.getUserRating(customerFoundId!!)
-            val ratingRefId = ratingRef.push().key
-
-            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating,"comment" to mRatingText.text.toString())
-            ratingRef.child(ratingRefId!!).updateChildren(map)
-
-            startFresh()
-        }
-
-        binding.chatCustomer.setOnClickListener {
-            val direction = DriverMapFragmentDirections.actionDriverMapFragmentToChatFragment()
-            it.findNavController().navigate(direction)
         }
 
         getActiveRequest()
@@ -208,7 +199,7 @@ open class DriverMapFragment : GenericMapFragment() {
                     var destinationAll: String = ""
                     for (loc in currentRequest?.destinationList!!)
                         destinationAll = loc.locName + " "
-                    customerDestination.text = destinationAll
+                    destination.text = destinationAll
 
                     when (status) {
                         Status.Pending -> showPendingUI()
@@ -236,15 +227,13 @@ open class DriverMapFragment : GenericMapFragment() {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists()) binding.chatCustomer.text = getString(R.string.message_excl)
+                if (dataSnapshot.exists()) chatUser.text = getString(R.string.message_excl)
             }
 
         })
     }
 
     private fun getAssignedCustomerInfo() {
-        mCustomerInfo.visibility = View.VISIBLE
-
         val mCustomerDatabase = FirebaseHelper.getUserInfo(customerFoundId!!)
         mCustomerDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
@@ -252,10 +241,10 @@ open class DriverMapFragment : GenericMapFragment() {
                     val userInfo = dataSnapshot.getValue(UserInfo::class.java)
                     userInfo ?: return
 
-                    userInfo.name.let { mCustomerName.text = it }
+                    userInfo.name.let { userName.text = it }
                     userInfo.username.let { customerFoundUsername = it }
-                    userInfo.phone.let { mCustomerPhone.text = it }
-                    userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCustomerProfileImage, it) }
+                    userInfo.phone.let { userPhone.text = it }
+                    userInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(userProfileImage, it) }
 
                     if (showMessages) getAssignedCustomerMessage()
                 }
@@ -282,9 +271,9 @@ open class DriverMapFragment : GenericMapFragment() {
                         }
                         if (ratingsTotal != 0.toFloat()) {
                             ratingsAvg = ratingSum / ratingsTotal
-                            mRatingBar.rating = ratingsAvg
+                            currentRatingBar.rating = ratingsAvg
                         }
-                        mRatingAvg.text = "Average Rating: " + df.format(ratingsAvg).toString() + "/5"
+                        currentRatingAvg.text = "Average Rating: " + df.format(ratingsAvg).toString() + "/5"
 
                     }
 
@@ -314,7 +303,6 @@ open class DriverMapFragment : GenericMapFragment() {
                     val distance: Float = loc1.distanceTo(loc2)
 
                     binding.rideStatus.text = if (distance < 100) getString(R.string.picked_customer) else getString(R.string.distance).plus(distance.toString())
-                    if (distance < 100) status = Status.UserMet
 
                     mCustomerMarker?.remove()
                     mCustomerMarker = mMap.addMarker(MarkerOptions().position(latLng).title(getString(R.string.your_driver)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_default_user)))
@@ -348,10 +336,7 @@ open class DriverMapFragment : GenericMapFragment() {
 
             }
 
-            override fun onGeoQueryReady() {
-                if (customerFoundId == null && searchCustomersAround)
-                    findNextCustomer()
-            }
+            override fun onGeoQueryReady() {}
 
             override fun onGeoQueryError(error: DatabaseError) {
 
@@ -410,7 +395,6 @@ open class DriverMapFragment : GenericMapFragment() {
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
                 destinationMarkerList.add(destinationMarker)
             }
-            getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), destinationLatLngList)
         }
     }
 
@@ -425,23 +409,39 @@ open class DriverMapFragment : GenericMapFragment() {
         customerFoundId = null
         customerFoundUsername = null
 
-        status = Status.Free
-        mRatingBar.rating = 0.toFloat()
-        mRatingAvg.text = ""
-        //mRatingText = null
-        mRatingButton.visibility = View.GONE
-        ratingTextLayout.visibility = View.GONE
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.GONE
 
-        mRatingBar.rating = 0.toFloat()
-        mRatingBar.setIsIndicator(false)
-        mRatingBar.numStars = 1
-        mRatingAvg.text = ""
-        mRatingAvg.visibility = View.VISIBLE
-        mCustomerInfo.visibility = View.GONE
-        mCustomerName.text = ""
-        mCustomerPhone.text = ""
-        mCustomerDestination.text = "Destination: --"
-        mCustomerProfileImage.setImageResource(R.mipmap.ic_default_user)
+        destination.text = ""
+
+        userInfo.visibility = View.GONE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.GONE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+
+        rideStatus.visibility = View.GONE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.accept_customer)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
     }
 
     private fun startFresh() {
@@ -457,13 +457,6 @@ open class DriverMapFragment : GenericMapFragment() {
         showMessages = false
         hasAccepted = false
 
-        binding.callCustomer.visibility = View.GONE
-        binding.callCustomer.visibility = View.GONE
-
-        binding.rideStatus.visibility = View.GONE
-        binding.rideStatus.isClickable = false
-        binding.rideStatus.text = getString(R.string.accept_customer)
-
         pickupMarker?.remove()
         mCustomerMarker?.remove()
 
@@ -471,6 +464,7 @@ open class DriverMapFragment : GenericMapFragment() {
         clearDestinationInfo()
         clearCustomersInfo()
 
+        requestListener?.let { requestRef?.removeEventListener(it) }
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
@@ -478,16 +472,43 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun showPendingUI() {
         status = Status.Pending
 
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.VISIBLE
+
+        destination.text = ""
+
+        userInfo.visibility = View.VISIBLE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.VISIBLE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+
+        rideStatus.visibility = View.VISIBLE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.accept_customer)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
         searchCustomersAround = false
         completedRide = false
         showMessages = false
-
-        binding.callCustomer.visibility = View.GONE
-        binding.callCustomer.visibility = View.GONE
-
-        binding.rideStatus.visibility = View.VISIBLE
-        binding.rideStatus.isClickable = true
-        binding.rideStatus.text = getString(R.string.accept_customer)
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
@@ -496,6 +517,10 @@ open class DriverMapFragment : GenericMapFragment() {
         erasePolylines()
         clearDestinationInfo()
         syncRequestDestination()
+
+        val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), pickupLatLng!!)
+        locationStopList.addAll(destinationLatLngList)
+        getRouteToMarker(locationStopList)
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -507,16 +532,43 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun showDriverToCustomerUI() {
         status = Status.DriverToCustomer
 
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.VISIBLE
+
+        destination.text = ""
+
+        userInfo.visibility = View.VISIBLE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.VISIBLE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.VISIBLE
+
+        rideStatus.visibility = View.VISIBLE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.picked_customer)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
         searchCustomersAround = false
         completedRide = false
         showMessages = true
-
-        binding.callCustomer.visibility = View.VISIBLE
-        binding.callCustomer.visibility = View.VISIBLE
-
-        binding.rideStatus.visibility = View.VISIBLE
-        binding.rideStatus.isClickable = true
-        binding.rideStatus.text = getString(R.string.picked_customer)
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
@@ -536,16 +588,43 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun showRideUI() {
         status = Status.ToDestination
 
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.GONE
+
+        destination.text = ""
+
+        userInfo.visibility = View.GONE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.GONE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+
+        rideStatus.visibility = View.VISIBLE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.drive_completed)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
         searchCustomersAround = false
         completedRide = false
         showMessages = false
-
-        binding.callCustomer.visibility = View.GONE
-        binding.callCustomer.visibility = View.GONE
-
-        binding.rideStatus.visibility = View.VISIBLE
-        binding.rideStatus.isClickable = true
-        binding.rideStatus.text = getString(R.string.drive_completed)
 
         pickupTime = getCurrentTimestamp()
 
@@ -555,6 +634,7 @@ open class DriverMapFragment : GenericMapFragment() {
         erasePolylines()
         clearDestinationInfo()
         syncRequestDestination()
+        getRouteToMarker(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), destinationLatLngList)
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -563,18 +643,46 @@ open class DriverMapFragment : GenericMapFragment() {
     override fun showRatingUI() {
         status = Status.Rating
 
-        mRatingBar.rating = 0.toFloat()
-        mRatingBar.setIsIndicator(false)
-        mRatingBar.numStars = 5
-        mRatingAvg.visibility = View.GONE
-        mRatingButton.visibility = View.VISIBLE
-        ratingTextLayout.visibility = View.VISIBLE
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.VISIBLE
+
+        destination.text = ""
+
+        userInfo.visibility = View.VISIBLE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.GONE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.VISIBLE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+
+        rideStatus.visibility = View.VISIBLE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.cancel)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
         showMessages = false
 
-        binding.rideStatus.visibility = View.VISIBLE
-        binding.rideStatus.isClickable = true
-        binding.rideStatus.text = getString(R.string.cancel)
+        erasePolylines()
+        clearDestinationInfo()
 
+        requestListener?.let { requestRef?.removeEventListener(it) }
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }

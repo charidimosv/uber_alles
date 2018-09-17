@@ -4,7 +4,6 @@ enum class Status {
     Free,
     Pending,
     DriverToCustomer,
-    UserMet,
     ToDestination,
     Rating,
     Done

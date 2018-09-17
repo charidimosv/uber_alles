@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.util.Log
-import android.widget.Toast
+import android.widget.*
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -21,6 +21,8 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
@@ -59,6 +61,38 @@ abstract class GenericMapFragment :
 
     private var requestingLocationUpdates: Boolean = false
     private var mLocationPermissionGranted: Boolean = false
+
+    /*
+    ----------------------------------
+    UI
+    ----------------------------------
+    */
+
+    protected lateinit var popup: LinearLayout
+
+    protected lateinit var destination: TextView
+    protected lateinit var userAllInfo: LinearLayout
+
+    protected lateinit var userInfo: LinearLayout
+    protected lateinit var userProfileImage: ImageView
+    protected lateinit var userName: TextView
+    protected lateinit var userPhone: TextView
+
+    protected lateinit var currentRating: LinearLayout
+    protected lateinit var currentRatingBar: RatingBar
+    protected lateinit var currentRatingAvg: TextView
+
+    protected lateinit var newRating: LinearLayout
+    protected lateinit var newRatingBar: RatingBar
+    protected lateinit var newRatingText: TextInputEditText
+    protected lateinit var newRatingButton: MaterialButton
+
+    protected lateinit var communicateUser: LinearLayout
+
+    protected lateinit var callUser: MaterialButton
+    protected lateinit var chatUser: MaterialButton
+
+    protected lateinit var rideStatus: MaterialButton
 
     /*
     ----------------------------------
@@ -254,6 +288,10 @@ abstract class GenericMapFragment :
             ActivityHelper.getRouteToMarker(arrayListOf(LatLng(mLastLocation!!.latitude, mLastLocation!!.longitude), pickupLatLng), this)
     }
 
+    protected fun getRouteToMarker(latLngList: List<LatLng>) {
+        if (!latLngList.isEmpty()) ActivityHelper.getRouteToMarker(latLngList, this)
+    }
+
     protected fun getCurrentTimestamp(): Long {
         return System.currentTimeMillis() / 1000
     }
@@ -272,6 +310,7 @@ abstract class GenericMapFragment :
 
     protected abstract fun endRideRequest()
 
+
     protected abstract fun showFreshUI()
 
     protected abstract fun showRatingUI()
@@ -281,4 +320,6 @@ abstract class GenericMapFragment :
     protected abstract fun showDriverToCustomerUI()
 
     protected abstract fun showRideUI()
+
+//    protected abstract fun showCardUI()
 }
