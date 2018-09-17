@@ -189,7 +189,7 @@ class CustomerMapFragment : GenericMapFragment(),
             val ratingRef = FirebaseHelper.getUserRating(driverFoundID!!)
             val ratingRefId = ratingRef.push().key
 
-            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating/*,"comment" to mRatingText*/)
+            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating,"comment" to mRatingText.text.toString())
 
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
@@ -625,6 +625,8 @@ class CustomerMapFragment : GenericMapFragment(),
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
+
+        getAssignedDriverInfo()
     }
 
     override fun showRatingUI() {

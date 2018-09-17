@@ -154,7 +154,7 @@ open class DriverMapFragment : GenericMapFragment() {
             val ratingRef = FirebaseHelper.getUserRating(customerFoundId!!)
             val ratingRefId = ratingRef.push().key
 
-            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating/*,"comment" to mRatingText*/)
+            val map = hashMapOf<String, Any?>("value" to mRatingBar.rating,"comment" to mRatingText.text.toString())
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
             startFresh()
