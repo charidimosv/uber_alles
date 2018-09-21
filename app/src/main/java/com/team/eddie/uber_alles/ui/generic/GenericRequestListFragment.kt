@@ -46,6 +46,7 @@ class GenericRequestListFragment : Fragment() {
         recyclerView = binding.requestRecyclerView
         recyclerView.adapter = mAdapter
 
+        mBalance.text = "0"
         userId = FirebaseHelper.getUserId()
         getUserHistoryIds()
 
@@ -78,6 +79,8 @@ class GenericRequestListFragment : Fragment() {
                 if (dataSnapshot.exists()) {
                     val request = dataSnapshot.getValue(Request::class.java)
                     if (request != null && !resultsRequestIdList.contains(request.requestId)) {
+                        balance += request.amount
+
                         resultsRequestIdList.add(request.requestId)
                         resultsRequestList.add(request)
                         mAdapter.notifyDataSetChanged()
