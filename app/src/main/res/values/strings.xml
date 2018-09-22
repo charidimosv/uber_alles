@@ -13,37 +13,19 @@
     <string name="action_sign_in">Sign in</string>
     <string name="action_log_in">Log in</string>
     <string name="action_sing_up">Sign up</string>
-    <string name="logout">Logout</string>
 
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_password_match">Passwords do not match</string>
     <string name="error_field_required">This field is required</string>
 
-    <string name="permission_rationale_location">Access to the location service is required to demonstrate the \'my location\' feature, which shows your current location on the map.</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email completions."</string>
-
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
-
-    <string name="title_activity_maps">Map</string>
 
 
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
-    <string name="pref_header_general">General</string>
-
-    <string name="pref_title_social_recommendations">Enable social recommendations</string>
-    <string name="pref_description_social_recommendations">Recommendations for people to contact
-        based on your message history
-    </string>
-
-    <string name="pref_title_display_name">Display name</string>
-    <string name="pref_default_display_name">John Smith</string>
-
-    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
 
     <string-array name="car_brands_array">
         <item>Toyota</item>
@@ -56,59 +38,21 @@
         <item>Subaru</item>
     </string-array>
 
-    <string-array name="multi_select_list_preference_default_value" />
 
-    <string name="pref_title_system_sync_settings">System sync settings</string>
-
-    <string name="pref_header_notifications">Notifications</string>
-
-    <string name="pref_title_new_message_notifications">New message notifications</string>
-
-    <string name="pref_title_ringtone">Ringtone</string>
-    <string name="pref_ringtone_silent">Silent</string>
-
-    <string name="pref_title_vibrate">Vibrate</string>
-
-
-    <string name="password_error">Password must have  at least 6 characters</string>
-    <string name="email_error">Invalid email</string>
-    <string name="email_hint">E-mail</string>
-    <string name="password_hint">Password</string>
-    <string name="username_hint">Username</string>
-    <string name="register_button">Sign up</string>
-    <string name="repeat_password_hint">Repeat password</string>
-    <string name="username_error">Username needs to be at least 6 characters</string>
-    <string name="repeat_password_error">Passwords do not match</string>
-    <string name="log_in_button">Log in</string>
-
-    <string name="default_info_title">Default Location</string>
-    <string name="default_info_snippet">No places found, because location permission is disabled.</string>
-    <string name="option_get_place">Get place</string>
-    <string name="pick_place">Choose a place</string>
-
-    <string name="navigation_drawer_header_title" translatable="false">Sunflower</string>
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
     <!-- Accessibility -->
     <string name="ride_started">Your ride has start</string>
-    <string name="ride_payment">Payment time...</string>
-    <string name="ride_ended">Your ride has end</string>
     <string name="getting_driver">Getting your Driver....</string>
     <string name="call_uber">Call Uber</string>
     <string name="driver_here">Driver\'s Here</string>
-    <string name="driver_found">Driver Found:</string>
     <string name="distance">Distance:</string>
     <string name="your_driver">your driver</string>
     <string name="looking_driver_loc">Looking for Driver Location....</string>
-    <string name="end_ride_before_logout">Ride must be ended before you can logout</string>
     <string name="pickup_here">Pickup Here</string>
-    <string name="destination_here">Destination Here</string>
     <string name="problem_saving_photo">There is a problem saving the photo</string>
     <string name="saved_successfully">Saved successfully</string>
     <string name="next">Next</string>
     <string name="complete">Complete</string>
-    <string name="rate_your_driver">Rate your driver</string>
-    <string name="write_message">Write a message…</string>
-    <string name="send_button">Send Button</string>
     <string name="car_image">Car Image</string>
     <string name="profile_image">profile_image</string>
     <string name="username">Username</string>
@@ -139,5 +83,12 @@
     <string name="my_cars">My Cars</string>
     <string name="sign_out">Sign Out</string>
     <string name="payment_info">Payment Info</string>
+    <string name="brand">Brand</string>
+    <string name="model">Model</string>
+    <string name="color">Color</string>
+    <string name="plate">Plate</string>
+    <string name="year">Year</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
 
 </resources>

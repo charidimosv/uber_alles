@@ -18,12 +18,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <ImageView
                     android:id="@+id/carImage"
                     android:layout_width="100sp"
                     android:layout_height="100sp"
                     android:layout_marginBottom="20sp"
-                    android:src="@mipmap/ic_default_car" />
+                    android:contentDescription="@string/car_image"
+                    android:src="@drawable/ic_directions_car" />
+
                 <Switch
                     android:id="@+id/defaultSwitch"
                     android:layout_width="wrap_content"
@@ -31,15 +34,13 @@
                     android:layout_margin="20sp"
                     android:gravity="top"
                     android:text="@string/default_car" />
-
-
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Brand">
+                android:hint="@string/brand">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/brand"
@@ -71,7 +72,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Model">
+                android:hint="@string/model">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/model"
@@ -88,7 +89,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Color">
+                android:hint="@string/color">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/color"
@@ -106,7 +107,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Plate">
+                android:hint="@string/plate">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/plate"
@@ -123,7 +124,7 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Year">
+                android:hint="@string/year">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/year"
@@ -145,7 +146,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:text="Save" />
+                    android:text="@string/save" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/delete"
@@ -154,7 +155,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="12dp"
                     android:layout_toStartOf="@id/save"
-                    android:text="Delete" />
+                    android:text="@string/delete" />
             </RelativeLayout>
 
         </LinearLayout>

@@ -4,11 +4,4 @@
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#e62b6f</color>
     <color name="colorTeal">#19b495</color>
-
-    <color name="toolbarIconColor">#FFFFFF</color>
-    <color name="loginPageBackgroundColor">#FFFFFF</color>
-    <color name="productGridBackgroundColor">#FFFFFF</color>
-
-    <color name="year">#999999</color>
-    <color name="title">#222222</color>
 </resources>

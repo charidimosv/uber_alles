@@ -33,7 +33,7 @@
             android:layout_height="80sp"
             android:contentDescription="@string/car_image"
             android:scaleType="centerCrop"
-            android:src="@mipmap/ic_default_car"
+            android:src="@drawable/ic_directions_car"
             app:imageFromUrl="@{carItem.imageUrl}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
