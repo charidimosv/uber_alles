@@ -7,6 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="AppTheme" parent="BaseAppTheme" />
+    <style name="AppTheme" parent="BaseAppTheme">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowActionBarOverlay">true</item>
+    </style>
 
 </resources>

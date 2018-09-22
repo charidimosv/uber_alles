@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/customer_map_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerMapFragment"
-        android:label="Map"
         tools:layout="@layout/fragment_customer_map">
         <action
             android:id="@+id/action_customer_map_fragment_to_chat_fragment"
@@ -22,7 +21,6 @@
     <fragment
         android:id="@+id/generic_history_list_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestListFragment"
-        android:label="History"
         tools:layout="@layout/fragment_generic_request_list">
 
         <action
@@ -37,7 +35,6 @@
     <fragment
         android:id="@+id/generic_history_single_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestSingleFragment"
-        android:label="GenericHistorySingleFragment"
         tools:layout="@layout/fragment_generic_request_single">
         <argument
             android:name="requestId"
@@ -47,26 +44,21 @@
     <fragment
         android:id="@+id/chat_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericChatFragment"
-        android:label="Chat"
         tools:layout="@layout/fragment_chat" />
 
     <fragment
         android:id="@+id/customer_profile_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerProfileFragment"
-        android:label="Profile"
         tools:layout="@layout/fragment_customer_profile" />
 
     <fragment
         android:id="@+id/customer_payment_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerPaymentFragment"
-        android:label="Payment Info"
         tools:layout="@layout/fragment_customer_payment" />
-
 
     <fragment
         android:id="@+id/customer_logout_fragment"
         android:name="com.team.eddie.uber_alles.ui.customer.CustomerLogoutFragment"
-        android:label="Sign Out"
         tools:layout="@layout/fragment_customer_logout" />
 
 </navigation>

@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/welcomeFragment"
         android:name="com.team.eddie.uber_alles.ui.session.WelcomeFragment"
-        android:label="WelcomeFragment"
         tools:layout="@layout/fragment_welcome">
 
         <action
@@ -30,13 +29,11 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.team.eddie.uber_alles.ui.session.LoginFragment"
-        android:label="LoginFragment"
         tools:layout="@layout/fragment_login" />
 
     <fragment
         android:id="@+id/registerFragment"
         android:name="com.team.eddie.uber_alles.ui.session.RegisterFragment"
-        android:label="RegisterFragment"
         tools:layout="@layout/fragment_register">
         <action
             android:id="@+id/action_registerFragment_to_registerCustomerProfileFragment"
@@ -50,7 +47,6 @@
     <fragment
         android:id="@+id/registerDriverProfileFragment"
         android:name="com.team.eddie.uber_alles.ui.session.RegisterDriverProfileFragment"
-        android:label="RegisterDriverProfileFragment"
         tools:layout="@layout/fragment_driver_profile">
 
         <action
@@ -65,13 +61,11 @@
     <fragment
         android:id="@+id/registerDriverCarFragment"
         android:name="com.team.eddie.uber_alles.ui.session.RegisterDriverCarFragment"
-        android:label="RegisterDriverCarFragment"
         tools:layout="@layout/fragment_driver_car_single" />
 
     <fragment
         android:id="@+id/registerCustomerProfileFragment"
         android:name="com.team.eddie.uber_alles.ui.session.RegisterCustomerProfileFragment"
-        android:label="RegisterCustomerProfileFragment"
         tools:layout="@layout/fragment_customer_profile" />
 
 </navigation>

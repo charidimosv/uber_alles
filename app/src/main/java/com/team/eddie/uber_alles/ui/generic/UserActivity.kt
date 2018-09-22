@@ -1,22 +1,28 @@
 package com.team.eddie.uber_alles.ui.generic
 
+import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
+import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.Navigation
 import androidx.navigation.ui.NavigationUI
+import androidx.navigation.ui.setupWithNavController
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.databinding.ActivityCustomerBinding
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
 
 open class UserActivity : AppCompatActivity() {
 
+    protected var activityId: Int = 0
+    protected var navFragmentId: Int = 0
     protected lateinit var drawerLayout: DrawerLayout
 
     protected fun getSyncUserInfoDrawer() {
@@ -37,7 +43,7 @@ open class UserActivity : AppCompatActivity() {
                         val name = findViewById<TextView>(R.id.nameDrawer)
                         name.text = it.toString()
                     }
-                    userInfo.email?.let {
+                    userInfo.email.let {
                         val email = findViewById<TextView>(R.id.emailDrawer)
                         email.text = it.toString()
                     }
@@ -50,7 +56,7 @@ open class UserActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return NavigationUI.navigateUp(drawerLayout,
-                Navigation.findNavController(this, R.id.driver_nav_fragment))
+                Navigation.findNavController(this, navFragmentId))
     }
 
     override fun onBackPressed() {

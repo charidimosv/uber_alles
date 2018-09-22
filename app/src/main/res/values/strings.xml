@@ -133,5 +133,11 @@
     <string name="complete_payment">Complete Payment</string>
     <string name="pay_with_cash">Pay with cash</string>
     <string name="waiting_payment">Waiting for payment</string>
+    <string name="map">Map</string>
+    <string name="history">History</string>
+    <string name="profile">Profile</string>
+    <string name="my_cars">My Cars</string>
+    <string name="sign_out">Sign Out</string>
+    <string name="payment_info">Payment Info</string>
 
 </resources>

@@ -11,13 +11,25 @@
         android:layout_height="match_parent"
         android:fitsSystemWindows="true">
 
-        <fragment
-            android:id="@+id/driver_nav_fragment"
-            android:name="androidx.navigation.fragment.NavHostFragment"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:defaultNavHost="true"
-            app:navGraph="@navigation/nav_driver" />
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="1dp" />
+
+            <fragment
+                android:id="@+id/driver_nav_fragment"
+                android:name="androidx.navigation.fragment.NavHostFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:defaultNavHost="true"
+                app:navGraph="@navigation/nav_driver" />
+
+        </FrameLayout>
 
         <com.google.android.material.navigation.NavigationView
             android:id="@+id/navigation_view"
@@ -25,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="start"
+            android:fitsSystemWindows="true"
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/menu_navigation_driver" />
 

@@ -8,7 +8,6 @@
     <fragment
         android:id="@+id/driver_map_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverMapFragment"
-        android:label="Map"
         tools:layout="@layout/fragment_driver_map">
 
         <action
@@ -23,7 +22,6 @@
     <fragment
         android:id="@+id/generic_history_list_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestListFragment"
-        android:label="History"
         tools:layout="@layout/fragment_generic_request_list">
 
         <action
@@ -38,7 +36,6 @@
     <fragment
         android:id="@+id/generic_history_single_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericRequestSingleFragment"
-        android:label="GenericHistorySingleFragment"
         tools:layout="@layout/fragment_generic_request_single">
 
         <argument
@@ -49,19 +46,16 @@
     <fragment
         android:id="@+id/chat_fragment"
         android:name="com.team.eddie.uber_alles.ui.generic.GenericChatFragment"
-        android:label="Chat"
         tools:layout="@layout/fragment_chat" />
 
     <fragment
         android:id="@+id/driver_profile_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverProfileFragment"
-        android:label="Profile"
         tools:layout="@layout/fragment_driver_profile" />
 
     <fragment
         android:id="@+id/driver_car_list_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverCarListFragment"
-        android:label="Car"
         tools:layout="@layout/fragment_driver_car_list">
 
         <action
@@ -76,7 +70,6 @@
     <fragment
         android:id="@+id/driver_car_single_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverCarSingleFragment"
-        android:label="DriverCarSingleFragment"
         tools:layout="@layout/fragment_driver_car_single">
 
         <argument
@@ -87,7 +80,6 @@
     <fragment
         android:id="@+id/driver_logout_fragment"
         android:name="com.team.eddie.uber_alles.ui.driver.DriverLogoutFragment"
-        android:label="Sign Out"
         tools:layout="@layout/fragment_driver_logout" />
 
 </navigation>

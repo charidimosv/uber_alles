@@ -8,7 +8,7 @@ buildscript {
         minSdkVersion = 24
 
         // App dependencies
-        kotlinVersion = '1.2.70'
+         kotlinVersion = '1.2.70'
         gradleVersion = '3.2.0-rc03'
         // DO NOT UPDATE IT - NEVER!
     }
@@ -22,7 +22,7 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.2.0-rc03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.google.gms:google-services:4.0.1'
-        classpath "android.arch.navigation:navigation-safe-args-gradle-plugin:1.0.0-alpha05"
+        classpath "android.arch.navigation:navigation-safe-args-gradle-plugin:1.0.0-alpha06"
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
