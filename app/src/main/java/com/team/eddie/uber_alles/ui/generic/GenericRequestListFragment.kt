@@ -27,8 +27,11 @@ class GenericRequestListFragment : Fragment() {
     private var resultsRequestList = ArrayList<Request>()
     private var resultsRequestIdList = ArrayList<String>()
 
-    private lateinit var mBalance: TextView
-    private var balance: Double = 0.0
+    private lateinit var mBalanceValue: TextView
+    private lateinit var mTotalTripsValue: TextView
+
+    private var balanceValue: Double = 0.0
+    private var totalTripsValue: Int = 0
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -42,11 +45,15 @@ class GenericRequestListFragment : Fragment() {
         mAdapter = RequestAdapter()
         mAdapter.submitList(resultsRequestList)
 
-        mBalance = binding.balance
+        mBalanceValue = binding.balanceValue
+        mTotalTripsValue = binding.totalTripsValue
+
         recyclerView = binding.requestRecyclerView
         recyclerView.adapter = mAdapter
 
-        mBalance.text = "0"
+        mBalanceValue.text = "0€"
+        mTotalTripsValue.text = "0"
+
         userId = FirebaseHelper.getUserId()
         getUserHistoryIds()
 
@@ -57,15 +64,12 @@ class GenericRequestListFragment : Fragment() {
         val userHistoryDatabase = FirebaseHelper.getUserRequestList(userId)
         userHistoryDatabase.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if (dataSnapshot.exists())
+                if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0)
                     for (request in dataSnapshot.children) fetchRideInformation(request.key)
-//                if (resultsRequestList.isEmpty()) {
-//                    binding.layout.visibility = View.GONE
-//                    binding.noRequest.visibility = View.VISIBLE
-//                } else {
-//                    binding.layout.visibility = View.VISIBLE
-//                    binding.noRequest.visibility = View.GONE
-//                }
+                else {
+                    binding.layout.visibility = View.GONE
+                    binding.noRequest.visibility = View.VISIBLE
+                }
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
@@ -79,7 +83,11 @@ class GenericRequestListFragment : Fragment() {
                 if (dataSnapshot.exists()) {
                     val request = dataSnapshot.getValue(Request::class.java)
                     if (request != null && !resultsRequestIdList.contains(request.requestId)) {
-                        balance += request.amount
+                        balanceValue += request.amount
+                        totalTripsValue++
+
+                        mBalanceValue.text = balanceValue.toString() + "€"
+                        mTotalTripsValue.text = totalTripsValue.toString()
 
                         resultsRequestIdList.add(request.requestId)
                         resultsRequestList.add(request)

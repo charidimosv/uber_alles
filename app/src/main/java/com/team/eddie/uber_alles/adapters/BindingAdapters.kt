@@ -20,19 +20,34 @@ fun bindDateFromLong(view: TextView, time: Long?) {
     time?.let { view.text = ActivityHelper.getDate(it) }
 }
 
-
 @BindingAdapter("destinationFromRequest")
-fun bindDateFromLong(view: TextView, requestId: String) {
+fun bindDestinationFromRequest(view: TextView, requestId: String) {
     val requestRef = FirebaseHelper.getRequestKey(requestId)
-    val requestListener = requestRef.addValueEventListener(object : ValueEventListener {
+    requestRef.addListenerForSingleValueEvent(object : ValueEventListener {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                 val currentRequest = dataSnapshot.getValue(Request::class.java)
                 currentRequest ?: return
                 var destinationAll: String = ""
                 for (loc in currentRequest.destinationList!!)
-                    destinationAll = loc.locName + " "
+                    destinationAll = destinationAll + loc.locName + " "
                 view.text = destinationAll
+            }
+        }
+
+        override fun onCancelled(databaseError: DatabaseError) {}
+    })
+}
+
+@BindingAdapter("pickupFromRequest")
+fun bindPickupFromRequest(view: TextView, requestId: String) {
+    val requestRef = FirebaseHelper.getRequestKey(requestId)
+    requestRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        override fun onDataChange(dataSnapshot: DataSnapshot) {
+            if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
+                val currentRequest = dataSnapshot.getValue(Request::class.java)
+                currentRequest ?: return
+                view.text = currentRequest.pickupLocation?.locName
             }
         }
 

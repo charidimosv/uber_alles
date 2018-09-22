@@ -9,7 +9,6 @@
     <string name="prompt_payment">Electronic payment</string>
     <string name="default_car">Is default Car</string>
 
-
     <string name="action_sign_in">Sign in</string>
     <string name="action_log_in">Log in</string>
     <string name="action_sing_up">Sign up</string>
@@ -22,11 +21,6 @@
     <string name="back">Back</string>
     <string name="cancel">Cancel</string>
 
-
-    <!-- Strings related to Settings -->
-
-    <!-- Example General settings -->
-
     <string-array name="car_brands_array">
         <item>Toyota</item>
         <item>Opel</item>
@@ -37,7 +31,6 @@
         <item>Ford</item>
         <item>Subaru</item>
     </string-array>
-
 
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
     <!-- Accessibility -->
@@ -65,14 +58,14 @@
     <string name="message">Message</string>
     <string name="call">Call</string>
     <string name="ride_date">Ride Date</string>
-    <string name="destination">Destination: --</string>
+    <string name="destination">Destination: —</string>
     <string name="rate_your_customer">Rate your customer</string>
     <string name="picked_customer">Picked Customer</string>
     <string name="message_excl">Message (!)</string>
     <string name="accept_customer">Accept Customer</string>
     <string name="drive_completed">Drive completed</string>
     <string name="driver_coming">Driver is coming</string>
-    <string name="write_a_message">Write a message...</string>
+    <string name="write_a_message">Write a message…</string>
     <string name="pay_with_card">Pay with card</string>
     <string name="complete_payment">Complete Payment</string>
     <string name="pay_with_cash">Pay with cash</string>
@@ -90,5 +83,7 @@
     <string name="year">Year</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="total_trips">Total trips:</string>
+    <string name="balance">Balance (€):</string>
 
 </resources>

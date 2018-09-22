@@ -15,34 +15,52 @@
             type="com.team.eddie.uber_alles.utils.firebase.Request" />
     </data>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="@{clickListener}"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/row_padding_vertical"
-        android:paddingBottom="@dimen/row_padding_vertical">
 
-        <TextView
-            android:id="@+id/location"
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:destinationFromRequest="@{requestItem.requestId}"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Location" />
+            android:onClick="@{clickListener}"
+            android:orientation="vertical"
+            android:paddingTop="@dimen/row_padding_vertical"
+            android:paddingBottom="@dimen/row_padding_vertical">
 
-        <TextView
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:dateFromLong="@{requestItem.arrivingTime}"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Time" />
+            <TextView
+                android:id="@+id/from"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:destinationFromRequest="@{requestItem.requestId}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="From" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/to"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:pickupFromRequest="@{requestItem.requestId}"
+                app:layout_constraintTop_toBottomOf="@+id/from"
+                tools:text="To" />
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:dateFromLong="@{requestItem.arrivingTime}"
+                app:layout_constraintTop_toBottomOf="@+id/from"
+                app:layout_constraintEnd_toEndOf="@+id/to"
+                tools:text="Time" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
 
 </layout>
