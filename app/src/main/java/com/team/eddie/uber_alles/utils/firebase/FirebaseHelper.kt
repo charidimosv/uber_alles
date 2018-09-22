@@ -343,14 +343,14 @@ HELPERS
 
     fun updateDefaultCarForDriver(driverID: String, carId: String) {
         val driverDefaultCarRef = getUserDefaultCar(driverID)
-        var previousDefault :String? = ""
-        driverDefaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        var previousDefault: String? = ""
+        driverDefaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.exists()) {
+                if (dataSnapshot.exists()) {
                     previousDefault = dataSnapshot.value.toString()
-                    if(previousDefault != carId) {
+                    if (previousDefault != carId) {
                         val previousCarRef = getCar().child(previousDefault!!)
                         val map = hashMapOf("defaultCar" to "false")
                         previousCarRef.updateChildren(map as Map<String, Any>)
@@ -367,11 +367,11 @@ HELPERS
         val driverCarRef = getUserCarKey(driverID, carId)
         val carRef = getCarKey(carId)
         val defaultCarRef = getUserDefaultCar(driverID)
-        defaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener{
+        defaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                if(dataSnapshot.exists() && dataSnapshot.value.toString() == carId)
+                if (dataSnapshot.exists() && dataSnapshot.value.toString() == carId)
                     defaultCarRef.setValue(null)
             }
 

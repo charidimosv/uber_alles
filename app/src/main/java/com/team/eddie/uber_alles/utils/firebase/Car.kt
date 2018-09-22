@@ -13,7 +13,7 @@ class Car(
         var imageUrl: String? = null
 
 ) {
-     fun defaultCarToBoolean(): Boolean {
+    fun defaultCarToBoolean(): Boolean {
         return defaultCar.toBoolean()
     }
 }

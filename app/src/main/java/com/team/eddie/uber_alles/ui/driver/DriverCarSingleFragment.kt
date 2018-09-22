@@ -114,7 +114,7 @@ class DriverCarSingleFragment : Fragment() {
                     car.year?.let { mYearField.setText(it) }
                     car.defaultCar?.let {
                         mDefaultSwitch.isChecked = it.toBoolean()
-                        if(mDefaultSwitch.isChecked)
+                        if (mDefaultSwitch.isChecked)
                             mDefaultSwitch.isEnabled = false
                     }
                     car.imageUrl?.let { ActivityHelper.bindImageFromUrl(mCarImage, it) }
@@ -139,8 +139,8 @@ class DriverCarSingleFragment : Fragment() {
             syncCarInfo()
         }
 
-        if(mDefaultSwitch.isChecked)
-            FirebaseHelper.updateDefaultCarForDriver(userId,carId)
+        if (mDefaultSwitch.isChecked)
+            FirebaseHelper.updateDefaultCarForDriver(userId, carId)
 
 
         val currentCar = Car(carId, mBrand, mModel, mColor, mPlate, mYear, mDefault)

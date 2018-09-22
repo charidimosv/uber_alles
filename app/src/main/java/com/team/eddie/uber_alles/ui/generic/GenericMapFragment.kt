@@ -27,10 +27,10 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.R
-import com.team.eddie.uber_alles.utils.map.MapRouteHelper
 import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
+import com.team.eddie.uber_alles.utils.map.MapRouteHelper
 import java.util.*
 
 private const val LOCATION_PERMISSION_REQUEST_CODE = 1

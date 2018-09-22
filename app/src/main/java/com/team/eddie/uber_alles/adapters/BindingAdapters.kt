@@ -28,7 +28,7 @@ fun bindDateFromLong(view: TextView, requestId: String) {
         override fun onDataChange(dataSnapshot: DataSnapshot) {
             if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                 val currentRequest = dataSnapshot.getValue(Request::class.java)
-                currentRequest?: return
+                currentRequest ?: return
                 var destinationAll: String = ""
                 for (loc in currentRequest.destinationList!!)
                     destinationAll = loc.locName + " "
