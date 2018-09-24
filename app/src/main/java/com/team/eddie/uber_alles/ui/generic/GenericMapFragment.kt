@@ -125,7 +125,7 @@ abstract class GenericMapFragment :
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mapHelper.setMap(mMap)
+        mapHelper.map = mMap
 
         getLocationPermission()
 
@@ -262,9 +262,7 @@ abstract class GenericMapFragment :
     }
 
     protected fun getRouteToMarker(latLngList: List<LatLng>) {
-        if (latLngList.size < 2) return
-        for (i in 0 until latLngList.size - 1)
-            mapHelper.drawRoute(latLngList.get(i), latLngList.get(i + 1))
+        mapHelper.drawRoute(latLngList)
     }
 
     protected fun cleanMap() {
@@ -316,11 +314,5 @@ abstract class GenericMapFragment :
     protected abstract fun showStatusUI()
 
     protected abstract fun switchState()
-
-
-    /////////////////////////////////////////
-    // playground
-    /////////////////////////////////////////
-
 
 }

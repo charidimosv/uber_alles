@@ -44,19 +44,27 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/balance"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="end"
-                        android:text="@string/balance" />
-
-                    <TextView
                         android:id="@+id/totalTrips"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:layout_marginTop="8dp"
                         android:text="@string/total_trips" />
+
+                    <TextView
+                        android:id="@+id/totalCash"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/total_cash" />
+
+                    <TextView
+                        android:id="@+id/totalDistance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/total_distance" />
 
                 </LinearLayout>
 
@@ -68,13 +76,20 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/balance_value"
+                        android:id="@+id/totalTrips_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end" />
 
                     <TextView
-                        android:id="@+id/totalTrips_value"
+                        android:id="@+id/totalCash_value"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp" />
+
+                    <TextView
+                        android:id="@+id/totalDistance_value"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"

@@ -27,11 +27,13 @@ class GenericRequestListFragment : Fragment() {
     private var resultsRequestList = ArrayList<Request>()
     private var resultsRequestIdList = ArrayList<String>()
 
-    private lateinit var mBalanceValue: TextView
     private lateinit var mTotalTripsValue: TextView
+    private lateinit var mTotalCashValue: TextView
+    private lateinit var mTotalDistanceValue: TextView
 
-    private var balanceValue: Double = 0.0
     private var totalTripsValue: Int = 0
+    private var totalCashValue: Double = 0.0
+    private var totalDistanceValue: Double = 0.0
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -45,14 +47,16 @@ class GenericRequestListFragment : Fragment() {
         mAdapter = RequestAdapter()
         mAdapter.submitList(resultsRequestList)
 
-        mBalanceValue = binding.balanceValue
         mTotalTripsValue = binding.totalTripsValue
+        mTotalCashValue = binding.totalCashValue
+        mTotalDistanceValue = binding.totalDistanceValue
 
         recyclerView = binding.requestRecyclerView
         recyclerView.adapter = mAdapter
 
-        mBalanceValue.text = "0€"
         mTotalTripsValue.text = "0"
+        mTotalCashValue.text = "0 €"
+        mTotalDistanceValue.text = "0 km"
 
         userId = FirebaseHelper.getUserId()
         getUserHistoryIds()
@@ -83,11 +87,13 @@ class GenericRequestListFragment : Fragment() {
                 if (dataSnapshot.exists()) {
                     val request = dataSnapshot.getValue(Request::class.java)
                     if (request != null && !resultsRequestIdList.contains(request.requestId)) {
-                        balanceValue += request.amount
                         totalTripsValue++
+                        totalCashValue += request.amount
+                        totalDistanceValue += request.distance
 
-                        mBalanceValue.text = balanceValue.toString() + "€"
                         mTotalTripsValue.text = totalTripsValue.toString()
+                        mTotalCashValue.text = totalCashValue.toString() + "€"
+                        mTotalDistanceValue.text = totalDistanceValue.toString() + " km"
 
                         resultsRequestIdList.add(request.requestId)
                         resultsRequestList.add(request)

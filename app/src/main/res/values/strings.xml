@@ -50,7 +50,7 @@
     <string name="profile_image">profile_image</string>
     <string name="username">Username</string>
     <string name="from_to">From - To</string>
-    <string name="date">date</string>
+    <string name="date">Date</string>
     <string name="phone">Phone</string>
     <string name="name">Name</string>
     <string name="pay_here">Pay Here</string>
@@ -84,6 +84,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="total_trips">Total trips:</string>
+    <string name="total_distance">Total distance:</string>
     <string name="balance">Balance (€):</string>
     <string name="logging_out">Logging out</string>
     <string name="card_number">Card Number</string>
@@ -93,5 +94,7 @@
     <string name="email">e-mail</string>
     <string name="address">Address</string>
     <string name="default_str">Default</string>
+    <string name="amount">Amount</string>
+    <string name="total_cash">Total cash:</string>
 
 </resources>
