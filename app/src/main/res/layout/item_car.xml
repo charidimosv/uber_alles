@@ -91,7 +91,7 @@
             android:layout_marginStart="52dp"
             android:checked="@{carItem.defaultCarToBoolean()}"
             android:enabled="false"
-            android:text="Default"
+            android:text="@string/default_str"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/plate"
             app:layout_constraintTop_toBottomOf="@+id/plate"

@@ -56,7 +56,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="e-mail">
+                    android:hint="@string/email">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/email"
@@ -73,7 +73,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Name">
+                    android:hint="@string/name">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/name"
@@ -89,7 +89,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Phone">
+                    android:hint="@string/phone">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/phone"
@@ -105,7 +105,7 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Address">
+                    android:hint="@string/address">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/address"
@@ -122,7 +122,7 @@
                     android:id="@+id/confirm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Save" />
+                    android:text="@string/save" />
 
             </LinearLayout>
         </ScrollView>

@@ -4,6 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 apply plugin: 'androidx.navigation.safeargs'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'nebula.lint'
 
 android {
     compileSdkVersion rootProject.compileSdkVersion
@@ -36,6 +37,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+}
+
+gradleLint {
+    rules  = ['dependency-parentheses']
+    criticalRules = ['unused-dependency'] // <-- this will fail the build in the event of a violation
 }
 
 dependencies {
@@ -78,12 +84,11 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.8.0'
 
     // google play services
-    def playServices_version = "15.0.1"
-    implementation "com.google.android.gms:play-services-maps:$playServices_version"
-    implementation "com.google.android.gms:play-services-location:$playServices_version"
-    implementation "com.google.android.gms:play-services-base:$playServices_version"
-    implementation "com.google.android.gms:play-services-places:$playServices_version"
-    implementation "com.google.android.gms:play-services-nearby:$playServices_version"
+    implementation "com.google.android.gms:play-services-maps:15.0.1"
+    implementation "com.google.android.gms:play-services-location:15.0.1"
+    implementation "com.google.android.gms:play-services-base:15.0.1"
+    implementation "com.google.android.gms:play-services-places:15.0.1"
+    implementation "com.google.android.gms:play-services-nearby:15.0.1"
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.github.jd-alexander:library:1.1.0'
 

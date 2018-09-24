@@ -13,6 +13,7 @@
     <string name="action_log_in">Log in</string>
     <string name="action_sing_up">Sign up</string>
 
+    <string name="filter_view_http_uberalles">filter_view_http_uberalles</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_password_match">Passwords do not match</string>
@@ -33,7 +34,6 @@
     </string-array>
 
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
-    <!-- Accessibility -->
     <string name="ride_started">Your ride has start</string>
     <string name="getting_driver">Getting your Driver....</string>
     <string name="call_uber">Call Uber</string>
@@ -85,5 +85,13 @@
     <string name="delete">Delete</string>
     <string name="total_trips">Total trips:</string>
     <string name="balance">Balance (€):</string>
+    <string name="logging_out">Logging out</string>
+    <string name="card_number">Card Number</string>
+    <string name="card_image">cardImage</string>
+    <string name="owner_name">Owner Name</string>
+    <string name="cv_code">CV Code</string>
+    <string name="email">e-mail</string>
+    <string name="address">Address</string>
+    <string name="default_str">Default</string>
 
 </resources>

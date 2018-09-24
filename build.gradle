@@ -8,7 +8,7 @@ buildscript {
         minSdkVersion = 24
 
         // App dependencies
-         kotlinVersion = '1.2.70'
+        kotlinVersion = '1.2.70'
         gradleVersion = '3.2.0-rc03'
         // DO NOT UPDATE IT - NEVER!
     }
@@ -22,7 +22,8 @@ buildscript {
         classpath 'com.android.tools.build:gradle:3.2.0-rc03'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         classpath 'com.google.gms:google-services:4.0.1'
-        classpath "android.arch.navigation:navigation-safe-args-gradle-plugin:1.0.0-alpha06"
+        classpath 'android.arch.navigation:navigation-safe-args-gradle-plugin:1.0.0-alpha06'
+        classpath 'com.netflix.nebula:gradle-lint-plugin:10.1.2'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -34,6 +35,13 @@ allprojects {
         google()
         jcenter()
     }
+
+    apply plugin: 'nebula.lint'
+    gradleLint {
+        rules  = ['dependency-parentheses']
+        criticalRules = ['unused-dependency'] // <-- this will fail the build in the event of a violation
+    }
+//    gradleLint.rules = ['all-dependency'] // add as many rules here as you'd like
 }
 
 task clean(type: Delete) {

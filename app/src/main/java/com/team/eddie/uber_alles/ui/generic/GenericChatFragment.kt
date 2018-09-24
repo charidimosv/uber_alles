@@ -100,10 +100,10 @@ class GenericChatFragment : androidx.fragment.app.Fragment() {
         lp2.weight = 1.0f
 
         if (type == 1) {
-            lp2.gravity = Gravity.RIGHT
+            lp2.gravity = Gravity.END
             textView.setBackgroundResource(R.drawable.bubble_out)
         } else {
-            lp2.gravity = Gravity.LEFT
+            lp2.gravity = Gravity.START
             textView.setBackgroundResource(R.drawable.bubble_in)
         }
         textView.layoutParams = lp2

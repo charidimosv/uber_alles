@@ -26,7 +26,6 @@ interface RetrofitClient {
 
     companion object Factory {
 
-        //TODO: ENTER YOUR API BASE URL
         val BASE_URL = "https://SNF-838608.vm.okeanos.grnet.gr:8443/"  // Production
 
         var retrofit: Retrofit? = null

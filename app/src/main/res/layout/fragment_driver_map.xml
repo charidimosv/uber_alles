@@ -65,14 +65,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="customerName" />
+                            android:text="@string/username" />
 
                         <TextView
                             android:id="@+id/userPhone"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="phone" />
+                            android:text="@string/phone" />
                     </LinearLayout>
 
                     <LinearLayout
