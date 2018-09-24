@@ -207,7 +207,7 @@ abstract class GenericMapFragment :
         }
     }
 
-    fun saveLocation(location: Location) {
+    private fun saveLocation(location: Location) {
         mLastLocation = location
 
         val geoLocation = GeoLocation(location.latitude, location.longitude)
