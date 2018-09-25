@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.navigation.findNavController
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
@@ -35,6 +37,7 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.Status
+import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.firebase.UserInfo
@@ -63,6 +66,12 @@ class CustomerMapFragment : GenericMapFragment(),
 
     private lateinit var paymentInfo: LinearLayout
     private lateinit var payment: MaterialButton
+
+    private lateinit var carInfo: LinearLayout
+    private lateinit var carImage: ImageView
+    private lateinit var carBrand: TextView
+    private lateinit var carModel: TextView
+    private lateinit var carPlate: TextView
 
     /*
     ----------------------------------
@@ -130,6 +139,12 @@ class CustomerMapFragment : GenericMapFragment(),
         userName = binding.userName
         userPhone = binding.userPhone
 
+        carInfo = binding.carInfo
+        carImage = binding.carImage
+        carBrand = binding.carBrand
+        carModel = binding.carModel
+        carPlate = binding.carPlate
+
         currentRating = binding.currentRating
         currentRatingBar = binding.currentRatingBar
         currentRatingAvg = binding.currentRatingAvg
@@ -190,10 +205,12 @@ class CustomerMapFragment : GenericMapFragment(),
             val map = hashMapOf<String, Any?>("value" to newRatingBar.rating, "comment" to newRatingText.text.toString())
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
+            setStatusSynced(Status.Done, true)
+
             showFreshUI()
         }
 
-        payment.setOnClickListener { setStatusSynced(Status.Done, true) }
+        payment.setOnClickListener { setStatusSynced(Status.Rating, true) }
         rideStatus.setOnClickListener { switchState() }
 
         getActiveRequest()
@@ -284,6 +301,33 @@ class CustomerMapFragment : GenericMapFragment(),
             }
 
             override fun onCancelled(databaseError: DatabaseError) {}
+        })
+
+        val driverDefaultCarRef = FirebaseHelper.getUserDefaultCar(driverFoundID!!)
+        driverDefaultCarRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onCancelled(p0: DatabaseError) {}
+
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val defaultCarId = dataSnapshot?.value.toString()
+                val mDriverCar = FirebaseHelper.getCarKey(defaultCarId)
+                mDriverCar.addListenerForSingleValueEvent(object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {}
+
+                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                        if(dataSnapshot.exists() && dataSnapshot.childrenCount > 0){
+                            val carInfo = dataSnapshot.getValue(Car::class.java)
+                            carInfo ?: return
+
+                            carInfo.brand.let { carBrand.text  = it }
+                            carInfo.model.let { carModel.text  = it }
+                            carInfo.plate.let { carPlate.text  = it }
+                            carInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(carImage, it) }
+                        }
+                    }
+
+                })
+            }
+
         })
 
         if (withRatings) {
@@ -486,10 +530,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.GONE
         userInfo.visibility = View.GONE
+        carInfo.visibility = View.GONE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.GONE
         currentRatingBar.rating = 0.toFloat()
@@ -546,10 +596,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.GONE
         userInfo.visibility = View.GONE
+        carInfo.visibility = View.GONE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.GONE
         currentRatingBar.rating = 0.toFloat()
@@ -607,10 +663,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.VISIBLE
         userInfo.visibility = View.VISIBLE
+        carInfo.visibility = View.VISIBLE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.VISIBLE
         currentRatingBar.rating = 0.toFloat()
@@ -663,10 +725,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.GONE
         userInfo.visibility = View.GONE
+        carInfo.visibility = View.GONE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.GONE
         currentRatingBar.rating = 0.toFloat()
@@ -728,10 +796,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.GONE
         userInfo.visibility = View.GONE
+        carInfo.visibility = View.GONE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.GONE
         currentRatingBar.rating = 0.toFloat()
@@ -784,10 +858,16 @@ class CustomerMapFragment : GenericMapFragment(),
 
         userAllInfo.visibility = View.VISIBLE
         userInfo.visibility = View.VISIBLE
+        carInfo.visibility = View.GONE
 
         userProfileImage.setImageResource(R.mipmap.ic_default_user)
         userName.text = ""
         userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
 
         currentRating.visibility = View.GONE
         currentRatingBar.rating = 0.toFloat()
