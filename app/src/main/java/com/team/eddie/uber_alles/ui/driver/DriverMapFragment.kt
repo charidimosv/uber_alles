@@ -142,6 +142,8 @@ class DriverMapFragment : GenericMapFragment() {
             val map = hashMapOf<String, Any?>("value" to newRatingBar.rating, "comment" to newRatingText.text.toString())
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
+            switchState()
+
             startFresh()
         }
 
@@ -753,6 +755,7 @@ class DriverMapFragment : GenericMapFragment() {
             Status.Rating -> {
                 showRatingUI()
             }
+            Status.RatingDone -> { }
             Status.Done -> {
                 successfulRide = true
                 requestListener?.let { requestRef?.removeEventListener(it) }
@@ -786,6 +789,10 @@ class DriverMapFragment : GenericMapFragment() {
                 showPaymentUI()
             }
             Status.Rating -> {
+                setStatusSynced(Status.RatingDone, true)
+            }
+            Status.RatingDone -> {
+                setStatusSynced(Status.Done, true)
             }
             Status.Done -> {
             }

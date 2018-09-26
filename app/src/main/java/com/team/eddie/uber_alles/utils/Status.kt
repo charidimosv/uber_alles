@@ -7,5 +7,6 @@ enum class Status {
     ToDestination,
     Payment,
     Rating,
+    RatingDone,
     Done
 }

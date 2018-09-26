@@ -205,7 +205,8 @@ class CustomerMapFragment : GenericMapFragment(),
             val map = hashMapOf<String, Any?>("value" to newRatingBar.rating, "comment" to newRatingText.text.toString())
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
-            setStatusSynced(Status.Done, true)
+            switchState()
+            //setStatusSynced(Status.Done, true)
 
             showFreshUI()
         }
@@ -923,6 +924,7 @@ class CustomerMapFragment : GenericMapFragment(),
             Status.Rating -> {
                 showRatingUI()
             }
+            Status.RatingDone -> { }
             Status.Done -> {
                 successfulRide = true
                 requestListener?.let { requestRef?.removeEventListener(it) }
@@ -950,6 +952,10 @@ class CustomerMapFragment : GenericMapFragment(),
                 setStatusSynced(Status.Rating, true)
             }
             Status.Rating -> {
+                setStatusSynced(Status.RatingDone, true)
+            }
+            Status.RatingDone -> {
+                setStatusSynced(Status.Done, true)
             }
             Status.Done -> {
             }
