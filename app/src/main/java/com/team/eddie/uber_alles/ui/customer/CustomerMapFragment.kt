@@ -82,8 +82,6 @@ class CustomerMapFragment : GenericMapFragment() {
     private var driverFoundUsername: String? = null
 
     private var dateOfRide: String? = null
-    private val destinationMap: HashMap<Marker, Place> = HashMap()
-    private val destinationList: ArrayList<Place> = ArrayList()
 
     private var isPickedUp: Boolean = false
     private var pickupLatLng: LatLng? = null
@@ -184,7 +182,7 @@ class CustomerMapFragment : GenericMapFragment() {
                 followMeFlag = false
                 moveCamera(place.latLng)
 
-                mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
+                mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
                 if (dateOfRide != null) rideStatus.visibility = View.VISIBLE
             }
@@ -252,7 +250,7 @@ class CustomerMapFragment : GenericMapFragment() {
                 destinationMap.remove(marker)
 
                 if (!destinationList.isEmpty())
-                    mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
+                    mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
             }
             true
         }
@@ -505,20 +503,6 @@ class CustomerMapFragment : GenericMapFragment() {
         })
     }
 
-    private fun getLatLngList(): ArrayList<LatLng> {
-        val latLngList = ArrayList<LatLng>()
-        for (place in destinationList) latLngList.add(place.latLng)
-        return latLngList
-    }
-
-    override fun clearDestinationInfo() {
-        super.clearDestinationInfo()
-
-        for (marker in destinationMap.keys) marker.remove()
-        destinationMap.clear()
-        destinationList.clear()
-    }
-
     private fun clearDriversInfo() {
         currentRequest = null
         driverFoundID = null
@@ -643,9 +627,8 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMarkerRoute()
-
-        pickupLatLng?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
+//        syncRequestDestination()
+        pickupLatLng?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -770,11 +753,8 @@ class CustomerMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMarkerRoute()
-        clearDestinationInfo()
         syncRequestDestination()
-
-        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), destinationLatLngList) }
+        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }

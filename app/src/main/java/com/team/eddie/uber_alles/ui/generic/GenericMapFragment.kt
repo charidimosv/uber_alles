@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
+import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -118,8 +119,8 @@ abstract class GenericMapFragment :
     protected var successfulRide: Boolean = false
     protected var showMessages: Boolean = false
 
-    protected val destinationMarkerList: ArrayList<Marker> = ArrayList()
-    protected val destinationLatLngList: ArrayList<LatLng> = ArrayList()
+    protected val destinationMap: HashMap<Marker, Place> = HashMap()
+    protected val destinationList: ArrayList<Place> = ArrayList()
 
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -241,23 +242,34 @@ abstract class GenericMapFragment :
     }
 
     protected fun syncRequestDestination() {
-        for (reqLocation in currentRequest!!.destinationList!!)
-            destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
+        clearDestinationInfo()
 
-        if (!destinationLatLngList.isEmpty()) {
-            for (latLng in destinationLatLngList) {
-                val destinationMarker = mMap.addMarker(MarkerOptions()
-                        .position(latLng)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-                destinationMarkerList.add(destinationMarker)
-            }
+        destinationList.addAll(currentRequest!!.destinationList!!)
+        for (place in destinationList) {
+            val destinationMarker = mMap.addMarker(MarkerOptions()
+                    .position(place.latLng)
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+            destinationMap[destinationMarker] = place
         }
     }
 
-    protected open fun clearDestinationInfo() {
-        for (marker in destinationMarkerList) marker.remove()
-        destinationMarkerList.clear()
-        destinationLatLngList.clear()
+    protected fun clearDestinationInfo() {
+        for (marker in destinationMap.keys) marker.remove()
+        destinationMap.clear()
+        destinationList.clear()
+    }
+
+    protected fun getDestinationLatLngList(): ArrayList<LatLng> {
+        val latLngList = ArrayList<LatLng>()
+        for (place in destinationList) latLngList.add(place.latLng)
+        return latLngList
+    }
+
+    protected fun getDestinationAsString(): String {
+        var destinationAll: String = ""
+        for (place in currentRequest?.destinationList!!)
+            destinationAll = destinationAll + place.address + " "
+        return destinationAll
     }
 
     protected fun createMarkerRoute(from: LatLng, to: List<LatLng>) {
@@ -268,7 +280,7 @@ abstract class GenericMapFragment :
         createMarkerRoute(locationStopList)
     }
 
-    protected fun createMarkerRoute(latLngList: List<LatLng>) {
+    private fun createMarkerRoute(latLngList: List<LatLng>) {
         mapHelper.drawRoute(latLngList)
     }
 
@@ -285,13 +297,6 @@ abstract class GenericMapFragment :
         currentRequest?.status = status
 
         if (shouldUpdate) FirebaseHelper.updateRequest(currentRequest!!)
-    }
-
-    protected fun getDestinationAsString(): String {
-        var destinationAll: String = ""
-        for (loc in currentRequest?.destinationList!!)
-            destinationAll = loc.locName + " "
-        return destinationAll
     }
 
     protected abstract fun getActiveRequest()

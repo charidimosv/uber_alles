@@ -493,15 +493,8 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMarkerRoute()
-        clearDestinationInfo()
         syncRequestDestination()
-
-        mLastLocation?.let {
-            val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude), pickupLatLng!!)
-            locationStopList.addAll(destinationLatLngList)
-            createMarkerRoute(locationStopList)
-        }
+        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -557,14 +550,8 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMarkerRoute()
-        clearDestinationInfo()
         syncRequestDestination()
-
-        mLastLocation?.let {
-            val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude), pickupLatLng!!)
-            createMarkerRoute(locationStopList)
-        }
+        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), arrayListOf(pickupLatLng!!)) }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -620,15 +607,8 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         mCustomerMarker?.remove()
 
-        cleanMarkerRoute()
-        clearDestinationInfo()
         syncRequestDestination()
-
-        mLastLocation?.let {
-            val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude))
-            locationStopList.addAll(destinationLatLngList)
-            createMarkerRoute(locationStopList)
-        }
+        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }

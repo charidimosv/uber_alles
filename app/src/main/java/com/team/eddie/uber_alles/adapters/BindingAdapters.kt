@@ -29,8 +29,8 @@ fun bindDestinationFromRequest(view: TextView, requestId: String) {
                 val currentRequest = dataSnapshot.getValue(Request::class.java)
                 currentRequest ?: return
                 var destinationAll: String = ""
-                for (loc in currentRequest.destinationList!!)
-                    destinationAll = destinationAll + loc.locName + " "
+                for (place in currentRequest.destinationList!!)
+                    destinationAll = destinationAll + place.address + " "
                 view.text = destinationAll
             }
         }

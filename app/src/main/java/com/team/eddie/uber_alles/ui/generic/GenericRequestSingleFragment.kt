@@ -123,9 +123,9 @@ class GenericRequestSingleFragment :
                     }
                     if (pickupLatLng == null) pickupLatLng = LatLng(0.0, 0.0)
 
-                    for (reqLocation in request.destinationList!!) {
-                        tripStr += " -> " + reqLocation.locName
-                        destinationLatLngList.add(LatLng(reqLocation.lat, reqLocation.lng))
+                    for (place in request.destinationList!!) {
+                        tripStr += " -> " + place.address
+                        destinationLatLngList.add(place.latLng)
                     }
                     rideLocation.text = tripStr
 
