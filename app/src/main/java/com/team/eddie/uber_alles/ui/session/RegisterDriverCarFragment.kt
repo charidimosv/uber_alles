@@ -81,7 +81,7 @@ class RegisterDriverCarFragment : Fragment() {
             startActivityForResult(intent, 1)
         }
 
-        mYearField.setOnClickListener(){
+        mYearField.setOnClickListener() {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)

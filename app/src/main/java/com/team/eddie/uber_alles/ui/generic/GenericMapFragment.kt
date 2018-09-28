@@ -47,11 +47,10 @@ abstract class GenericMapFragment :
     ----------------------------------
     */
 
-    private val mapHelper: MapRouteHelper = MapRouteHelper()
-
     protected lateinit var applicationContext: Context
 
     protected lateinit var mMap: GoogleMap
+    private lateinit var mapHelper: MapRouteHelper
 
     protected var mLastLocation: Location? = null
     private var mLocationRequest: LocationRequest? = null
@@ -125,7 +124,7 @@ abstract class GenericMapFragment :
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mapHelper.map = mMap
+        mapHelper = MapRouteHelper(mMap)
 
         getLocationPermission()
 
@@ -261,11 +260,19 @@ abstract class GenericMapFragment :
         destinationLatLngList.clear()
     }
 
-    protected fun getRouteToMarker(latLngList: List<LatLng>) {
+    protected fun createMarkerRoute(from: LatLng, to: List<LatLng>) {
+        cleanMarkerRoute()
+
+        val locationStopList: ArrayList<LatLng> = arrayListOf(from)
+        locationStopList.addAll(to)
+        createMarkerRoute(locationStopList)
+    }
+
+    protected fun createMarkerRoute(latLngList: List<LatLng>) {
         mapHelper.drawRoute(latLngList)
     }
 
-    protected fun cleanMap() {
+    protected fun cleanMarkerRoute() {
         mapHelper.cleanRoute()
     }
 

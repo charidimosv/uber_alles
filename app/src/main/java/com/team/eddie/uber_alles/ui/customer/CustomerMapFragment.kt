@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.DatePicker
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -49,9 +50,7 @@ import java.util.*
 private const val DEFAULT_SEARCH_RADIUS: Double = 5555000.0
 private const val DEFAULT_SEARCH_LOC_DIF: Float = 1F
 
-class CustomerMapFragment : GenericMapFragment(),
-        PlaceSelectionListener,
-        GoogleMap.OnMarkerClickListener {
+class CustomerMapFragment : GenericMapFragment() {
 
     /*
     ----------------------------------
@@ -165,29 +164,56 @@ class CustomerMapFragment : GenericMapFragment(),
         rideStatus = binding.rideStatus
 
 
-        autocompleteFragment = childFragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as SupportPlaceAutocompleteFragment
-        autocompleteFragment.setOnPlaceSelectedListener(this)
+        /*
+        ----------------------------------
+        AutoCompleteFragment
+        ----------------------------------
+        */
 
+        autocompleteFragment = childFragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as SupportPlaceAutocompleteFragment
+        autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onPlaceSelected(place: Place) {
+                val destination = place.name.toString()
+                val destinationMarker = mMap.addMarker(MarkerOptions()
+                        .position(place.latLng)
+                        .title(destination)
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+                destinationMap[destinationMarker] = place
+                destinationList.add(place)
+
+                followMeFlag = false
+                moveCamera(place.latLng)
+
+                mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
+
+                if (dateOfRide != null) rideStatus.visibility = View.VISIBLE
+            }
+
+            override fun onError(p0: com.google.android.gms.common.api.Status?) {}
+        })
+
+        /*
+        ----------------------------------
+        DatePicker
+        ----------------------------------
+        */
+
+        val datePickerListener = DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
+            val newCalendar = Calendar.getInstance()
+            newCalendar.set(year, month, dayOfMonth)
+            dateOfRide = SimpleDateFormat("dd/MM/yyy", Locale("el")).format(newCalendar.time)
+            binding.rideDate.text = dateOfRide
+
+            if (!destinationList.isEmpty())
+                rideStatus.visibility = View.VISIBLE
+
+        }
         binding.rideDate.setOnClickListener {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-            val datePickerListener = DatePickerDialog.OnDateSetListener { datePicker, i, j, k ->
-                val day = datePicker.dayOfMonth
-                val month = datePicker.month
-                val year = datePicker.year
-
-                val newCalendar = Calendar.getInstance()
-                newCalendar.set(year, month, day)
-                dateOfRide = SimpleDateFormat("dd/MM/yyy").format(newCalendar.time)
-                binding.rideDate.text = dateOfRide
-
-                if (!destinationList.isEmpty())
-                    rideStatus.visibility = View.VISIBLE
-
-            }
             val datePickerDialog = DatePickerDialog(activity!!, datePickerListener, year, month, day)
             datePickerDialog.datePicker.minDate = System.currentTimeMillis()
             datePickerDialog.show()
@@ -206,9 +232,6 @@ class CustomerMapFragment : GenericMapFragment(),
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
             switchState()
-            //setStatusSynced(Status.Done, true)
-
-            showFreshUI()
         }
 
         payment.setOnClickListener { setStatusSynced(Status.Rating, true) }
@@ -222,7 +245,18 @@ class CustomerMapFragment : GenericMapFragment(),
     override fun onMapReady(googleMap: GoogleMap) {
         super.onMapReady(googleMap)
 
-        mMap.setOnMarkerClickListener(this)
+        mMap.setOnMarkerClickListener { marker ->
+            if (destinationMap.contains(marker)) {
+                marker.remove()
+                destinationList.remove(destinationMap[marker])
+                destinationMap.remove(marker)
+
+                if (!destinationList.isEmpty())
+                    mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
+            }
+            true
+        }
+
         mMap.setOnMyLocationButtonClickListener {
             followMeFlag = true
             mLastLocation?.let { moveCamera(it) }
@@ -309,19 +343,19 @@ class CustomerMapFragment : GenericMapFragment(),
             override fun onCancelled(p0: DatabaseError) {}
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val defaultCarId = dataSnapshot?.value.toString()
+                val defaultCarId = dataSnapshot.value.toString()
                 val mDriverCar = FirebaseHelper.getCarKey(defaultCarId)
                 mDriverCar.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onCancelled(p0: DatabaseError) {}
 
                     override fun onDataChange(dataSnapshot: DataSnapshot) {
-                        if(dataSnapshot.exists() && dataSnapshot.childrenCount > 0){
+                        if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                             val carInfo = dataSnapshot.getValue(Car::class.java)
                             carInfo ?: return
 
-                            carInfo.brand.let { carBrand.text  = it }
-                            carInfo.model.let { carModel.text  = it }
-                            carInfo.plate.let { carPlate.text  = it }
+                            carInfo.brand.let { carBrand.text = it }
+                            carInfo.model.let { carModel.text = it }
+                            carInfo.plate.let { carPlate.text = it }
                             carInfo.imageUrl?.let { ActivityHelper.bindImageFromUrl(carImage, it) }
                         }
                     }
@@ -418,7 +452,6 @@ class CustomerMapFragment : GenericMapFragment(),
         showFreshUI()
     }
 
-
     private fun handleDriversAround() {
         if (showDriversAround) {
             if (shouldRefreshDriversAround()) getDriversAround()
@@ -476,32 +509,6 @@ class CustomerMapFragment : GenericMapFragment(),
         val latLngList = ArrayList<LatLng>()
         for (place in destinationList) latLngList.add(place.latLng)
         return latLngList
-    }
-
-    override fun onPlaceSelected(place: Place) {
-        val destination = place.name.toString()
-        val destinationMarker = mMap.addMarker(MarkerOptions()
-                .position(place.latLng)
-                .title(destination)
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
-        destinationMap[destinationMarker] = place
-        destinationList.add(place)
-
-        followMeFlag = false
-        moveCamera(place.latLng)
-
-        if (dateOfRide != null) rideStatus.visibility = View.VISIBLE
-    }
-
-    override fun onError(p0: com.google.android.gms.common.api.Status?) {}
-
-    override fun onMarkerClick(marker: Marker): Boolean {
-        if (destinationMap.contains(marker)) {
-            marker.remove()
-            destinationList.remove(destinationMap[marker])
-            destinationMap.remove(marker)
-        }
-        return true
     }
 
     override fun clearDestinationInfo() {
@@ -572,7 +579,7 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         mDriverMarker?.remove()
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         clearDriversInfo()
 
@@ -636,13 +643,9 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMap()
+        cleanMarkerRoute()
 
-        pickupLatLng?.let {
-            val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude))
-            locationStopList.addAll(getLatLngList())
-            getRouteToMarker(locationStopList)
-        }
+        pickupLatLng?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getLatLngList()) }
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -701,7 +704,7 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMap()
+        cleanMarkerRoute()
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -767,15 +770,11 @@ class CustomerMapFragment : GenericMapFragment(),
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         syncRequestDestination()
 
-        mLastLocation?.let {
-            val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude))
-            locationStopList.addAll(destinationLatLngList)
-            getRouteToMarker(locationStopList)
-        }
+        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), destinationLatLngList) }
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -835,7 +834,7 @@ class CustomerMapFragment : GenericMapFragment(),
         isPickedUp = false
         showMessages = false
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
 
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
@@ -894,7 +893,7 @@ class CustomerMapFragment : GenericMapFragment(),
         isPickedUp = false
         showMessages = false
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
 
         requestListener?.let { requestRef?.removeEventListener(it) }
@@ -924,7 +923,8 @@ class CustomerMapFragment : GenericMapFragment(),
             Status.Rating -> {
                 showRatingUI()
             }
-            Status.RatingDone -> { }
+            Status.RatingDone -> {
+            }
             Status.Done -> {
                 successfulRide = true
                 requestListener?.let { requestRef?.removeEventListener(it) }
@@ -956,6 +956,7 @@ class CustomerMapFragment : GenericMapFragment(),
             }
             Status.RatingDone -> {
                 setStatusSynced(Status.Done, true)
+                showFreshUI()
             }
             Status.Done -> {
             }

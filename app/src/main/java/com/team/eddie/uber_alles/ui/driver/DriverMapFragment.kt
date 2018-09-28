@@ -436,7 +436,7 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         mCustomerMarker?.remove()
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         clearCustomersInfo()
 
@@ -493,14 +493,14 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         syncRequestDestination()
 
         mLastLocation?.let {
             val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude), pickupLatLng!!)
             locationStopList.addAll(destinationLatLngList)
-            getRouteToMarker(locationStopList)
+            createMarkerRoute(locationStopList)
         }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
@@ -557,13 +557,13 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         syncRequestDestination()
 
         mLastLocation?.let {
             val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude), pickupLatLng!!)
-            getRouteToMarker(locationStopList)
+            createMarkerRoute(locationStopList)
         }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
@@ -620,14 +620,14 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker?.remove()
         mCustomerMarker?.remove()
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
         syncRequestDestination()
 
         mLastLocation?.let {
             val locationStopList: ArrayList<LatLng> = arrayListOf(LatLng(it.latitude, it.longitude))
             locationStopList.addAll(destinationLatLngList)
-            getRouteToMarker(locationStopList)
+            createMarkerRoute(locationStopList)
         }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
@@ -676,7 +676,7 @@ class DriverMapFragment : GenericMapFragment() {
         showMessages = false
         calcDistance = false
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
@@ -725,7 +725,7 @@ class DriverMapFragment : GenericMapFragment() {
         showMessages = false
         calcDistance = false
 
-        cleanMap()
+        cleanMarkerRoute()
         clearDestinationInfo()
 
         requestListener?.let { requestRef?.removeEventListener(it) }
@@ -755,7 +755,8 @@ class DriverMapFragment : GenericMapFragment() {
             Status.Rating -> {
                 showRatingUI()
             }
-            Status.RatingDone -> { }
+            Status.RatingDone -> {
+            }
             Status.Done -> {
                 successfulRide = true
                 requestListener?.let { requestRef?.removeEventListener(it) }

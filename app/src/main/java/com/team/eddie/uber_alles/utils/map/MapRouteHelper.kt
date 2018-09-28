@@ -15,31 +15,27 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 
-class MapRouteHelper {
+class MapRouteHelper(var map: GoogleMap) {
 
-    var map: GoogleMap? = null
-    private val polylines = ArrayList<Polyline>()
+    private var mapKey: String = "AIzaSyDrl7f1p_BUiH-Tn5jL4Q01wFujKWxu9mM"
+    private val polylineList = ArrayList<Polyline>()
 
     fun drawRoute(latLngList: List<LatLng>) {
         if (latLngList.size < 2) return
         for (i in 0 until latLngList.size - 1)
-            drawRoute(latLngList.get(i), latLngList.get(i + 1))
+            drawRoute(latLngList[i], latLngList[i + 1])
     }
 
-    fun drawRoute(origin: LatLng, dest: LatLng) {
+    private fun drawRoute(origin: LatLng, dest: LatLng) {
         // Getting URL to the Google Directions API
         val url = getDirectionsUrl(origin, dest)
-
-        val downloadTask = DownloadTask()
-
-        // Start downloading json data from Google Directions API
-        downloadTask.execute(url)
+        DownloadTask().execute(url)
     }
 
     fun cleanRoute() {
-        for (line in polylines)
+        for (line in polylineList)
             line.remove()
-        polylines.clear()
+        polylineList.clear()
     }
 
     private fun getDirectionsUrl(origin: LatLng, dest: LatLng): String {
@@ -48,11 +44,12 @@ class MapRouteHelper {
         val routeDestStr = "destination=" + dest.latitude + "," + dest.longitude
 
         // Sensor enabled
-        val sensor = "sensor=false"
+        val sensor = "sensor=true"
         val mode = "mode=driving"
+        val key = "key=$mapKey"
 
         // Building the parameters to the web service
-        val parameters = "$routeOrigStr&$routeDestStr&$sensor&$mode"
+        val parameters = "$routeOrigStr&$routeDestStr&$sensor&$mode&$key"
 
         // Output format
         val output = "json"
@@ -114,9 +111,7 @@ class MapRouteHelper {
 
         override fun onPostExecute(result: String) {
             super.onPostExecute(result)
-
-            val parserTask = ParserTask()
-            parserTask.execute(result)
+            ParserTask().execute(result)
         }
     }
 
@@ -141,11 +136,10 @@ class MapRouteHelper {
         }
 
         override fun onPostExecute(result: List<List<HashMap<String, String>>>) {
-            var points: ArrayList<LatLng>? = null
             var lineOptions: PolylineOptions? = null
 
             for (i in result.indices) {
-                points = ArrayList()
+                val points: ArrayList<LatLng> = ArrayList()
                 lineOptions = PolylineOptions()
 
                 val path = result[i]
@@ -153,8 +147,8 @@ class MapRouteHelper {
                 for (j in path.indices) {
                     val point = path[j]
 
-                    val lat = java.lang.Double.parseDouble(point["lat"]!!)
-                    val lng = java.lang.Double.parseDouble(point["lng"]!!)
+                    val lat = point["lat"]?.toDouble() ?: 0.0
+                    val lng = point["lng"]?.toDouble() ?: 0.0
                     val position = LatLng(lat, lng)
 
                     points.add(position)
@@ -168,7 +162,7 @@ class MapRouteHelper {
 
             // Drawing polyline in the Google Map for the i-th route
             if (lineOptions != null)
-                polylines.add(map!!.addPolyline(lineOptions))
+                polylineList.add(map.addPolyline(lineOptions))
         }
     }
 }

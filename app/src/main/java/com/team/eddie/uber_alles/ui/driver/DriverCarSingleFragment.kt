@@ -100,23 +100,18 @@ class DriverCarSingleFragment : Fragment() {
             }
         }
 
-        mYearField.setOnClickListener(){
+        val datePickerListener = DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
+            val newCalendar = Calendar.getInstance()
+            newCalendar.set(year, month, dayOfMonth)
+            val carDate = Editable.Factory.getInstance().newEditable(SimpleDateFormat("dd/MM/yyy", Locale("el")).format(newCalendar.time))
+            mYearField.text = carDate
+        }
+        mYearField.setOnClickListener() {
             val calendar = Calendar.getInstance()
             val year = calendar.get(Calendar.YEAR)
             val month = calendar.get(Calendar.MONTH)
             val day = calendar.get(Calendar.DAY_OF_MONTH)
 
-            val datePickerListener = DatePickerDialog.OnDateSetListener { datePicker, i, j, k ->
-                val day = datePicker.dayOfMonth
-                val month = datePicker.month
-                val year = datePicker.year
-
-                val newCalendar = Calendar.getInstance()
-                newCalendar.set(year, month, day)
-                var carDate = Editable.Factory.getInstance().newEditable(SimpleDateFormat("dd/MM/yyy").format(newCalendar.time))
-                mYearField.text = carDate
-
-            }
             val datePickerDialog = DatePickerDialog(activity!!, datePickerListener, year, month, day)
             datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
             datePickerDialog.show()

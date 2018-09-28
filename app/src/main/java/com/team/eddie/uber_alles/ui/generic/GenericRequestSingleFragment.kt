@@ -32,9 +32,9 @@ class GenericRequestSingleFragment :
 
     private lateinit var binding: FragmentGenericRequestSingleBinding
 
-    private lateinit var mMap: GoogleMap
     private lateinit var mapFragment: SupportMapFragment
-    private val mapHelper: MapRouteHelper = MapRouteHelper()
+    private lateinit var mMap: GoogleMap
+    private lateinit var mapHelper: MapRouteHelper
 
     private val currentUserId: String = FirebaseHelper.getUserId()
 
@@ -86,7 +86,7 @@ class GenericRequestSingleFragment :
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mapHelper.map = mMap
+        mapHelper = MapRouteHelper(mMap)
 
         getRideInformation()
     }
