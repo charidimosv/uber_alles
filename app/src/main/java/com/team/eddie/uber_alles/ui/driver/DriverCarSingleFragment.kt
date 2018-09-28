@@ -1,12 +1,14 @@
 package com.team.eddie.uber_alles.ui.driver
 
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +27,8 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.firebase.Car
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import java.io.ByteArrayOutputStream
+import java.text.SimpleDateFormat
+import java.util.*
 
 class DriverCarSingleFragment : Fragment() {
 
@@ -94,6 +98,28 @@ class DriverCarSingleFragment : Fragment() {
             override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
                 Toast.makeText(applicationContext, parent.getItemAtPosition(pos).toString(), Toast.LENGTH_SHORT).show()
             }
+        }
+
+        mYearField.setOnClickListener(){
+            val calendar = Calendar.getInstance()
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            val datePickerListener = DatePickerDialog.OnDateSetListener { datePicker, i, j, k ->
+                val day = datePicker.dayOfMonth
+                val month = datePicker.month
+                val year = datePicker.year
+
+                val newCalendar = Calendar.getInstance()
+                newCalendar.set(year, month, day)
+                var carDate = Editable.Factory.getInstance().newEditable(SimpleDateFormat("dd/MM/yyy").format(newCalendar.time))
+                mYearField.text = carDate
+
+            }
+            val datePickerDialog = DatePickerDialog(activity!!, datePickerListener, year, month, day)
+            datePickerDialog.datePicker.maxDate = System.currentTimeMillis()
+            datePickerDialog.show()
         }
 
         return binding.root

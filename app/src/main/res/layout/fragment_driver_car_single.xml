@@ -134,6 +134,8 @@
                     android:drawableStart="@drawable/ic_calendar"
                     android:inputType="date"
                     android:maxLines="1"
+                    android:focusable="false"
+                    android:clickable="true"
                     android:singleLine="true" />
             </com.google.android.material.textfield.TextInputLayout>
 
