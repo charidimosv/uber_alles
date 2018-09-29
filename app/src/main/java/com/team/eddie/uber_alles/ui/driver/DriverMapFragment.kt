@@ -491,7 +491,7 @@ class DriverMapFragment : GenericMapFragment() {
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
         syncRequestDestination()
         mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
@@ -548,7 +548,7 @@ class DriverMapFragment : GenericMapFragment() {
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
         syncRequestDestination()
         mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), arrayListOf(pickupLatLng!!)) }

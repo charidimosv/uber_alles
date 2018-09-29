@@ -19,7 +19,6 @@ import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
@@ -27,7 +26,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
-import com.team.eddie.uber_alles.R
+import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 import com.team.eddie.uber_alles.utils.firebase.Request
@@ -248,7 +247,7 @@ abstract class GenericMapFragment :
         for (place in destinationList) {
             val destinationMarker = mMap.addMarker(MarkerOptions()
                     .position(place.latLng)
-                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+                    .icon(ActivityHelper.getPinBitmap(applicationContext)))
             destinationMap[destinationMarker] = place
         }
     }

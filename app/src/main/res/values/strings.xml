@@ -96,5 +96,6 @@
     <string name="default_str">Default</string>
     <string name="amount">Amount</string>
     <string name="total_cash">Total cash:</string>
+    <string name="tap_to_remove">Tap to remove</string>
 
 </resources>

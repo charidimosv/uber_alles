@@ -171,11 +171,11 @@ class CustomerMapFragment : GenericMapFragment() {
         autocompleteFragment = childFragmentManager.findFragmentById(R.id.place_autocomplete_fragment) as SupportPlaceAutocompleteFragment
         autocompleteFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                val destination = place.name.toString()
                 val destinationMarker = mMap.addMarker(MarkerOptions()
                         .position(place.latLng)
-                        .title(destination)
-                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+                        .title(getString(R.string.tap_to_remove))
+                        .icon(ActivityHelper.getPinBitmap(applicationContext)))
+                destinationMarker.showInfoWindow()
                 destinationMap[destinationMarker] = place
                 destinationList.add(place)
 
@@ -249,6 +249,7 @@ class CustomerMapFragment : GenericMapFragment() {
                 destinationList.remove(destinationMap[marker])
                 destinationMap.remove(marker)
 
+                cleanMarkerRoute()
                 if (!destinationList.isEmpty())
                     mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
             }
@@ -625,7 +626,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
 //        syncRequestDestination()
         pickupLatLng?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
@@ -685,7 +686,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
         cleanMarkerRoute()
 
@@ -751,7 +752,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
         pickupMarker?.remove()
-        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_pickup)))
+        pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
         syncRequestDestination()
         mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
