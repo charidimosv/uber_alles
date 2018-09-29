@@ -38,10 +38,7 @@ import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.ui.generic.GenericMapFragment
 import com.team.eddie.uber_alles.utils.SaveSharedPreference
 import com.team.eddie.uber_alles.utils.Status
-import com.team.eddie.uber_alles.utils.firebase.Car
-import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
-import com.team.eddie.uber_alles.utils.firebase.Request
-import com.team.eddie.uber_alles.utils.firebase.UserInfo
+import com.team.eddie.uber_alles.utils.firebase.*
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -176,8 +173,15 @@ class CustomerMapFragment : GenericMapFragment() {
                         .title(getString(R.string.tap_to_remove))
                         .icon(ActivityHelper.getPinBitmap(applicationContext)))
                 destinationMarker.showInfoWindow()
-                destinationMap[destinationMarker] = place
-                destinationList.add(place)
+
+                val placeShort = PlaceShort(
+                        id = place.id,
+                        name = place.name.toString(),
+                        address = place.address.toString(),
+                        latLng = LatLngShort(latitude = place.latLng.latitude, longitude = place.latLng.longitude)
+                )
+                destinationMap[destinationMarker] = placeShort
+                destinationList.add(placeShort)
 
                 followMeFlag = false
                 moveCamera(place.latLng)
@@ -429,7 +433,7 @@ class CustomerMapFragment : GenericMapFragment() {
     override fun startRideRequest() {
         currentRequest = Request(customerId = currentUserId,
                 pickupLocation = mLastLocation!!,
-                locationList = destinationList,
+                placeList = destinationList,
                 requestDate = dateOfRide!!)
         FirebaseHelper.createRequest(currentRequest!!)
 
@@ -624,7 +628,7 @@ class CustomerMapFragment : GenericMapFragment() {
         isPickedUp = false
         successfulRide = false
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.latLng.latitude, currentRequest!!.pickupLocation!!.latLng.longitude)
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
@@ -684,7 +688,7 @@ class CustomerMapFragment : GenericMapFragment() {
 
         showMessages = true
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.latLng.latitude, currentRequest!!.pickupLocation!!.latLng.longitude)
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
@@ -750,7 +754,7 @@ class CustomerMapFragment : GenericMapFragment() {
         successfulRide = false
         showMessages = false
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.latLng.latitude, currentRequest!!.pickupLocation!!.latLng.longitude)
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 

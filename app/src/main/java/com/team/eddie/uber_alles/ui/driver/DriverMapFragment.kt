@@ -76,7 +76,7 @@ class DriverMapFragment : GenericMapFragment() {
 
     private var pendingRequestQuery: GeoQuery? = null
     private var searchCustomersAround: Boolean = true
-    private var rejectedCustomersSet = ArraySet<String>()
+    private var rejectedRequestSet = ArraySet<String>()
 
 
     override fun onCreateView(
@@ -128,6 +128,7 @@ class DriverMapFragment : GenericMapFragment() {
         cashPayment = binding.cashPayment
 
         rideStatus = binding.rideStatus
+        rejectStatus = binding.rejectStatus
 
 
         chatUser.setOnClickListener {
@@ -149,6 +150,11 @@ class DriverMapFragment : GenericMapFragment() {
 
         rideStatus.setOnClickListener { switchState() }
 
+        rejectStatus.setOnClickListener {
+            currentRequest?.let { request -> rejectedRequestSet.add(request.requestId) }
+            startFresh()
+        }
+
         cardPayment.setOnClickListener { startPayment(true) }
         cashPayment.setOnClickListener { startPayment(false) }
 
@@ -157,7 +163,7 @@ class DriverMapFragment : GenericMapFragment() {
         return binding.root
     }
 
-    fun startPayment(byCard: Boolean) {
+    private fun startPayment(byCard: Boolean) {
         currentRequest?.let {
             setStatusSynced(Status.Payment, false)
             it.payByCard = byCard
@@ -318,7 +324,7 @@ class DriverMapFragment : GenericMapFragment() {
         pendingRequestQuery?.addGeoQueryEventListener(object : GeoQueryEventListener {
             override fun onKeyEntered(key: String, location: GeoLocation) {
                 if (customerFoundId == null
-                        && !rejectedCustomersSet.contains(key)
+                        && !rejectedRequestSet.contains(key)
                         && searchCustomersAround) {
                     searchCustomersAround = false
                     getRequestInfo(key)
@@ -410,6 +416,11 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = View.GONE
         rideStatus.isClickable = true
         rideStatus.text = getString(R.string.accept_customer)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
+
         /*
         ----------------------------------
         UI
@@ -478,6 +489,11 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = View.VISIBLE
         rideStatus.isClickable = true
         rideStatus.text = getString(R.string.accept_customer)
+
+        rejectStatus.visibility = View.VISIBLE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
+
         /*
         ----------------------------------
         UI
@@ -489,7 +505,7 @@ class DriverMapFragment : GenericMapFragment() {
         showMessages = false
         calcDistance = false
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.latLng.latitude, currentRequest!!.pickupLocation!!.latLng.longitude)
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
@@ -535,6 +551,10 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = View.VISIBLE
         rideStatus.isClickable = true
         rideStatus.text = getString(R.string.picked_customer)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
         /*
         ----------------------------------
         UI
@@ -546,7 +566,7 @@ class DriverMapFragment : GenericMapFragment() {
         showMessages = true
         calcDistance = false
 
-        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.lat, currentRequest!!.pickupLocation!!.lng)
+        pickupLatLng = LatLng(currentRequest!!.pickupLocation!!.latLng.latitude, currentRequest!!.pickupLocation!!.latLng.longitude)
         pickupMarker?.remove()
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
@@ -593,6 +613,10 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = View.VISIBLE
         rideStatus.isClickable = true
         rideStatus.text = getString(R.string.drive_completed)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
         /*
         ----------------------------------
         UI
@@ -647,6 +671,10 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = if (currentRequest!!.amount > 0.0) View.VISIBLE else View.GONE
         rideStatus.isClickable = false
         rideStatus.text = getString(R.string.waiting_payment)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
         /*
         ----------------------------------
         UI
@@ -696,6 +724,10 @@ class DriverMapFragment : GenericMapFragment() {
         rideStatus.visibility = View.GONE
         rideStatus.isClickable = true
         rideStatus.text = getString(R.string.cancel)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
         /*
         ----------------------------------
         UI

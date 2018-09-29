@@ -47,7 +47,7 @@ fun bindPickupFromRequest(view: TextView, requestId: String) {
             if (dataSnapshot.exists() && dataSnapshot.childrenCount > 0) {
                 val currentRequest = dataSnapshot.getValue(Request::class.java)
                 currentRequest ?: return
-                view.text = currentRequest.pickupLocation?.locName
+                view.text = currentRequest.pickupLocation?.address
             }
         }
 

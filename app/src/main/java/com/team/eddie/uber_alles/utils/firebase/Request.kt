@@ -1,7 +1,6 @@
 package com.team.eddie.uber_alles.utils.firebase
 
 import android.location.Location
-import com.google.android.gms.location.places.Place
 import com.team.eddie.uber_alles.utils.Status
 
 class Request(
@@ -10,11 +9,11 @@ class Request(
         var customerId: String = "",
         var driverId: String = "",
 
-        var destinationList: ArrayList<Place>? = null,
-        var pickupLocation: RequestLocation? = null,
+        var pickupLocation: PlaceShort? = null,
+        var destinationList: ArrayList<PlaceShort> = ArrayList(),
 
-        var pickupTime: Long = 0,
         var requestDate: String = "",
+        var pickupTime: Long = 0,
         var arrivingTime: Long? = 0,
 
         var distance: Float = 0F,
@@ -24,23 +23,26 @@ class Request(
 
         var status: Status = Status.Pending
 ) {
-
     constructor(customerId: String = "",
                 pickupLocation: Location,
-                locationList: ArrayList<Place>,
+                placeList: ArrayList<PlaceShort>,
                 requestDate: String = "")
             : this(customerId = customerId,
             driverId = "",
-            requestDate = requestDate,
-            destinationList = locationList) {
-
-        this.pickupLocation = RequestLocation("", pickupLocation.latitude, pickupLocation.longitude)
+            destinationList = placeList,
+            requestDate = requestDate) {
+        this.pickupLocation = PlaceShort(latLng = LatLngShort(latitude = pickupLocation.latitude, longitude = pickupLocation.longitude))
     }
 }
 
-class RequestLocation(
-        var locName: String = "",
-        var lat: Double = 0.0,
-        var lng: Double = 0.0,
-        var place: Place? = null
+class PlaceShort(
+        var id: String = "",
+        var name: String = "",
+        var address: String = "",
+        var latLng: LatLngShort = LatLngShort(0.0, 0.0)
+)
+
+class LatLngShort(
+        var latitude: Double = 0.0,
+        var longitude: Double = 0.0
 )

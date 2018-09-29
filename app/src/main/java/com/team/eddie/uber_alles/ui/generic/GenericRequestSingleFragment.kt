@@ -118,14 +118,14 @@ class GenericRequestSingleFragment :
                     var tripStr: String = ""
 
                     request.pickupLocation?.let {
-                        pickupLatLng = LatLng(it.lat, it.lng)
-                        tripStr = request.pickupLocation!!.locName
+                        pickupLatLng = LatLng(it.latLng.latitude, it.latLng.longitude)
+                        tripStr = request.pickupLocation!!.address
                     }
                     if (pickupLatLng == null) pickupLatLng = LatLng(0.0, 0.0)
 
-                    for (place in request.destinationList!!) {
+                    for (place in request.destinationList) {
                         tripStr += " -> " + place.address
-                        destinationLatLngList.add(place.latLng)
+                        destinationLatLngList.add(LatLng(place.latLng.latitude, place.latLng.longitude))
                     }
                     rideLocation.text = tripStr
 

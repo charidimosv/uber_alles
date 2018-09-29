@@ -15,7 +15,6 @@ import androidx.fragment.app.Fragment
 import com.firebase.geofire.GeoLocation
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.*
-import com.google.android.gms.location.places.Place
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -29,6 +28,7 @@ import com.google.firebase.database.ValueEventListener
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
+import com.team.eddie.uber_alles.utils.firebase.PlaceShort
 import com.team.eddie.uber_alles.utils.firebase.Request
 import com.team.eddie.uber_alles.utils.map.MapRouteHelper
 import java.util.*
@@ -93,6 +93,7 @@ abstract class GenericMapFragment :
     protected lateinit var chatUser: MaterialButton
 
     protected lateinit var rideStatus: MaterialButton
+    protected lateinit var rejectStatus: MaterialButton
 
     /*
     ----------------------------------
@@ -118,8 +119,8 @@ abstract class GenericMapFragment :
     protected var successfulRide: Boolean = false
     protected var showMessages: Boolean = false
 
-    protected val destinationMap: HashMap<Marker, Place> = HashMap()
-    protected val destinationList: ArrayList<Place> = ArrayList()
+    protected val destinationMap: HashMap<Marker, PlaceShort> = HashMap()
+    protected val destinationList: ArrayList<PlaceShort> = ArrayList()
 
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -243,10 +244,10 @@ abstract class GenericMapFragment :
     protected fun syncRequestDestination() {
         clearDestinationInfo()
 
-        destinationList.addAll(currentRequest!!.destinationList!!)
+        destinationList.addAll(currentRequest!!.destinationList)
         for (place in destinationList) {
             val destinationMarker = mMap.addMarker(MarkerOptions()
-                    .position(place.latLng)
+                    .position(LatLng(place.latLng.latitude, place.latLng.longitude))
                     .icon(ActivityHelper.getPinBitmap(applicationContext)))
             destinationMap[destinationMarker] = place
         }
@@ -260,7 +261,7 @@ abstract class GenericMapFragment :
 
     protected fun getDestinationLatLngList(): ArrayList<LatLng> {
         val latLngList = ArrayList<LatLng>()
-        for (place in destinationList) latLngList.add(place.latLng)
+        for (place in destinationList) latLngList.add(LatLng(place.latLng.latitude, place.latLng.longitude))
         return latLngList
     }
 

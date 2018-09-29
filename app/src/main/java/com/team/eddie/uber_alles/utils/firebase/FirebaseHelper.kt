@@ -201,7 +201,7 @@ HELPERS
         request.requestId = requestId
         requestRef.child(requestId).setValue(request)
 
-        val pickupLocation = GeoLocation(request.pickupLocation?.lat!!, request.pickupLocation?.lng!!)
+        val pickupLocation = GeoLocation(request.pickupLocation?.latLng!!.latitude, request.pickupLocation?.latLng!!.longitude)
         val geoPendingRequest = GeoFire(getPendingRequest())
         geoPendingRequest.setLocation(requestId, pickupLocation)
     }
