@@ -10,6 +10,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.databinding.ActivityDriverBinding
 import com.team.eddie.uber_alles.ui.generic.UserActivity
+import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
 
 class DriverActivity : UserActivity() {
 
@@ -42,5 +43,10 @@ class DriverActivity : UserActivity() {
 
         binding.navigationView.setupWithNavController(navController)
         getSyncUserInfoDrawer()
+    }
+
+    override fun onStop() {
+        FirebaseHelper.removeDriverAvailable(FirebaseHelper.getUserId())
+        super.onStop()
     }
 }
