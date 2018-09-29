@@ -392,7 +392,7 @@ HELPERS
     }
 
     fun getMessageUsers(users: String): DatabaseReference {
-        return getMessage().child(users).child(NEW_MESSAGE)
+            return getMessage().child(users).child(NEW_MESSAGE)
     }
 
     /*

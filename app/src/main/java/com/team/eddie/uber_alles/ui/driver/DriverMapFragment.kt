@@ -144,8 +144,6 @@ class DriverMapFragment : GenericMapFragment() {
             ratingRef.child(ratingRefId!!).updateChildren(map)
 
             switchState()
-
-            startFresh()
         }
 
         rideStatus.setOnClickListener { switchState() }
@@ -368,6 +366,8 @@ class DriverMapFragment : GenericMapFragment() {
 
     override fun completeRideRequest() {
         requestListener?.let { requestRef?.removeEventListener(it) }
+
+        recordRide()
         FirebaseHelper.completeRequest(currentRequest!!)
 
         startFresh()
@@ -510,7 +510,7 @@ class DriverMapFragment : GenericMapFragment() {
         pickupMarker = mMap.addMarker(MarkerOptions().position(pickupLatLng!!).title(getString(R.string.pickup_here)).icon(ActivityHelper.getPinBitmap(applicationContext)))
 
         syncRequestDestination()
-        mLastLocation?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
+        pickupLatLng?.let { createMarkerRoute(LatLng(it.latitude, it.longitude), getDestinationLatLngList()) }
 
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
@@ -740,11 +740,63 @@ class DriverMapFragment : GenericMapFragment() {
         cleanMarkerRoute()
         clearDestinationInfo()
 
-        requestListener?.let { requestRef?.removeEventListener(it) }
         customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
 
         getAssignedCustomerInfo(false)
+    }
+
+    override fun showRatingDoneUI() {
+        status = Status.RatingDone
+
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        popup.visibility = View.GONE
+
+        destination.text = getDestinationAsString()
+
+        userAllInfo.visibility = View.GONE
+        userInfo.visibility = View.GONE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        currentRating.visibility = View.GONE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+        paymentInfo.visibility = View.GONE
+
+        rideStatus.visibility = View.GONE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.cancel)
+
+        rejectStatus.visibility = View.GONE
+        rejectStatus.isClickable = true
+        rejectStatus.text = getString(R.string.reject_customer)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
+        showMessages = false
+        calcDistance = false
+
+        cleanMarkerRoute()
+        clearDestinationInfo()
+
+        customerLocationListener?.let { customerLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
     override fun showStatusUI() {
@@ -768,15 +820,10 @@ class DriverMapFragment : GenericMapFragment() {
                 showRatingUI()
             }
             Status.RatingDone -> {
+                status = Status.RatingDone
             }
             Status.Done -> {
-                successfulRide = true
-                requestListener?.let { requestRef?.removeEventListener(it) }
-
-                recordRide()
                 completeRideRequest()
-
-                startFresh()
             }
         }
     }
@@ -803,11 +850,13 @@ class DriverMapFragment : GenericMapFragment() {
             }
             Status.Rating -> {
                 setStatusSynced(Status.RatingDone, true)
+                showRatingDoneUI()
             }
             Status.RatingDone -> {
                 setStatusSynced(Status.Done, true)
             }
             Status.Done -> {
+                startFresh()
             }
         }
     }

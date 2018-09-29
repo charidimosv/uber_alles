@@ -826,7 +826,6 @@ class CustomerMapFragment : GenericMapFragment() {
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
-
     override fun showRatingUI() {
         status = Status.Rating
 
@@ -881,11 +880,68 @@ class CustomerMapFragment : GenericMapFragment() {
         cleanMarkerRoute()
         clearDestinationInfo()
 
-        requestListener?.let { requestRef?.removeEventListener(it) }
         driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
         newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
 
         getAssignedDriverInfo(false)
+    }
+
+    override fun showRatingDoneUI() {
+        status = Status.RatingDone
+
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+        searchRequest.visibility = View.GONE
+
+        popup.visibility = View.GONE
+
+        destination.text = getDestinationAsString()
+
+        userAllInfo.visibility = View.GONE
+        userInfo.visibility = View.GONE
+        carInfo.visibility = View.GONE
+
+        userProfileImage.setImageResource(R.mipmap.ic_default_user)
+        userName.text = ""
+        userPhone.text = ""
+
+        carImage.setImageResource(R.mipmap.ic_car)
+        carPlate.text = ""
+        carModel.text = ""
+        carBrand.text = ""
+
+        currentRating.visibility = View.GONE
+        currentRatingBar.rating = 0.toFloat()
+        currentRatingAvg.text = ""
+
+        newRating.visibility = View.GONE
+        newRatingBar.rating = 0.toFloat()
+        newRatingText.setText("")
+
+        communicateUser.visibility = View.GONE
+        paymentInfo.visibility = View.GONE
+
+        rideStatus.visibility = View.GONE
+        rideStatus.isClickable = true
+        rideStatus.text = getString(R.string.cancel)
+        /*
+        ----------------------------------
+        UI
+        ----------------------------------
+        */
+
+        successfulRide = false
+        isPickedUp = false
+        showMessages = false
+
+        cleanMarkerRoute()
+        clearDestinationInfo()
+
+        driverLocationListener?.let { driverLocationRef?.removeEventListener(it) }
+        newIncomeMessageListener?.let { newIncomeMessageRef?.removeEventListener(it) }
     }
 
     override fun showStatusUI() {
@@ -909,11 +965,9 @@ class CustomerMapFragment : GenericMapFragment() {
                 showRatingUI()
             }
             Status.RatingDone -> {
+                status = Status.RatingDone
             }
             Status.Done -> {
-                successfulRide = true
-                requestListener?.let { requestRef?.removeEventListener(it) }
-
                 showFreshUI()
             }
         }
@@ -938,12 +992,13 @@ class CustomerMapFragment : GenericMapFragment() {
             }
             Status.Rating -> {
                 setStatusSynced(Status.RatingDone, true)
+                showRatingDoneUI()
             }
             Status.RatingDone -> {
                 setStatusSynced(Status.Done, true)
-                showFreshUI()
             }
             Status.Done -> {
+                showFreshUI()
             }
         }
     }

@@ -33,8 +33,7 @@ class MapRouteHelper(var map: GoogleMap) {
     }
 
     fun cleanRoute() {
-        for (line in polylineList)
-            line.remove()
+        for (line in polylineList) line.remove()
         polylineList.clear()
     }
 

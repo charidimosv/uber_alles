@@ -25,6 +25,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.ValueEventListener
+import com.team.eddie.uber_alles.R
 import com.team.eddie.uber_alles.ui.ActivityHelper
 import com.team.eddie.uber_alles.utils.Status
 import com.team.eddie.uber_alles.utils.firebase.FirebaseHelper
@@ -248,6 +249,7 @@ abstract class GenericMapFragment :
         for (place in destinationList) {
             val destinationMarker = mMap.addMarker(MarkerOptions()
                     .position(LatLng(place.latLng.latitude, place.latLng.longitude))
+                    .title(getString(R.string.arrive_here))
                     .icon(ActivityHelper.getPinBitmap(applicationContext)))
             destinationMap[destinationMarker] = place
         }
@@ -321,6 +323,8 @@ abstract class GenericMapFragment :
     protected abstract fun showPaymentUI()
 
     protected abstract fun showRatingUI()
+
+    protected abstract fun showRatingDoneUI()
 
 
     protected abstract fun showStatusUI()

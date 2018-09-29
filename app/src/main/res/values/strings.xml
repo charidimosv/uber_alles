@@ -42,6 +42,7 @@
     <string name="your_driver">your driver</string>
     <string name="looking_driver_loc">Looking for Driver Location....</string>
     <string name="pickup_here">Pickup Here</string>
+    <string name="arrive_here">Arrive Here</string>
     <string name="problem_saving_photo">There is a problem saving the photo</string>
     <string name="saved_successfully">Saved successfully</string>
     <string name="next">Next</string>
