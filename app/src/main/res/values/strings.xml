@@ -33,6 +33,14 @@
         <item>Subaru</item>
     </string-array>
 
+    <string-array name="date_options_array">
+        <item>All</item>
+        <item>Today</item>
+        <item>Specific Date</item>
+        <item>Week</item>
+        <item>Month</item>
+    </string-array>
+
     <string name="navigation_drawer_header_content_description" translation_description="Content description for the image that is shown at the top of the navigation drawer.">Navigation drawer header logo</string>
     <string name="ride_started">Your ride has start</string>
     <string name="getting_driver">Getting your Driver....</string>
