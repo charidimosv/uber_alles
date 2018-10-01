@@ -70,10 +70,18 @@ class GenericRequestListFragment : Fragment() {
         val adapter: ArrayAdapter<CharSequence> = ArrayAdapter.createFromResource(activity!!.applicationContext, R.array.date_options_array, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         mDateOption.adapter = adapter
+
+        userId = FirebaseHelper.getUserId()
+
+        //Init spinner to All option
+        mDateOption.setSelection(0, false)
+        getUserHistoryIds()
+
         mDateOption.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>) {}
 
             override fun onItemSelected(parent: AdapterView<*>, view: View, pos: Int, id: Long) {
+
                 val option = parent.getItemAtPosition(pos).toString()
                 mSelectedDate.isEnabled = false
                 initValues()
@@ -109,8 +117,6 @@ class GenericRequestListFragment : Fragment() {
                 }
             }
         }
-
-        userId = FirebaseHelper.getUserId()
 
         val datePickerListener = DatePickerDialog.OnDateSetListener { view: DatePicker?, year: Int, month: Int, dayOfMonth: Int ->
             initValues()
@@ -230,4 +236,6 @@ class GenericRequestListFragment : Fragment() {
         resultsRequestList.add(request)
         mAdapter.notifyDataSetChanged()
     }
+
+
 }
