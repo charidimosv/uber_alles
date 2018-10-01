@@ -37,18 +37,11 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
-                    android:layout_width="120dp"
+                    android:layout_width="100dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="60dp"
                     android:orientation="vertical">
-
-                    <Spinner
-                        android:id="@+id/date_options"
-                        android:layout_width="125dp"
-                        android:layout_height="wrap_content"
-                        android:background="@android:drawable/btn_dropdown"
-                        android:padding="20dp" />
 
                     <TextView
                         android:id="@+id/totalTrips"
@@ -76,18 +69,11 @@
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="150dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="15dp"
-                    android:layout_marginTop="40dp"
+                    android:layout_marginTop="60dp"
                     android:orientation="vertical">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/selectedDate"
-                        style="@style/Widget.MaterialComponents.Button.Icon"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:icon="@drawable/ic_calendar" />
 
                     <TextView
                         android:id="@+id/totalTrips_value"
@@ -106,6 +92,29 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp" />
                 </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="50dp"
+                    android:layout_marginEnd="10dp"
+                    android:gravity="end"
+                    android:orientation="vertical">
+
+                    <Spinner
+                        android:id="@+id/date_options"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/btn_dropdown" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/selectedDate"
+                        style="@style/Widget.MaterialComponents.Button.Icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/ic_calendar" />
+                </LinearLayout>
+
             </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
